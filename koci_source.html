@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#001119">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/assets/img/icons/icon-192x192.png">
+    <link rel="manifest" href="https://koci.web.id/brand-manifest.webmanifest">
+    <meta name="user-id" content="">
+    <!-- Your app title -->
+    <title>KOCI</title>
+    <link rel="icon" type="image/png" href="/assets/img/logo.png">
+    <link rel="stylesheet" href="/assets/css/framework7-bundle.css">
+    <link rel="stylesheet" href="/assets/css/framework7-icons.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/id.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+
+        <style>
+        .page-content {
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: #001119 !important;
+        }
+
+        .navbar::before {
+            background: #001119 !important;
+        }
+
+        /* Isi area atas (status bar / dynamic island) */
+        .navbar-inner {
+            height: auto !important;
+            min-height: 44px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+
+            border: 1px solid rgba(255, 255, 255, 0.1);
+
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-photo {
+            cursor: pointer;
+        }
+
+        @keyframes marqueeScroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .running-text-banner {
+            display: flex;
+            align-items: center;
+            background: rgba(239, 68, 68, 0.12);
+            border-top: 1px solid rgba(239, 68, 68, 0.2);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 8px 12px;
+            margin-top: 4px;
+            margin-bottom: 6px;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .running-text-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 11px;
+            flex-shrink: 0;
+            padding-right: 8px;
+            border-right: 1px solid rgba(239, 68, 68, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .running-text-content {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            position: relative;
+        }
+
+        .running-text-scroll {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: marqueeScroll 22s linear infinite;
+            font-size: 12px;
+            color: #f8fafc;
+            font-weight: 500;
+        }
+
+        /* Modal Force Change Password */
+        .force-password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 12000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .force-password-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 10, 18, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .force-password-card {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            background: linear-gradient(165deg, rgba(16, 28, 44, 0.95) 0%, rgba(8, 16, 26, 0.98) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 24px;
+            padding: 28px 22px 20px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(239, 68, 68, 0.2);
+            animation: modalBounceIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-sizing: border-box;
+        }
+
+        @keyframes modalBounceIn {
+            from {
+                opacity: 0;
+                transform: scale(0.88) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .security-badge-wrapper {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .security-shield-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.4) 100%);
+            border: 1.5px solid rgba(239, 68, 68, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            font-size: 32px;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+            z-index: 2;
+        }
+
+        .security-pulse-ring {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid rgba(239, 68, 68, 0.5);
+            animation: pulseRing 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            z-index: 1;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.85); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .security-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .force-password-title {
+            margin: 0 0 8px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .force-password-subtitle {
+            margin: 0 0 18px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #94a3b8;
+        }
+
+        .force-password-subtitle strong {
+            color: #f87171;
+        }
+
+        .input-modern-group {
+            text-align: left;
+        }
+
+        .input-modern-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .input-modern-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon-left {
+            position: absolute;
+            left: 14px;
+            color: #64748b;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .input-modern {
+            width: 100%;
+            height: 46px;
+            padding: 0 42px 0 42px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #ffffff;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .input-modern:focus {
+            border-color: #ef4444;
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+            outline: none;
+        }
+
+        .btn-toggle-eye {
+            position: absolute;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-toggle-eye:hover, .btn-toggle-eye:active {
+            color: #ffffff;
+        }
+
+        .input-hint {
+            display: block;
+            font-size: 11px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .input-hint.error {
+            color: #ef4444;
+        }
+
+        .input-hint.success {
+            color: #22c55e;
+        }
+
+        .btn-submit-force {
+            margin-top: 16px;
+            width: 100%;
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: #ffffff;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit-force:hover {
+            opacity: 0.95;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-submit-force:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .force-password-alert {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            text-align: left;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .force-password-footer {
+            margin-top: 14px;
+        }
+
+        .btn-dismiss-modal {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 12px;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .btn-dismiss-modal:hover {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body class="dark color-red">
+    <!-- App root element -->
+    <div id="app">
+        <!-- Views container -->
+        <div class="views tabs">
+            <div class="view view-main tab tab-active view-init">
+                    <div class="page">
+        <div class="navbar" style="margin-bottom: 10px;">
+            <div class="navbar-inner"
+                style="background:#001119; display:flex; align-items:center; gap:6px; padding-left:12px; padding-right:8px; padding-bottom:3px;">
+
+                
+                <div class="searchbar searchbar-inline" style="flex:1; margin:0; min-width:0;">
+                    <div class="searchbar-inner">
+                        <div class="searchbar-input-wrap">
+                            <input type="search" placeholder="Cari Program KOCI" style="border-radius:50px;">
+                            <i class="searchbar-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div style="display:flex; gap:0; flex-shrink:0; align-items:center;">
+                                            <a href="#" class="link icon-only" style="width:32px;">
+                            <i class="icon f7-icons" style="font-size:20px;">qrcode</i>
+                        </a>
+                        <a href="#" class="link icon-only" style="width:32px;">
+                            <i class="icon f7-icons" style="font-size:20px;">chat_bubble_fill</i>
+                        </a>
+                        <a href="#" class="link icon-only external" style="width:32px;">
+                            <i class="icon f7-icons" style="font-size:20px;">bell_fill</i>
+                        </a>
+                                    </div>
+
+            </div>
+        </div>
+        <div class="page-content" style="padding-left:0; padding-right:0;">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <picture>
+                            <source srcset="/assets/img/images/hero2.webp?v=20261116" type="image/webp">
+                            <img src="/assets/img/images/hero2.jpeg?v=20261116" class="hero-photo" data-src="/assets/img/images/hero2.jpeg"
+                                style="width:100%; height:auto; display:block;" fetchpriority="high" width="1200" height="600" alt="Banner KOCI 1">
+                        </picture>
+                    </div>
+                    <div class="swiper-slide">
+                        <picture>
+                            <source srcset="/assets/img/images/hero-4.webp?v=20261116" type="image/webp">
+                            <img src="/assets/img/images/hero-4.jpeg?v=20261116" class="hero-photo" data-src="/assets/img/images/hero-4.jpeg"
+                                style="width:100%; height:auto; display:block;" loading="lazy" decoding="async" width="1200" height="600" alt="Banner KOCI 2">
+                        </picture>
+                    </div>
+                    <div class="swiper-slide">
+                        <picture>
+                            <source srcset="/assets/img/images/hero1.webp?v=20261116" type="image/webp">
+                            <img src="/assets/img/images/hero1.png?v=20261116" class="hero-photo" data-src="/assets/img/images/hero1.png"
+                                style="width:100%; height:auto; display:block;" loading="lazy" decoding="async" width="1200" height="600" alt="Banner KOCI 3">
+                        </picture>
+                    </div>
+                    <div class="swiper-slide">
+                        <picture>
+                            <source srcset="/assets/img/images/hero3.webp?v=20261116" type="image/webp">
+                            <img src="/assets/img/images/hero3.jpg?v=20261116" class="hero-photo" data-src="/assets/img/images/hero3.jpg"
+                                style="width:100%; height:auto; display:block;" loading="lazy" decoding="async" width="1200" height="600" alt="Banner KOCI 4">
+                        </picture>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+
+            <!-- Running Text Info Banner -->
+            <div class="running-text-banner">
+                <div class="running-text-tag">
+                    <i class="icon f7-icons" style="font-size: 14px;">speaker_fill</i>
+                    <span>INFO</span>
+                </div>
+                <div class="running-text-content">
+                    <div class="running-text-scroll">
+                                                    📢 Pada hari ini tanggal 15 November 2026, layanan Customer Service aktif sampai dengan pukul 14.00 WIB.
+
+Komplain yang masuk setelah pukul tersebut akan diproses pada hari berikutnya tanggal 16 November 2026 mulai pukul 07.00–22.00 WIB.
+
+Terima kasih atas pengertian dan kerja samanya. 🙏
+                                            </div>
+                </div>
+            </div>
+
+            <div style="padding: 0 15px; margin-top: 20px; margin-bottom: 90px;">
+                <div class="grid grid-cols-2" style="gap: 8px;">
+                    <a href="https://koci.web.id/home" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/jptm.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/jptm.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Kredit JPTM">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Kredit JPTM</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Jual Pulsa Tanpa Modal</div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/kresya" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/kresya.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/kresya.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Usaha KRESYA">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Usaha KRESYA</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Kredit syari'ah cicilan ringan
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/tasya" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/tasya.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/tasya.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Simpanan TASYA">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Simpanan TASYA</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Tabungan syari'ah tanpa admin
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/sasya" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/sasya.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/sasya.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Saham SASYA">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Saham SASYA</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Saham syari'ah tanpa riba
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/insya" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/insya.webp?v=1794549081" type="image/webp">
+                                <img src="/assets/img/program/insya.png?v=1794549081" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Investasi INSYA">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Investasi INSYA</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Investasi syari'ah tanpa riba
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/komar" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/komar2.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/komar2.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Toko KOMAR">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Toko KOMAR</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Produk murah dan berkualitas
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.wlabel.id/" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/images/koci.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/images/koci.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Deposit PULSA">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Deposit PULSA</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Pulsa murah dan emoney
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" class="card external disabled-program" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/umkm.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/umkm.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Mitra UMKM">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Mitra UMKM</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Modal usaha dan pemasaran
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/ziskaf" class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/ziskaf.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/ziskaf.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Donasi ZISKAF">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Donasi ZISKAF</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">zona Infak, Sedekah, dan Wakaf
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="https://koci.web.id/recruitment"
+                        class="card external" style="border-radius:10px; margin:0;">
+                        
+                        <div class="card-content" style="display:flex; align-items:center; gap:8px; padding:10px 8px;">
+                            <picture>
+                                <source srcset="/assets/img/program/tms.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/program/tms.png?v=20261116" loading="lazy" decoding="async" width="46" height="46"
+                                    style="width:46px; height:46px; object-fit:contain; flex-shrink:0;" alt="Loker Freelance">
+                            </picture>
+                            <div>
+                                <div style="font-weight:600; font-size:12px; line-height:1.2;">Loker Freelance</div>
+                                <div style="font-size:10px; color:#888; line-height:1.3;">Lowongan Kerja & Freelancer
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+
+
+                </div>
+            </div>
+
+            <div style="background: #ff3b30; overflow: hidden;">
+                <div style="display:flex; align-items:stretch; min-height:200px;">
+
+                    
+                    <div style="width:50%; flex-shrink:0;">
+                        <img src="/assets/img/illustrations/cs-ilustration.svg?v=20261116"
+                            loading="lazy" decoding="async"
+                            style="width:100%; height:100%; object-fit:contain; display:block; padding-left:10px;" alt="Ilustrasi KOCI">
+                    </div>
+
+                    
+                    <div
+                        style="flex:1; padding:40px 12px 14px 12px; display:flex; flex-direction:column; justify-content:space-between;">
+
+                        <div>
+                            <div style="color:#fff; font-size:14px; font-weight:700; margin-bottom:6px; line-height:1.3;">
+                                Apa itu KOCI?
+                            </div>
+                            <p style="color:rgba(255,255,255,0.85); font-size:11px; line-height:1.6; margin:0;">
+                                KOCI adalah aplikasi yang khusus di rancang oleh PT. Technology Multi System untuk membantu
+                                seluruh masyarakat indonesia dalam berbagai bidang usaha.
+                            </p>
+                        </div>
+
+                        
+                        <a href="https://koci.web.id/faq" class="external"
+                            style="display:inline-block; margin-top:10px; background:rgba(255,255,255,0.2); 
+                      color:#fff; font-size:11px; font-weight:600; text-decoration:none;
+                      padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.4);
+                      text-align:center;">
+                            Selengkapnya →
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 0 15px; margin-top: 10px;">
+                <p style="font-size:20px; font-weight:700; margin: 0 0 10px;">Promo</p>
+            </div>
+            <swiper-container class="full-width" slides-per-view="1.2" space-between="15" slides-offset-after="15"
+                slides-offset-before="15" speed="400">
+                <swiper-slide>
+                    <a href="https://koci.web.id/komar" class="ticket external">
+                        <div class="ticket-infos">
+                            <div class="ticket-text color-primary">Diskon Sampai</div>
+                            <div class="ticket-discount">-10%</div>
+                            <div class="ticket-description color-primary">Cek Di Toko Komar!</div>
+                        </div>
+                        <div class="ticket-image">
+                            <picture>
+                                <source srcset="/assets/img/illustrations/ilustrasi-komar-ticket.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/illustrations/ilustrasi-komar-ticket.png?v=20261116"
+                                    loading="lazy" decoding="async" alt="Promo Komar">
+                            </picture>
+                        </div>
+                    </a>
+                </swiper-slide>
+                <swiper-slide>
+                    <a href="https://koci.web.id/home" class="ticket-fill ticket-image external">
+                        <picture>
+                            <source srcset="/assets/img/illustrations/jptm-reward.webp?v=20261116" type="image/webp">
+                            <img src="/assets/img/illustrations/jptm-reward.png?v=20261116" alt="Reward Member" class="ticket-image-bg" loading="lazy" decoding="async">
+                        </picture>
+                        <div class="ticket-text">Reward Member</div>
+                        <div class="ticket-discount">JPTM</div>
+                        <div class="ticket-description">Tingkatkan Omset</div>
+                    </a>
+                </swiper-slide>
+                <swiper-slide>
+                    <a href="#" class="ticket">
+                        <div class="ticket-infos">
+                            <div class="ticket-text color-primary">Special Offer</div>
+                            <div class="ticket-discount">-50%</div>
+                            <div class="ticket-description color-primary">Off all our store!</div>
+                        </div>
+                        <div class="ticket-image">
+                            <picture>
+                                <source srcset="/assets/img/images/ticket-clothes.webp?v=20261116" type="image/webp">
+                                <img src="/assets/img/images/ticket-clothes.png?v=20261116" loading="lazy" decoding="async" alt="Special Offer">
+                            </picture>
+                        </div>
+                    </a>
+                </swiper-slide>
+            </swiper-container>
+            
+            <div style="text-align:center; padding: 24px 16px">
+                <p style="font-size:13px; color: var(--f7-list-item-footer-text-color, #8e8e93);">
+                    Technology by <strong style="letter-spacing:1px; color:#ff3b30;">TMS</strong>
+                </p>
+            </div>
+        </div>
+
+            </div>
+            </div>
+
+            
+            <div class="actions-modal confirm-action">
+                <div class="actions-group">
+                    <div class="actions-label">Apakah Kamu Yakin ?</div>
+                    <div class="actions-button actions-button-bold"
+                        onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                        <div class="actions-button-text">Ya</div>
+                    </div>
+                    <div class="actions-button">
+                        <div class="actions-button-text">Tidak</div>
+                    </div>
+                </div>
+                <div class="actions-group">
+                    <div class="actions-button color-red actions-close">
+                        <div class="actions-button-text">Batal</div>
+                    </div>
+                </div>
+                <form id="logout-form" action="https://koci.web.id/logout" method="POST" class="d-none">
+                    <input type="hidden" name="_token" value="fziFvFQRxfwVc9e2Mk9gGSOx8cwR2axnu8LaupP7" autocomplete="off">                </form>
+            </div>
+
+            
+            <div class="popup popup-1">
+                <div class="page">
+                    <div class="page-content popup-demo">
+                        <div class="popup-content">
+                            
+                            <div class="centered-text">
+                                <h1>Ubah Password</h1>
+                                <p class="forgot-password-text">Pastikan Password baru anda tidak diketahui oleh orang
+                                    lain </p>
+                            </div>
+                            <form action="https://koci.web.id/change-password" method="POST" id="formChangePassword">
+                                <input type="hidden" name="_token" value="fziFvFQRxfwVc9e2Mk9gGSOx8cwR2axnu8LaupP7" autocomplete="off">                                <input type="hidden" name="_method" value="PUT">                                <!-- Input untuk password lama -->
+                                <input type="password" id="old_password" name="old_password" placeholder="Password Lama"
+                                    required>
+                                <input type="password" id="password" name="password" placeholder="Password Baru">
+                                <button type="submit" href="#"
+                                    class="button button-fill color-danger" id="submitChangePassword">Ubah</button>
+                            </form>
+                            
+                        </div>
+                        <a href="#" class="button button-fill color-light-gray popup-close">Batalkan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="popup popup-impersonate">
+                <div class="page">
+                    <div class="page-content popup-demo">
+                        <div class="popup-content">
+                            <div class="centered-text">
+                                <h1>Login Sebagai</h1>
+                                <p class="forgot-password-text">Anda akan langsung login kedalam id member tersebut </p>
+                            </div>
+                            <form action="https://koci.web.id/impersonate" method="POST">
+                                <input type="hidden" name="_token" value="fziFvFQRxfwVc9e2Mk9gGSOx8cwR2axnu8LaupP7" autocomplete="off">                                <input type="number" id="member_id" name="member_id" placeholder="ID Member">
+                                <button type="submit" href="#"
+                                    class="button button-fill color-danger">Login Sebagai</button>
+                            </form>
+                        </div>
+                        <a href="#" class="button button-fill color-light-gray popup-close">Batalkan</a>
+                    </div>
+                </div>
+            </div>
+
+                <style>
+    .floating-navbar {
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 16px !important;
+        right: 16px !important;
+        width: auto !important;
+        height: 68px;
+
+        border-radius: 50px;
+
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+        z-index: 9999;
+    }
+
+    .floating-navbar .toolbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        height: 100%;
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .floating-navbar .link {
+        display: flex;
+        flex-direction: column !important;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        color: rgba(255, 255, 255, .65);
+        transition: all .25s ease;
+    }
+
+    .floating-navbar .ikomat-account-sso {
+        display: contents;
+    }
+
+    .floating-navbar .ikomat-account-sso button {
+        border: 0;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .floating-navbar .tab-link-active {
+        color: #ff3b30 !important;
+        position: relative;
+    }
+
+    .floating-navbar .tab-link-active::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 68px;
+        height: 55px;
+        border-radius: 50px;
+
+        background: rgba(255, 255, 255, 0.12);
+        z-index: -1;
+    }
+
+    .floating-navbar .tab-link-active i {
+        transform: translateY(-2px);
+    }
+
+    .floating-navbar i {
+        font-size: 24px;
+        transition: all .25s ease;
+    }
+
+    .floating-navbar .tabbar-label {
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    /* BOTTOM SHEET MODAL SELECTOR */
+    .qris-sheet-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .qris-sheet-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .qris-sheet-modal {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 25, 35, 0.95);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        z-index: 10001;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 16px 20px 24px 20px;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .qris-sheet-modal.active {
+        transform: translateY(0);
+    }
+
+    .qris-sheet-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .qris-sheet-handle {
+        width: 40px;
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        margin-bottom: 12px;
+    }
+
+    .qris-sheet-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .qris-sheet-body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .qris-option-card {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 16px;
+        color: #ffffff !important;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .qris-option-card:active {
+        background: rgba(255, 255, 255, 0.12);
+        transform: scale(0.98);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .qris-option-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+
+    .qris-option-icon.icon-bayar {
+        background: linear-gradient(135deg, #34c759, #30b0c7);
+    }
+
+    .qris-option-icon.icon-penagihan {
+        background: linear-gradient(135deg, #5856d6, #af52de);
+    }
+
+    .qris-option-icon i {
+        font-size: 24px;
+        color: #ffffff;
+    }
+
+    .qris-option-info {
+        flex: 1;
+    }
+
+    .qris-option-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-align: left;
+    }
+
+    .qris-option-desc {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.4;
+        text-align: left;
+    }
+
+    .qris-arrow-right {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .qris-sheet-footer {
+        display: flex;
+        justify-content: center;
+    }
+
+    .qris-sheet-footer button {
+        width: 100%;
+        height: 48px;
+        border-radius: 24px;
+        font-size: 15px;
+        font-weight: 600;
+        border: none;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+    }
+
+    .qris-sheet-footer button:active {
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    /* SCANNER VIEWPORT MODAL */
+    .qris-scanner-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #000000;
+        z-index: 10002;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(1.05);
+        transition: all 0.3s ease;
+    }
+
+    .qris-scanner-modal.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+    }
+
+    .scanner-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+        z-index: 10;
+    }
+
+    .scanner-title {
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .scanner-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff !important;
+        transition: background 0.2s;
+    }
+
+    .scanner-action:active {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .scanner-viewport {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle, rgba(20, 20, 30, 0.8) 0%, rgba(5, 5, 10, 0.95) 100%);
+    }
+
+    .scanner-viewport::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: center;
+    }
+
+    .scanner-target {
+        position: relative;
+        width: 250px;
+        height: 250px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6);
+        border-radius: 4px;
+    }
+
+    .scanner-target .corner {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        border: 4px solid #ff3b30;
+    }
+
+    .scanner-target .top-left {
+        top: -4px;
+        left: -4px;
+        border-right: none;
+        border-bottom: none;
+        border-top-left-radius: 8px;
+    }
+
+    .scanner-target .top-right {
+        top: -4px;
+        right: -4px;
+        border-left: none;
+        border-bottom: none;
+        border-top-right-radius: 8px;
+    }
+
+    .scanner-target .bottom-left {
+        bottom: -4px;
+        left: -4px;
+        border-right: none;
+        border-top: none;
+        border-bottom-left-radius: 8px;
+    }
+
+    .scanner-target .bottom-right {
+        bottom: -4px;
+        right: -4px;
+        border-left: none;
+        border-top: none;
+        border-bottom-right-radius: 8px;
+    }
+
+    .scanner-laser {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        height: 3px;
+        background: #34c759;
+        box-shadow: 0 0 12px #34c759, 0 0 4px #34c759;
+        border-radius: 50%;
+        animation: laserScan 2.5s linear infinite;
+    }
+
+    @keyframes laserScan {
+        0% {
+            top: 0%;
+        }
+
+        50% {
+            top: 100%;
+        }
+
+        100% {
+            top: 0%;
+        }
+    }
+
+    .scanner-hint {
+        position: absolute;
+        bottom: 30px;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+    }
+
+    .scanner-flash-on {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: #000000 !important;
+    }
+
+    .scanner-flash-overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .scanner-flash-overlay.active {
+        opacity: 1;
+    }
+
+    .scanner-footer {
+        padding: 30px 20px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+        display: flex;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .scanner-gallery-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-decoration: none;
+        font-size: 13px;
+        transition: color 0.2s;
+    }
+
+    .scanner-gallery-btn:active {
+        color: #ff3b30 !important;
+    }
+
+    .scanner-gallery-btn i {
+        font-size: 28px;
+    }
+
+    /* MOCK CAMERA PRELOADER */
+    .scanner-processing {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.85);
+        padding: 24px;
+        border-radius: 16px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        z-index: 20;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .scanner-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #34c759;
+        animation: spin 1s ease infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .scanner-processing span {
+        color: #ffffff;
+        font-size: 14px;
+    }
+
+    /* PAYMENT FORM MODAL */
+    .qris-payment-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+    .qris-payment-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .qris-payment-modal {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #001119;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        z-index: 10001;
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 0;
+        height: 92vh;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+    }
+
+    .qris-payment-modal.active {
+        transform: translateY(0);
+    }
+
+    .qris-payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: #001119;
+        padding: 20px 20px 16px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        flex-shrink: 0;
+    }
+
+    .payment-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .payment-header-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #ffffff;
+        text-align: left;
+    }
+
+    .payment-header-subtitle {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+        text-align: left;
+    }
+
+    .payment-close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7) !important;
+        transition: all 0.2s;
+    }
+
+    .payment-close-btn:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .qris-payment-body {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1;
+        margin-bottom: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 20px 20px 0 20px;
+    }
+
+    .payment-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .payment-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+    }
+
+    .amount-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 12px 16px;
+        transition: border-color 0.2s;
+    }
+
+    .amount-input-wrapper:focus-within {
+        border-color: #ff3b30;
+    }
+
+    .currency-prefix {
+        font-size: 24px;
+        font-weight: 800;
+        color: #ff3b30;
+        margin-right: 8px;
+    }
+
+    .amount-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 800;
+        width: 100%;
+        padding: 0;
+    }
+
+    .amount-input::placeholder {
+        color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quick-amounts-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .btn-quick-amount {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 10px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-quick-amount:active {
+        background: #ff3b30;
+        border-color: #ff3b30;
+        transform: scale(0.95);
+    }
+
+    .input-note-wrapper {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 14px 16px;
+    }
+
+    .note-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-size: 15px;
+        width: 100%;
+        padding: 0;
+    }
+
+    .note-input::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    .payment-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        padding: 12px 14px !important;
+        color: #ffffff !important;
+        font-size: 14px !important;
+        transition: all 0.25s ease !important;
+        box-sizing: border-box;
+        outline: none;
+        margin-top: 6px;
+    }
+
+    .payment-input:focus {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: #ff3b30 !important;
+        box-shadow: 0 0 8px rgba(255, 59, 48, 0.3) !important;
+    }
+
+    .payment-methods-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .payment-method-card {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 14px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .payment-method-card.active {
+        background: rgba(255, 59, 48, 0.08);
+        border-color: rgba(255, 59, 48, 0.4);
+    }
+
+    .method-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        margin-right: 14px;
+    }
+
+    .method-icon.green {
+        background: rgba(52, 199, 89, 0.15);
+        color: #34c759;
+    }
+
+    .method-icon.blue {
+        background: rgba(0, 122, 255, 0.15);
+        color: #007aff;
+    }
+
+    .method-icon i {
+        font-size: 20px;
+    }
+
+    .method-details {
+        flex: 1;
+        text-align: left;
+    }
+
+    .method-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 2px;
+    }
+
+    .method-balance {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .method-checkbox {
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 20px;
+    }
+
+    .payment-method-card.active .method-checkbox {
+        color: #ff3b30;
+    }
+
+    .qris-payment-footer {
+        display: flex;
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        background: #001119;
+        padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px)) 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        flex-shrink: 0;
+    }
+
+    .btn-pay-now {
+        width: 100%;
+        height: 52px;
+        border-radius: 26px;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #ff3b30, #ff9500) !important;
+        color: #ffffff !important;
+        border: none;
+        box-shadow: 0 4px 16px rgba(255, 59, 48, 0.3);
+        transition: all 0.2s;
+    }
+
+    .btn-pay-now:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+    }
+
+    .btn-pay-now.btn-loading:disabled {
+        opacity: 0.75 !important;
+        color: #ffffff !important;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        pointer-events: none;
+    }
+
+    .spinner-loading {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid #ffffff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    /* MOCK MERCHANT DISPLAY (For when QR is scanned) */
+    .merchant-profile-card {
+        display: none;
+        align-items: center;
+        background: rgba(52, 199, 89, 0.08);
+        border: 1px solid rgba(52, 199, 89, 0.2);
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .merchant-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #34c759;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 14px;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .merchant-details {
+        text-align: left;
+    }
+
+    .merchant-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .merchant-location {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 1px;
+    }
+
+    /* SUCCESS modal receipt */
+    .qris-success-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #001119;
+        z-index: 10003;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.9);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .qris-success-modal.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+    }
+
+    .success-content {
+        width: 100%;
+        max-width: 340px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .success-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(52, 199, 89, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        border: 2px solid rgba(52, 199, 89, 0.3);
+    }
+
+    .success-checkmark {
+        font-size: 40px;
+        color: #34c759;
+    }
+
+    .success-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 8px;
+    }
+
+    .success-amount-display {
+        font-size: 32px;
+        font-weight: 900;
+        color: #34c759;
+        margin-bottom: 24px;
+    }
+
+    .receipt-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        width: 100%;
+        padding: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .receipt-row span:last-child {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .receipt-row.divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 4px 0;
+    }
+
+    .status-success {
+        color: #34c759 !important;
+        font-weight: bold;
+    }
+
+    .btn-close-success {
+        width: 100%;
+        height: 48px;
+        border-radius: 24px;
+        font-size: 15px;
+        font-weight: 700;
+        background: #34c759 !important;
+        color: #ffffff !important;
+        border: none;
+        box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);
+    }
+
+    .btn-close-success:active {
+        transform: scale(0.98);
+    }
+
+    .floating-navbar .scan-fab {
+        position: relative;
+        /* reserve ruang biar label "SCAN" tetap sejajar sama label lain */
+    }
+
+    /* Lingkaran glass sekarang berdiri sendiri, fixed ke viewport */
+    #scanFabGlass {
+        position: absolute;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        z-index: 9999;
+        /* di atas navbar (9999) */
+        transition: transform .2s ease, background .2s ease;
+        pointer-events: auto;
+        cursor: pointer;
+        /* klik tetap diteruskan ke tombol SCAN di bawahnya */
+    }
+
+    #scanFabGlass i {
+        font-size: 26px;
+    }
+
+    #scanFabGlass.pressed {
+        transform: scale(0.92);
+        background: rgba(255, 255, 255, 0.18);
+    }
+</style>
+
+<div class="floating-navbar tabbar-icons">
+    <div class="toolbar-inner">
+        <a href="https://koci.web.id"
+            class="link external tab-link tab-link-active ">
+            <i class="icon f7-icons">square_grid_2x2_fill</i>
+            <span class="tabbar-label">KOCI</span>
+        </a>
+                    <a href="https://koci.web.id/faq"
+                class="link external tab-link   ">
+                <i class="icon f7-icons">doc_on_clipboard_fill</i>
+                <span class="tabbar-label">Info</span>
+            </a>
+                <a href="https://koci.web.id/chats/v2"
+            class="link external tab-link  ">
+            <i class="icon f7-icons">ellipses_bubble_fill</i>
+            <span class="tabbar-label">Chat</span>
+        </a>
+                    <a href="https://koci.web.id/profile" class="link external tab-link">
+                <i class="icon f7-icons">person_crop_circle_fill</i>
+                <span class="tabbar-label">AKUN</span>
+            </a>
+            </div>
+    <!-- taruh di dalam .floating-navbar tapi di luar .toolbar-inner -->
+    <div id="scanFabGlass">
+        <i class="icon f7-icons">viewfinder</i>
+    </div>
+</div>
+
+<!-- ==================== QRIS INTERACTIVE INTERFACES ==================== -->
+
+<!-- 1. Bottom Sheet Pilihan QRIS -->
+<div class="qris-sheet-backdrop" id="qrisSheetBackdrop"></div>
+<div class="qris-sheet-modal" id="qrisSheetModal">
+    <div class="qris-sheet-header">
+        <div class="qris-sheet-handle"></div>
+        <div class="qris-sheet-title">Pilih Layanan SCAN</div>
+    </div>
+    <div class="qris-sheet-body">
+        <a href="https://koci.web.id/scan/member" class="qris-option-card external" id="btnQrisBayar">
+            <div class="qris-option-icon icon-bayar">
+                <i class="icon f7-icons">doc_plaintext</i>
+            </div>
+            <div class="qris-option-info">
+                <div class="qris-option-title">SCAN Member</div>
+                <div class="qris-option-desc">Isi Formulir untuk bayar tagihan, cairkan komisi, menabung dll</div>
+            </div>
+            <i class="icon f7-icons qris-arrow-right">chevron_right</i>
+        </a>
+
+            </div>
+    <div class="qris-sheet-footer">
+        <button class="button button-fill color-light-gray" id="btnCloseQrisSheet">Batal</button>
+    </div>
+</div>
+
+<!-- 2. Screen Scanner QRIS (Penagihan) -->
+<div class="qris-scanner-modal" id="qrisScannerModal">
+    <!-- Overlay untuk simulasi Flashlight -->
+    <div class="scanner-flash-overlay" id="scannerFlashOverlay"></div>
+
+    <div class="scanner-header">
+        <a href="#" class="scanner-action" id="btnToggleFlash">
+            <i class="icon f7-icons" id="iconFlash">bolt_fill</i>
+        </a>
+        <div class="scanner-title">Scan Disini</div>
+        <a href="#" class="scanner-action" id="btnCloseScanner">
+            <i class="icon f7-icons">multiply</i>
+        </a>
+    </div>
+
+    <div class="scanner-viewport">
+        <video id="scannerVideo" autoplay playsinline muted
+            style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;"></video>
+        <canvas id="scannerCanvas" style="display:none;"></canvas>
+
+        <!-- Target Box -->
+        <div class="scanner-target">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+            <div class="scanner-laser"></div>
+        </div>
+
+        <div class="scanner-hint">Posisikan kode SCAN di dalam kotak</div>
+
+        <!-- Processing loader simulation -->
+        <div class="scanner-processing" id="scannerProcessing">
+            <div class="scanner-spinner"></div>
+            <span>Membaca Kode...</span>
+        </div>
+    </div>
+
+    <div class="scanner-footer">
+        <a href="#" class="scanner-gallery-btn" id="btnUploadGallery">
+            <i class="icon f7-icons">photo_fill</i>
+            <span>Upload dari Galeri</span>
+        </a>
+        <input type="file" id="inputGalleryFile" accept="image/*" style="display:none;">
+    </div>
+</div>
+
+<!-- 4. Resi Pembayaran Sukses (Success State) -->
+<div class="qris-success-modal" id="qrisSuccessModal">
+    <div class="success-content">
+        <div class="success-icon-wrapper">
+            <div class="success-checkmark">
+                <i class="icon f7-icons">checkmark_alt</i>
+            </div>
+        </div>
+        <div class="success-title">Pembayaran Berhasil!</div>
+        <div class="success-amount-display" id="displaySuccessAmount">Rp 0</div>
+
+        <div class="receipt-card">
+            <div class="receipt-row" id="rowReceiptMerchant" style="display:none;">
+                <span>Merchant</span>
+                <span id="displaySuccessMerchant">Warung Kopi KOCI</span>
+            </div>
+            <div class="receipt-row">
+                <span>Metode Pembayaran</span>
+                <span id="displaySuccessMethod">KOCI Pay</span>
+            </div>
+            <div class="receipt-row">
+                <span>Waktu Transaksi</span>
+                <span id="displaySuccessTime">29 Jul 2026, 13:37</span>
+            </div>
+            <div class="receipt-row">
+                <span>Catatan</span>
+                <span id="displaySuccessNote">-</span>
+            </div>
+            <div class="receipt-row divider"></div>
+            <div class="receipt-row">
+                <span>Status</span>
+                <span class="status-success">SUKSES</span>
+            </div>
+        </div>
+
+        <button class="button button-fill color-green btn-close-success" id="btnCloseSuccess">Selesai</button>
+    </div>
+</div>
+
+<!-- 5. Modal Detail Hasil SCAN Marketing -->
+<div class="qris-payment-backdrop" id="scanResultBackdrop"></div>
+<div class="qris-payment-modal" id="scanResultModal">
+    <div class="qris-payment-header">
+        <div class="payment-title-group">
+            <span class="payment-header-title">Detail SCAN</span>
+            <span class="payment-header-subtitle" id="scanResultSubtitle">Data Ditemukan</span>
+            <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 2px;">
+                <span
+                    style="font-size: 11px; font-weight: 600; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.5px; text-transform: uppercase;">Total</span>
+                <span id="scanResultTotalDana"
+                    style="font-size: 18px; font-weight: 800; color: #ff3b30; font-family: -apple-system, SF Pro Display, Helvetica Neue, Roboto, sans-serif;">
+                    Rp 0
+                </span>
+            </div>
+        </div>
+        <a href="#" class="payment-close-btn" id="btnCloseScanResult">
+            <i class="icon f7-icons">multiply</i>
+        </a>
+    </div>
+
+    <form action="https://koci.web.id/scan/process" method="POST" id="formProsesScan"
+        style="display: flex; flex-direction: column; flex: 1; overflow: hidden; margin: 0;">
+        <input type="hidden" name="_token" value="fziFvFQRxfwVc9e2Mk9gGSOx8cwR2axnu8LaupP7" autocomplete="off">        <input type="hidden" name="id" id="scanResultIdInput">
+        <input type="hidden" name="type" id="scanResultTypeInput" value="proses">
+
+        <div class="qris-payment-body">
+            <div class="merchant-profile-card" style="display:flex;">
+                <div class="merchant-avatar" id="scanResultInitial">M</div>
+                <div class="merchant-details">
+                    <div class="merchant-name" id="scanResultName">-</div>
+                    <div class="merchant-location" id="scanResultIdMember">ID -</div>
+                </div>
+            </div>
+
+
+
+            <div class="payment-section">
+                <label class="payment-label">Bayar Tagihan</label>
+                <input type="text" id="scanResultTagihan" class="payment-input" readonly>
+            </div>
+            <div class="payment-section">
+                <label class="payment-label">Pencairan Komisi</label>
+                <input type="text" id="scanResultKomisi" class="payment-input" readonly>
+            </div>
+            <div class="payment-section">
+                <label class="payment-label">Bayar Kresya</label>
+                <input type="text" id="scanResultKresya" class="payment-input" readonly>
+            </div>
+            <div class="payment-section">
+                <label class="payment-label">Menabung</label>
+                <input type="text" id="scanResultTabungan" class="payment-input" readonly>
+            </div>
+            <div class="payment-section">
+                <label class="payment-label">Donasi</label>
+                <input type="text" id="scanResultZiskaf" class="payment-input" readonly>
+            </div>
+            <div class="payment-section">
+                <label class="payment-label">Isi Saldo (Max: <span id="displaySaldo">0</span>)</label>
+                <input type="number" class="payment-input" value="0" name="saldo" id="scanResultSaldo">
+            </div>
+            <div class="payment-section" style="margin-bottom: 20px;">
+                <label class="payment-label" for="scanResultKeterangan">Keterangan / Berita</label>
+                <textarea id="scanResultKeterangan" name="keterangan" class="payment-input"
+                    placeholder="Masukkan keterangan (wajib jika menolak)..." style="height: 80px; resize: none;"></textarea>
+            </div>
+        </div>
+
+        <div class="qris-payment-footer">
+            <div style="display: flex; gap: 10px; width: 100%; box-sizing: border-box;">
+                <button type="button" class="button button-fill btn-pay-now" id="btnTolakScan"
+                    style="flex: 1; background: linear-gradient(135deg, #ff3b30, #d32f2f) !important; box-shadow: 0 4px 16px rgba(255, 59, 48, 0.3);">
+                    <span>Tolak</span>
+                    <i class="icon f7-icons" style="font-size: 18px;">multiply</i>
+                </button>
+                <button type="button" class="button button-fill btn-pay-now" id="btnProsesScan"
+                    style="flex: 1; background: linear-gradient(135deg, #34c759, #28a745) !important; box-shadow: 0 4px 16px rgba(52, 199, 89, 0.3);">
+                    <span>Proses</span>
+                    <i class="icon f7-icons" style="font-size: 18px;">checkmark_alt</i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleFloatingNavbar() {
+        const currentPage = document.querySelector('.page-current');
+
+        if (currentPage && currentPage.classList.contains('no-toolbar')) {
+            $('.floating-navbar').hide();
+            $('.qris-floating-container').hide();
+        } else {
+            $('.floating-navbar').show();
+            $('.qris-floating-container').show();
+        }
+    }
+
+    $(document).on('page:init page:afterin', function() {
+        toggleFloatingNavbar();
+    });
+
+    $(document).ready(function() {
+        toggleFloatingNavbar();
+
+        // Variabel penanda apakah mode scan (mempunyai data merchant) atau bayar manual
+        let currentStream = null;
+        let scanLoopId = null;
+        let isScanFinished = false;
+
+        // ==================== INTERACTION SCRIPTS ====================
+
+        // tambahkan, gantikan bagian "efek tekan" yang lama
+        $(document).on('click', '#scanFabGlass', function(e) {
+            e.preventDefault();
+            $('#btnOpenQrisMenu').trigger('click');
+        });
+
+        function hideFab() {
+            $('#scanFabGlass').css('opacity', 0).css('pointer-events', 'none');
+        }
+
+        function showFab() {
+            $('#scanFabGlass').css('opacity', 1).css('pointer-events', 'auto');
+        }
+
+        function stopCameraStream() {
+            if (scanLoopId) cancelAnimationFrame(scanLoopId);
+            scanLoopId = null;
+            if (currentStream) {
+                currentStream.getTracks().forEach(t => t.stop());
+                currentStream = null;
+            }
+        }
+
+        function openScannerCamera() {
+            isScanFinished = false;
+            const video = document.getElementById('scannerVideo');
+            const canvas = document.getElementById('scannerCanvas');
+            const ctx = canvas.getContext('2d');
+
+            navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment'
+                    }
+                })
+                .then(function(stream) {
+                    currentStream = stream;
+                    video.srcObject = stream;
+
+                    function tick() {
+                        if (isScanFinished) return;
+                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                            if (code && code.data) {
+                                isScanFinished = true;
+                                stopCameraStream();
+                                handleScanResult(code.data);
+                                return;
+                            }
+                        }
+                        scanLoopId = requestAnimationFrame(tick);
+                    }
+                    scanLoopId = requestAnimationFrame(tick);
+                })
+                .catch(function(err) {
+                    app.dialog.alert('Tidak bisa mengakses kamera. Pastikan izin kamera diaktifkan.',
+                        'Gagal');
+                    $('#qrisScannerModal').removeClass('active');
+                    showFab();
+                });
+        }
+
+        // Buka scanner sungguhan (kamera)
+        $('#btnQrisPenagihan').on('click', function(e) {
+            e.preventDefault();
+            closeQrisSheet();
+            $('#qrisScannerModal').addClass('active');
+            openScannerCamera();
+        });
+
+        // Tutup Scanner -> matikan kamera juga
+        $('#btnCloseScanner').off('click').on('click', function(e) {
+            e.preventDefault();
+            isScanFinished = true;
+            stopCameraStream();
+            $('#scannerProcessing').hide();
+            $('#qrisScannerModal').removeClass('active');
+            showFab();
+        });
+
+        // Upload dari Galeri -> buka file picker, lalu decode gambarnya
+        $('#btnUploadGallery').off('click').on('click', function(e) {
+            e.preventDefault();
+            document.getElementById('inputGalleryFile').click();
+        });
+
+        $('#inputGalleryFile').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            isScanFinished = true;
+            stopCameraStream();
+            $('#scannerProcessing').find('span').text('Membaca berkas gambar...');
+            $('#scannerProcessing').css('display', 'flex');
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.getElementById('scannerCanvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    $('#scannerProcessing').hide();
+                    $('#qrisScannerModal').removeClass('active');
+                    $('#inputGalleryFile').val('');
+
+                    if (code && code.data) {
+                        handleScanResult(code.data);
+                    } else {
+                        app.dialog.alert('SCAN tidak terbaca dari gambar tersebut.', 'Gagal');
+                        showFab();
+                    }
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Terima hasil decode (id), lalu cek ke server
+        function handleScanResult(scannedId) {
+            $('#scannerProcessing').find('span').text('Memeriksa data...');
+            $('#scannerProcessing').css('display', 'flex');
+            $('#qrisScannerModal').addClass('active'); // tetap tampil sebentar sbg loading
+
+            fetch(`/scan/check/${encodeURIComponent(scannedId)}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(json => {
+                    $('#scannerProcessing').hide();
+                    $('#qrisScannerModal').removeClass('active');
+
+                    if (json.success && json.data) {
+                        showScanResultModal(json.data, scannedId);
+                    } else {
+                        app.dialog.alert('SCAN sudah kadaluarsa.', 'Gagal');
+                        showFab();
+                    }
+                })
+                .catch(() => {
+                    $('#scannerProcessing').hide();
+                    $('#qrisScannerModal').removeClass('active');
+                    app.dialog.alert('Terjadi kesalahan saat memeriksa data.', 'Gagal');
+                    showFab();
+                });
+        }
+
+        function formatRupiah(num) {
+            return 'Rp ' + parseFloat(num || 0).toLocaleString('id-ID');
+        }
+
+        function showScanResultModal(data, scannedId) {
+            $('#scanResultInitial').text(data.nama ? data.nama.charAt(0).toUpperCase() : 'M');
+            $('#scanResultName').text(data.nama || '-');
+            $('#scanResultIdMember').text('Member Terverifikasi • ID ' + (data.id_member || '-'));
+
+            $('#scanResultTagihan').val(formatRupiah(data.tagihan));
+            $('#scanResultKomisi').val(formatRupiah(data.komisi));
+            $('#scanResultKresya').val(formatRupiah(data.kresya));
+            $('#scanResultTabungan').val(formatRupiah(data.tabungan));
+            $('#scanResultZiskaf').val(formatRupiah(data.ziskaf));
+            $('#displaySaldo').text(formatRupiah(data.saldo));
+            $('#scanResultSaldo').attr('max', data.saldo);
+
+            // Calculate total: tagihan + kresya + tabungan + ziskaf - komisi
+            const tagihan = parseFloat(data.tagihan || 0);
+            const kresya = parseFloat(data.kresya || 0);
+            const tabungan = parseFloat(data.tabungan || 0);
+            const ziskaf = parseFloat(data.ziskaf || 0);
+            const komisi = parseFloat(data.komisi || 0);
+            const totalDana = tagihan + kresya + tabungan + ziskaf - komisi;
+            $('#scanResultTotalDana').text(formatRupiah(totalDana));
+
+            $('#scanResultIdInput').val(scannedId);
+            $('#scanResultKeterangan').val('');
+
+            $('#scanResultBackdrop').addClass('active');
+            $('#scanResultModal').addClass('active');
+        }
+
+        function closeScanResultModal() {
+            $('#scanResultBackdrop').removeClass('active');
+            $('#scanResultModal').removeClass('active');
+            $('#scanResultKeterangan').val('');
+            showFab();
+        }
+        $('#btnCloseScanResult, #scanResultBackdrop').on('click', function(e) {
+            e.preventDefault();
+            closeScanResultModal();
+        });
+
+        $(document).on('click', '#btnProsesScan', function(e) {
+            e.preventDefault();
+            $('#scanResultTypeInput').val('proses');
+            $('#formProsesScan').submit();
+        });
+
+        $(document).on('click', '#btnTolakScan', function(e) {
+            e.preventDefault();
+            const keterangan = $('#scanResultKeterangan').val().trim();
+            if (!keterangan) {
+                app.dialog.alert('Keterangan wajib diisi untuk menolak scan.', 'Peringatan');
+                $('#scanResultKeterangan').focus();
+                return;
+            }
+            $('#scanResultTypeInput').val('tolak');
+            $('#formProsesScan').submit();
+        });
+
+        $('#formProsesScan').on('submit', function(e) {
+            const btnProses = $('#btnProsesScan');
+            const btnTolak = $('#btnTolakScan');
+            const type = $('#scanResultTypeInput').val();
+
+            if (btnProses.hasClass('btn-loading') || btnTolak.hasClass('btn-loading')) {
+                e.preventDefault();
+                return;
+            }
+
+            if (type === 'tolak') {
+                btnTolak.addClass('btn-loading').prop('disabled', true);
+                btnTolak.html('<span class="spinner-loading"></span> Menolak');
+                btnProses.prop('disabled', true).css('opacity', '0.5').css('pointer-events', 'none');
+            } else {
+                btnProses.addClass('btn-loading').prop('disabled', true);
+                btnProses.html('<span class="spinner-loading"></span> Memproses');
+                btnTolak.prop('disabled', true).css('opacity', '0.5').css('pointer-events', 'none');
+            }
+        });
+
+        // 1. Buka Bottom Sheet Pilihan QRIS
+        $('#btnOpenQrisMenu').on('click', function(e) {
+            e.preventDefault();
+            hideFab();
+            $('#qrisSheetBackdrop').addClass('active');
+            $('#qrisSheetModal').addClass('active');
+        });
+
+        // 2. Tutup Bottom Sheet
+        function closeQrisSheet() {
+            $('#qrisSheetBackdrop').removeClass('active');
+            $('#qrisSheetModal').removeClass('active');
+            showFab();
+        }
+        $('#btnCloseQrisSheet, #qrisSheetBackdrop').on('click', function(e) {
+            e.preventDefault();
+            closeQrisSheet();
+        });
+
+        // Flashlight Toggle Simulator
+        $('#btnToggleFlash').on('click', function(e) {
+            e.preventDefault();
+            $(this).toggleClass('scanner-flash-on');
+            $('#scannerFlashOverlay').toggleClass('active');
+
+            if ($(this).hasClass('scanner-flash-on')) {
+                $('#iconFlash').text('bolt_slash_fill');
+            } else {
+                $('#iconFlash').text('bolt_fill');
+            }
+        });
+
+        function positionScanFab() {
+            const $btn = $('#btnOpenQrisMenu');
+            const $glass = $('#scanFabGlass');
+            const $parent = $('.floating-navbar');
+
+            if (!$btn.length || !$btn.is(':visible')) {
+                $glass.hide();
+                return;
+            }
+            $glass.show();
+
+            const parentRect = $parent[0].getBoundingClientRect();
+            const btnRect = $btn[0].getBoundingClientRect();
+
+            const leftOffset = btnRect.left - parentRect.left + btnRect.width / 2;
+            const topOffset = btnRect.top - parentRect.top;
+
+            $glass.css({
+                left: leftOffset + 'px',
+                top: topOffset + 'px',
+                transform: 'translate(-50%, -55%)' // separuh nongol ke atas
+            });
+        }
+
+        $(document).ready(function() {
+            positionScanFab();
+        });
+        $(window).on('resize scroll', positionScanFab);
+        $(document).on('page:init page:afterin', positionScanFab);
+
+        // efek tekan (visual saja, karena pointer-events glass di-none, klik asli tetap di tombol)
+        $(document).on('touchstart mousedown', '#scanFabGlass', function() {
+            $(this).addClass('pressed');
+        });
+        $(document).on('touchend mouseup mouseleave', '#scanFabGlass', function() {
+            $(this).removeClass('pressed');
+        });
+    });
+</script>
+        </div>
+    </div>
+        <div class="sheet-modal sheet-info" data-backdrop="true" data-swipe-to-close="true">
+        <div class="sheet-modal-inner">
+            <div class="page-content">
+                <h1>Apa yang baru</h1>
+                <p>-Fitur Transaksi Menggunakan Tampilan. Kini user bisa transaksi menggunakan tampilan dan untuk cek
+                    transaksinya ke menu notif, atau tetap ingin di menu chat transaksi</p>
+                <p>-Fitur Struk. kini user bisa mengakses fitur struk bukti transaksi sukses beserta detail nya dimenu
+                    riwayat</p>
+                <p>-Optimasi Pengalaman pengguna. kami mengoptimasikan pengalaman pengguna agar lebih baik dan nyaman
+                </p>
+                <p>-Menu produk. Kini user bisa mengklik list produk dan akan bisa langsung transaksi dengan mengetikkan
+                    nomor tujuannya</p>
+                <h3>Scroll untuk menutup</h3>
+            </div>
+        </div>
+    </div>
+    <noscript>
+        <div class="no-js-warning">
+            <div class="no-js-warning-inner">
+                <div>
+                    <img src="/assets/img/images/koci-v6.png" alt="">
+                </div>
+                <p>Agar situs ini dapat berfungsi penuh, Anda harus mengaktifkan JavaScript.</p>
+                <h3><a href="https://www.enablejavascript.io/id" class="button button-fill color-light-gray">
+                        Klik disini</a></h3>
+            </div>
+        </div>
+    </noscript>
+    <script src="/assets/js/framework7-bundle.js"></script>
+    <script src="/assets/js/app.js"></script>
+
+    
+    
+                            <!-- <script>
+
+        var pusher = new Pusher('351bbd8fab6b8a9f8324', {
+            cluster: 'ap1'
+        });
+
+        var channel = pusher.subscribe('transaction-status');
+        channel.bind('TransactionStatusUpdated', function(data) {
+            var currentUserId = "";
+
+            if (data.memberId == currentUserId) {
+                var notification = app.notification.create({
+                    icon: '<img src="/assets/img/images/koci-center.jpg" alt="" class="notification-image" />',
+                    title: "Info Center",
+                    subtitle: "Transaksi",
+                    text: data.message,
+                    closeButton: true,
+                });
+                notification.open();
+            }
+        });
+    </script> -->
+    <script>
+        $(document).ready(function() {
+            $('#formChangePassword').submit(function(e) {
+                e.preventDefault();
+
+                let btn = $('#submitChangePassword');
+
+                // disable button
+                btn.prop('disabled', true);
+
+                // ubah class nya menjadi color-light-gray
+                btn.removeClass('color-danger');
+                btn.addClass('color-light-gray');
+
+                // ubah teks button nya menjadi "Mengecek"
+                btn.text('Memproses....');
+
+                // submit manual setelah UI berubah
+                this.submit();
+            });
+        });
+    </script>
+        <script>
+        // jika ada disabled program di klik tampil toast center
+        $$('.disabled-program').on('click', function() {
+            app.dialog.alert('Anda tidak memiliki akses ke program ini !!!', 'Info');
+        });
+
+
+        var swiper = app.swiper.create('.swiper', {
+            slidesPerView: 1,
+            spaceBetween: 16,
+            loop: true,
+            autoplay: {
+                delay: 3000, // Time in ms before the next slide
+                disableOnInteraction: false, // Keeps playing after user swipes
+            },
+            breakpoints: {
+                // When window width is >= 768px (Tablets)
+                768: {
+                    slidesPerView: 2,
+                    spaceBetween: 20
+                },
+                // When window width is >= 1024px (Desktop)
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30
+                }
+            }
+        });
+
+        var heroPhotos = [
+            '/assets/img/images/hero2.jpeg',
+            '/assets/img/images/hero-4.jpeg',
+            '/assets/img/images/hero1.png',
+            '/assets/img/images/hero3.jpg',
+        ];
+
+        var photoBrowserStandalone = app.photoBrowser.create({
+            photos: heroPhotos,
+            type: 'standalone',
+            theme: 'dark'
+        });
+
+        $$('.hero-photo').on('click', function() {
+            var clickedSrc = $$(this).data('src');
+            var index = heroPhotos.indexOf(clickedSrc);
+            if (index !== -1) {
+                photoBrowserStandalone.open(index);
+            }
+        });
+
+            </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function() {
+                    console.log('Service Worker Registered');
+                });
+        }
+    </script>
+</body>
+
+</html>
