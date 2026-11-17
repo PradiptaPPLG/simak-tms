@@ -125,6 +125,7 @@ Route::middleware(['auth'])->group(function () {
     // Developer Profile ala GitHub
     Route::get('/profil', [SimakController::class, 'profile'])->name('profile');
     Route::post('/profil', [SimakController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/password/update', [SimakController::class, 'updatePassword'])->name('password.update');
 
     // Admin TMS Management Hub
     Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');

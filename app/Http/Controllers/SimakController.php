@@ -11,6 +11,7 @@ use App\Models\TaskSubmission;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class SimakController extends Controller
 {
@@ -27,19 +28,37 @@ class SimakController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $request->validate([
+            'login_id' => 'required|string',
+            'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $loginId = trim($request->login_id);
+
+        // Cari berdasarkan 5-digit account_id, username, atau email
+        $user = User::where('account_id', $loginId)
+                    ->orWhere('username', $loginId)
+                    ->orWhere('email', $loginId)
+                    ->first();
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
-            'email' => 'Kredensial tidak valid. Silakan coba akun demo di bawah.',
-        ])->onlyInput('email');
+            'login_id' => 'ID Pengguna / Email atau Kata Sandi salah. Gunakan ID 5-digit Anda (contoh: 19364) dan kata sandi: tmshebatsukses.',
+        ])->onlyInput('login_id');
+    }
+
+    private function generateUniqueAccountId(): string
+    {
+        do {
+            $code = (string) rand(10000, 99999);
+        } while (User::where('account_id', $code)->orWhere('username', $code)->exists());
+
+        return $code;
     }
 
     // Quick Login Demo Helper for Siswa / Mentor / Admin
@@ -51,7 +70,9 @@ class SimakController extends Controller
             request()->session()->regenerate();
             return redirect()->route('dashboard')->with('success', 'Selamat datang, ' . $user->name . ' (' . strtoupper($user->role) . ')');
         }
-        return redirect()->route('login')->with('error', 'Akun tidak ditemukan.');
+        
+        $roleName = $role === 'mentor' ? 'Staff Mentor' : ($role === 'siswa' ? 'Siswa PKL' : 'Admin');
+        return redirect()->route('login')->with('error', "Belum ada akun {$roleName} terdaftar. Silakan login sebagai Admin TMS terlebih dahulu untuk mendaftarkan akun baru.");
     }
 
     public function logout(Request $request)
@@ -479,7 +500,7 @@ class SimakController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'nullable|string|max:150',
             'role' => 'required|in:mentor,siswa',
             'school_origin' => 'nullable|string|max:150',
             'major' => 'nullable|string|max:100',
@@ -489,22 +510,28 @@ class SimakController extends Controller
 
         $batch = Batch::first();
         $avatarBg = $validated['role'] === 'mentor' ? '090d16' : 'ef4444';
+        $accountId = $this->generateUniqueAccountId();
 
-        User::create([
+        $email = !empty($validated['email'])
+            ? (str_contains($validated['email'], '@') ? strtolower(trim($validated['email'])) : strtolower(trim($validated['email'])) . '@tms.co.id')
+            : ($validated['role'] === 'mentor' ? "mentor.{$accountId}@tms.co.id" : "siswa.{$accountId}@tms.co.id");
+
+        $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt('password'),
+            'account_id' => $accountId,
+            'username' => $accountId,
+            'email' => $email,
+            'password' => Hash::make('tmshebatsukses'),
             'role' => $validated['role'],
             'school_origin' => $validated['school_origin'] ?? ($validated['role'] === 'mentor' ? 'PT. Teknologi Multi Sistem' : 'SMKN 1 Ciamis'),
             'major' => $validated['major'] ?? ($validated['role'] === 'mentor' ? 'Software Engineering' : 'PPLG'),
             'mentor_id' => $validated['role'] === 'siswa' ? ($validated['mentor_id'] ?? null) : null,
             'batch_id' => $validated['batch_id'] ?? ($batch ? $batch->id : 1),
-            'username' => strtolower(str_replace(' ', '', $validated['name'])) . rand(10, 99),
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=' . $avatarBg . '&color=ffffff&bold=true&size=256',
         ]);
 
         $roleLabel = $validated['role'] === 'mentor' ? 'Staff Mentor' : 'Siswa PKL';
-        return back()->with('success', "Akun {$roleLabel} baru berhasil didaftarkan dan langsung terhubung di sistem!");
+        return back()->with('success', "Akun {$roleLabel} {$user->name} ({$accountId}) berhasil didaftarkan! ID Login: {$accountId} | Kata Sandi: tmshebatsukses");
     }
 
     // ==========================================
@@ -597,18 +624,25 @@ class SimakController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'nullable|string|max:150',
             'headline' => 'nullable|string|max:150',
             'phone_number' => 'nullable|string|max:30',
             'bio' => 'nullable|string',
         ]);
 
         $batch = Batch::first();
+        $accountId = $this->generateUniqueAccountId();
 
-        User::create([
+        $email = !empty($validated['email'])
+            ? (str_contains($validated['email'], '@') ? strtolower(trim($validated['email'])) : strtolower(trim($validated['email'])) . '@tms.co.id')
+            : "mentor.{$accountId}@tms.co.id";
+
+        $mentor = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt('password'),
+            'account_id' => $accountId,
+            'username' => $accountId,
+            'email' => $email,
+            'password' => Hash::make('tmshebatsukses'),
             'role' => 'mentor',
             'school_origin' => 'PT. Teknologi Multi Sistem',
             'major' => $validated['headline'] ?? 'Senior Software Engineer',
@@ -617,11 +651,10 @@ class SimakController extends Controller
             'bio' => $validated['bio'] ?? 'Staff Mentor Pembimbing Industri PT. TMS',
             'location' => 'Lab Software TMS',
             'batch_id' => $batch ? $batch->id : 1,
-            'username' => strtolower(str_replace([' ', '.', ','], '', $validated['name'])) . rand(10, 99),
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=090d16&color=ffffff&bold=true&size=256',
         ]);
 
-        return back()->with('success', "Akun Mentor {$validated['name']} berhasil didaftarkan dan aktif membimbing!");
+        return back()->with('success', "Akun Staff Mentor {$mentor->name} ({$accountId}) berhasil didaftarkan! ID Login: {$accountId} | Kata Sandi: tmshebatsukses");
     }
 
     public function adminUpdateMentor(Request $request, $id)
@@ -629,7 +662,7 @@ class SimakController extends Controller
         $mentor = User::where('role', 'mentor')->findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $mentor->id,
+            'email' => 'nullable|string|max:150',
             'headline' => 'nullable|string|max:150',
             'phone_number' => 'nullable|string|max:30',
             'bio' => 'nullable|string',
@@ -637,7 +670,7 @@ class SimakController extends Controller
 
         $mentor->update([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => $validated['email'] ?? $mentor->email,
             'major' => $validated['headline'] ?? $mentor->major,
             'headline' => $validated['headline'] ?? $mentor->headline,
             'phone_number' => $validated['phone_number'] ?? $mentor->phone_number,
@@ -658,5 +691,33 @@ class SimakController extends Controller
         $mentor->delete();
 
         return back()->with('success', "Akun mentor {$name} berhasil dihapus dari sistem.");
+    }
+
+    // ==========================================
+    // GANTI PASSWORD PENGGUNA (UNIVERSAL DEFAULT: tmshebatsukses)
+    // ==========================================
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi baru minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak cocok.']);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Kata sandi akun Anda berhasil diperbarui!');
     }
 }

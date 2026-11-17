@@ -122,9 +122,9 @@
                                         {{ substr($mentor->name, 0, 2) }}
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-900 text-xs">{{ $mentor->name }}</div>
+                                        <div class="font-bold text-slate-900 text-xs">{{ $mentor->name }} <span class="font-mono text-red-600 font-bold text-[11px]">({{ $mentor->account_id ?? $mentor->username ?? $mentor->id }})</span></div>
                                         <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 font-mono">
-                                            <span>&#64;{{ $mentor->username ?? 'mentor' }}</span>
+                                            <span>ID: {{ $mentor->account_id ?? $mentor->username ?? $mentor->id }}</span>
                                             <span>•</span>
                                             <span>{{ $mentor->email }}</span>
                                         </div>
@@ -157,7 +157,7 @@
                                             @foreach($mentor->students as $student)
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-700 shadow-2xs">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                    {{ $student->name }}
+                                                    {{ $student->name }} ({{ $student->account_id ?? $student->username ?? $student->id }})
                                                 </span>
                                             @endforeach
                                         </div>
@@ -242,7 +242,7 @@
                 <i data-lucide="user-plus" class="w-5 h-5 text-red-600"></i>
                 <span>Form Pendaftaran Akun Staff Mentor Baru</span>
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Admin mendaftarkan akun staff mentor industri baru. Mentor yang didaftarkan akan langsung otomatis muncul pada dropdown pilihan pembimbing saat pendaftaran siswa baru.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Admin mendaftarkan akun staff mentor industri baru. ID Login 5-digit dibuat otomatis oleh sistem dan kata sandi universal default adalah <code class="font-mono text-red-600 font-bold bg-red-50 px-1.5 py-0.5 rounded">tmshebatsukses</code>.</p>
         </div>
 
         <form action="{{ route('admin.mentors.store') }}" method="POST" class="space-y-4">
@@ -252,32 +252,40 @@
                 <!-- Nama Lengkap Mentor -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap Mentor (dengan gelar) *</label>
-                    <input type="text" name="name" required placeholder="Contoh: Alif Maulana, S.Kom" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                    <input type="text" name="name" required placeholder="Contoh: Farhan Ramadhan, S.Kom" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
                 </div>
 
-                <!-- Email Akun TMS -->
+                <!-- Email / Username (Opsional) -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Akun Resmi TMS *</label>
-                    <input type="email" name="email" required placeholder="alif@tms.co.id" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Email / Username TMS (Opsional)</label>
+                    <input type="text" name="email" placeholder="mentor@tms.co.id (otomatis jika kosong)" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
+                    <p class="text-[10px] text-slate-400 mt-1">Boleh dikosongkan, sistem akan meng-generate otomatis.</p>
                 </div>
 
-                <!-- Password Default -->
+                <!-- ID Login Otomatis -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Default</label>
-                    <input type="text" value="tms12345" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-500 font-mono select-none">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">ID Login Akun</label>
+                    <input type="text" value="[Auto-Generate 5-Digit]" readonly class="w-full px-3.5 py-2.5 bg-red-50/60 border border-red-200 rounded-xl text-xs text-red-700 font-mono font-bold select-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Diterbitkan otomatis sistem (contoh: 19364).</p>
+                </div>
+
+                <!-- Password Default Universal -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Default Universal</label>
+                    <input type="text" value="tmshebatsukses" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-700 font-mono font-bold select-none">
                     <p class="text-[10px] text-slate-400 mt-1">Mentor dapat mengganti password setelah login.</p>
                 </div>
 
                 <!-- Bidang Keahlian / Jabatan -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Bidang Keahlian / Jabatan Industri *</label>
-                    <input type="text" name="headline" required placeholder="Contoh: Senior Backend Engineer & Cloud Architect" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                    <input type="text" name="headline" required placeholder="Contoh: Senior Software Engineer / Tech Lead" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
                 </div>
 
                 <!-- Nomor WhatsApp -->
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Handphone / WhatsApp *</label>
-                    <input type="text" name="phone_number" required placeholder="Contoh: 0813-9876-5432" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
+                    <input type="text" name="phone_number" required placeholder="Contoh: 0852-1958-3336" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
                 </div>
 
                 <!-- Penempatan Lab -->

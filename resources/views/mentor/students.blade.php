@@ -43,7 +43,7 @@
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
                 <span>Pembimbing:</span>
-                <span class="font-bold text-slate-800">{{ $mentor->name }}</span>
+                <span class="font-bold text-slate-800">{{ $mentor->name ?? 'Staff Mentor TMS' }}</span>
             </div>
         </div>
 
@@ -196,7 +196,7 @@
                         <div class="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
                             <div class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center justify-between">
                                 <span>Nilai 4 Pilar Kompetensi Industri</span>
-                                <span class="text-[10px] text-slate-400 font-normal">Penilai: {{ $mentor->name }}</span>
+                                <span class="text-[10px] text-slate-400 font-normal">Penilai: {{ $mentor->name ?? 'Staff Mentor TMS' }}</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs">
                                 <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">

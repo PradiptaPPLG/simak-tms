@@ -443,12 +443,16 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Pembimbing TMS (Mentor)</label>
                         <select name="mentor_id" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                            <option value="">-- Pilih Mentor Pembimbing --</option>
+                            <option value="">{{ $mentors->count() > 0 ? '-- Pilih Mentor Pembimbing --' : '-- Belum Ada Staff Mentor Terdaftar --' }}</option>
                             @foreach($mentors as $m)
                                 <option value="{{ $m->id }}">{{ $m->name }} ({{ $m->school_origin }})</option>
                             @endforeach
                         </select>
-                        <p class="text-[10px] text-slate-400 mt-1">Siswa otomatis muncul di daftar monitoring mentor yang dipilih.</p>
+                        @if($mentors->count() === 0)
+                            <p class="text-[10px] text-amber-600 font-bold mt-1">Belum ada mentor. Daftarkan mentor terlebih dahulu di atas atau di menu Data Mentor & Staff.</p>
+                        @else
+                            <p class="text-[10px] text-slate-400 mt-1">Siswa otomatis muncul di daftar monitoring mentor yang dipilih.</p>
+                        @endif
                     </div>
 
                     <div>

@@ -239,11 +239,17 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Staff Mentor Pembimbing *</label>
                     <select name="mentor_id" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
-                        <option value="">-- Pilih Mentor Pembimbing TMS --</option>
+                        <option value="">{{ $mentors->count() > 0 ? '-- Pilih Mentor Pembimbing TMS --' : '-- Belum Ada Staff Mentor Terdaftar --' }}</option>
                         @foreach($mentors as $mentor)
                             <option value="{{ $mentor->id }}">{{ $mentor->name }} ({{ $mentor->major ?? 'Senior Software Engineer' }})</option>
                         @endforeach
                     </select>
+                    @if($mentors->count() === 0)
+                        <p class="text-[10px] text-amber-600 font-bold mt-1.5 flex items-center gap-1">
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                            <span>Belum ada mentor. Silakan <a href="{{ route('admin.mentors') }}" class="underline text-red-600 font-black">daftarkan mentor terlebih dahulu</a> di menu Data Mentor & Staff.</span>
+                        </p>
+                    @endif
                 </div>
             </div>
 

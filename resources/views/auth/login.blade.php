@@ -63,8 +63,22 @@
                 </div>
             </div>
 
+            @if(session('success'))
+                <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-amber-500"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             @if ($errors->any())
-                <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium">
+                <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -73,27 +87,31 @@
             <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
                 @csrf
 
-                <!-- Username / Email -->
+                <!-- Username / Email / 5-Digit ID -->
                 <div>
-                    <label for="email" class="block text-xs font-bold text-slate-700 mb-1.5">Email / NISN</label>
+                    <label for="login_id" class="block text-xs font-bold text-slate-700 mb-1.5">ID Pengguna (5-Digit) / Email Akun</label>
                     <div class="relative">
-                        <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                        <input type="email" id="email" name="email" value="{{ old('email', 'pradipta@tms.co.id') }}" required
-                               class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
-                               placeholder="pradipta@tms.co.id">
+                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="login_id" name="login_id" value="{{ old('login_id', 'admin@tms.co.id') }}" required
+                               class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono"
+                               placeholder="Contoh: 19364 atau admin@tms.co.id">
                     </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Siswa & Mentor login menggunakan ID 5-digit otomatis yang diterbitkan Admin.</p>
                 </div>
 
                 <!-- Password -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label for="password" class="block text-xs font-bold text-slate-700">Kata Sandi</label>
-                        <span class="text-[10px] text-slate-400 font-mono">Default: password</span>
+                        <span class="text-[10px] text-red-600 font-bold font-mono bg-red-50 px-2 py-0.5 rounded border border-red-200">Default: tmshebatsukses</span>
                     </div>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                        <input type="password" id="password" name="password" value="password" required
-                               class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                        <input type="password" id="password" name="password" value="tmshebatsukses" required
+                               class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono"
+                               placeholder="tmshebatsukses">
+                    </div>
+                </div>
                     </div>
                 </div>
 
@@ -113,6 +131,13 @@
                 </button>
             </form>
 
+        </div>
+
+        <!-- Credentials Quick Info -->
+        <div class="mt-4 p-3.5 bg-white/90 backdrop-blur-xs rounded-xl border border-slate-200 text-center text-[11px] text-slate-500 shadow-2xs space-y-1">
+            <div><b class="text-slate-800">Kata Sandi Universal:</b> <code class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-mono font-bold text-xs">tmshebatsukses</code></div>
+            <div class="text-[10px]"><b class="text-slate-700">Siswa & Mentor:</b> Menggunakan ID 5-digit dari admin (contoh: <span class="font-mono font-bold text-red-600">19364</span>)</div>
+            <div class="text-[10px]"><b class="text-slate-700">Admin TMS:</b> <code class="font-mono font-bold text-slate-800">admin@tms.co.id</code> / ID: <code class="font-mono font-bold text-slate-800">99999</code></div>
         </div>
 
         <!-- Partnership Footer -->
