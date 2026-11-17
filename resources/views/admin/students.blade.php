@@ -3,59 +3,61 @@
 @section('title', 'Master Data Siswa Magang (Semua Batch) • Admin TMS')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 min-w-0 max-w-full">
 
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                Master Data Lintas Angkatan & Periode PKL
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                <span class="hidden sm:inline">Master Data Lintas Angkatan & Periode PKL</span>
+                <span class="sm:hidden">Master Data Siswa Magang</span>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Master Data Siswa Magang (Semua Batch)</h1>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Master Data Siswa Magang (Semua Batch)</h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola data seluruh siswa magang lintas sekolah mitra, pembagian staff mentor pembimbing, serta rekapitulasi penugasan.</p>
         </div>
 
-        <div class="flex items-center gap-2.5">
-            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>Daftarkan Siswa Baru</span>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="w-full sm:w-auto px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="user-plus" class="w-4 h-4 shrink-0"></i>
+                <span class="hidden sm:inline">Daftarkan Siswa Baru</span>
+                <span class="sm:hidden">Daftar Siswa</span>
             </button>
-            <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
+            <button onclick="window.print()" class="w-full sm:w-auto px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
                 <span>Cetak Rekap</span>
             </button>
         </div>
     </div>
 
-    <!-- 1. Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="mas-card p-5 border-l-4 border-l-red-600 flex items-center justify-between">
+    <!-- 1. Quick Stats Cards (Compact 3-Cols on Mobile) -->
+    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-red-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Total Siswa Terdaftar</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $totalInterns }} <span class="text-xs font-normal text-slate-500">Peserta</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Total Siswa</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $totalInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Peserta</span></h3>
             </div>
-            <div class="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-red-50 text-red-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="users" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-slate-900 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Terhubung Pembimbing TMS</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $assignedInterns }} <span class="text-xs font-normal text-slate-500">Siswa</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Ada Pembimbing</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $assignedInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Siswa</span></h3>
             </div>
-            <div class="w-11 h-11 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-slate-100 text-slate-900 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="user-check" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-emerald-600 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Evaluasi & Nilai Rapor</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $evaluatedInterns }} <span class="text-xs font-normal text-slate-500">Ternilai</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Nilai Rapor</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $evaluatedInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Ternilai</span></h3>
             </div>
-            <div class="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="award" class="w-5 h-5"></i>
             </div>
         </div>
@@ -225,8 +227,8 @@
 
     <!-- 4. Form Registrasi Akun Siswa Baru -->
     <div id="form-register-student" class="mas-card p-6 bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200">
-        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-200">
-            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-600/30">
+        <div class="flex items-start sm:items-center gap-3 mb-4 pb-3 border-b border-slate-200">
+            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-600/30 shrink-0 aspect-square mt-0.5 sm:mt-0">
                 <i data-lucide="user-plus" class="w-5 h-5"></i>
             </div>
             <div>
@@ -303,7 +305,7 @@
         <div class="mas-card p-6 bg-white w-full max-w-lg shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                     </div>
                     <div>

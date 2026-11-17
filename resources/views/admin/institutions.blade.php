@@ -3,7 +3,7 @@
 @section('title', 'Data Sekolah & Kampus Mitra • Admin TMS')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 min-w-0 max-w-full">
 
     <!-- Flash Notification -->
     @if(session('success'))
@@ -172,7 +172,7 @@
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center">
+                <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 aspect-square">
                     <i data-lucide="building" class="w-4 h-4"></i>
                 </div>
                 <div>

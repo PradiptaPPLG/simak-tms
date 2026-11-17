@@ -42,6 +42,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
         body {
             font-family: 'Outfit', sans-serif;
             background-color: #f8fafc;
@@ -53,6 +57,8 @@
             border: 1px solid #e2e8f0;
             border-radius: 1rem;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+            min-width: 0;
+            max-width: 100%;
         }
         .mas-card-hover {
             transition: all 0.2s ease-in-out;
@@ -71,7 +77,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex antialiased bg-slate-50 text-slate-800">
+<body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 overflow-x-hidden">
 
     @php
         $role = auth()->check() ? auth()->user()->role : 'siswa';
@@ -104,31 +110,31 @@
                     <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aktivitas Siswa</div>
 
                     <!-- Dashboard Siswa -->
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('dashboard') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('dashboard') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 {{ request()->routeIs('dashboard') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Dashboard Siswa</span>
                     </a>
 
                     <!-- Jurnal Kegiatan (Khusus Siswa) -->
-                    <a href="{{ route('journals.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('journals.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('journals.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('journals.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="book-open" class="w-4 h-4 shrink-0 {{ request()->routeIs('journals.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Jurnal Kegiatan</span>
                     </a>
 
                     <!-- Showcase Portofolio -->
-                    <a href="{{ route('showcase.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('showcase.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="folder-git-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('showcase.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Arsip Portofolio</span>
                     </a>
 
                     <!-- Evaluasi & Nilai -->
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="award" class="w-4 h-4 shrink-0 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Evaluasi & Nilai</span>
                     </a>
 
                     <!-- Profil Developer Ala GitHub -->
-                    <a href="{{ route('profile') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('profile*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('profile') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('profile*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <i data-lucide="user" class="w-4 h-4 shrink-0 {{ request()->routeIs('profile*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                             <span class="truncate">Profil Developer</span>
@@ -141,19 +147,19 @@
                     <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Area Staff Mentor</div>
 
                     <!-- Dashboard Monitoring Batch Sekarang -->
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('dashboard') || request()->routeIs('mentor.dashboard') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('dashboard') || request()->routeIs('mentor.dashboard') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 {{ request()->routeIs('dashboard') || request()->routeIs('mentor.dashboard') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Monitoring Batch</span>
                     </a>
 
                     <!-- Siswa Bimbingan (Inspect & Stats Performa) -->
-                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="users" class="w-4 h-4 shrink-0 {{ request()->routeIs('mentor.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Siswa Bimbingan</span>
                     </a>
 
                     <!-- Validasi Jurnal Masuk (Review Hari Ini) -->
-                    <a href="{{ route('mentor.review') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('mentor.review') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('mentor.review') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('mentor.review') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <i data-lucide="check-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('mentor.review') ? 'text-red-600' : 'text-slate-400' }}"></i>
                             <span class="truncate">Validasi Jurnal Masuk</span>
@@ -162,13 +168,13 @@
                     </a>
 
                     <!-- Evaluasi Nilai Siswa Bimbingan -->
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="award" class="w-4 h-4 shrink-0 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Penilaian & Rapor Siswa</span>
                     </a>
 
                     <!-- Showcase Batch Sekarang -->
-                    <a href="{{ route('showcase.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('showcase.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="folder-git-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('showcase.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Showcase Batch Sekarang</span>
                     </a>
@@ -178,37 +184,37 @@
                     <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Area Admin TMS</div>
 
                     <!-- Monitoring Global & Arsip Master -->
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="shield-check" class="w-4 h-4 shrink-0 {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Monitoring Global & Arsip</span>
                     </a>
 
                     <!-- Data Siswa (Semua Batch) -->
-                    <a href="{{ route('admin.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('admin.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="users" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Data Siswa (Semua Batch)</span>
                     </a>
 
                     <!-- Data Mentor & Staff Pembimbing -->
-                    <a href="{{ route('admin.mentors') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('admin.mentors') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="user-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Data Mentor & Staff</span>
                     </a>
 
                     <!-- Data Angkatan & Project per Angkatan (1 Angkatan > 1 Project) -->
-                    <a href="{{ route('admin.batches') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.batches*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('admin.batches') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.batches*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="folder-git-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.batches*') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                        <span class="truncate">Angkatan & Project DUDI</span>
+                        <span class="truncate whitespace-nowrap">Angkatan & Project</span>
                     </a>
 
                     <!-- Data Asal Instansi: Sekolah & Kampus Mitra -->
-                    <a href="{{ route('admin.institutions') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.institutions*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('admin.institutions') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.institutions*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="building-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.institutions*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Sekolah & Kampus Mitra</span>
                     </a>
 
                     <!-- Master Arsip Portofolio (Semua Angkatan) -->
-                    <a href="{{ route('showcase.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('showcase.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <i data-lucide="archive" class="w-4 h-4 shrink-0 {{ request()->routeIs('showcase.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                             <span class="truncate">Master Arsip Portofolio</span>
@@ -217,7 +223,7 @@
                     </a>
 
                     <!-- Rekapitulasi Nilai & Laporan -->
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Rekap Nilai & Laporan DUDI</span>
                     </a>
@@ -227,7 +233,7 @@
                 <div class="pt-3 pb-1 px-3">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan</span>
                 </div>
-                <a href="{{ route('guide.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600 font-semibold border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                <a href="{{ route('guide.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                     <i data-lucide="book-open-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('guide.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                     <span class="truncate">Panduan & Tutorial</span>
                 </a>
@@ -320,7 +326,7 @@
                     </a>
                     <a href="{{ route('admin.batches') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.batches*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="folder-git-2" class="w-4 h-4"></i>
-                        <span>Angkatan & Project DUDI</span>
+                        <span>Angkatan & Project</span>
                     </a>
                     <a href="{{ route('admin.institutions') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.institutions*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="building-2" class="w-4 h-4"></i>
@@ -378,12 +384,12 @@
         <!-- Top Header (Hitam - Putih - Merah) -->
         <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
             
-            <!-- Mobile Brand & Hamburger Toggle -->
+            <!-- Mobile Brand & Hamburger Toggle (Kiri Atas Sesuai Standar Aplikasi) -->
             <div class="flex items-center gap-2.5 md:hidden">
-                <button id="mobile-drawer-toggle" type="button" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center justify-center transition-colors" title="Buka Menu Navigasi">
+                <button type="button" onclick="openMobileDrawer()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 flex items-center justify-center transition-all shrink-0 cursor-pointer" title="Buka Menu Sidebar">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
-                <div class="w-8 h-8 rounded-xl bg-slate-900 text-red-500 flex items-center justify-center font-black text-xs shadow-xs">
+                <div class="w-8 h-8 rounded-xl bg-slate-900 text-red-500 flex items-center justify-center font-black text-xs shadow-xs shrink-0 aspect-square">
                     TMS
                 </div>
                 <span class="font-black text-sm text-slate-900 tracking-tight">SIMAK-TMS</span>
@@ -400,8 +406,8 @@
             <!-- Right Controls: Profile & Logout -->
             <div class="flex items-center gap-2 sm:gap-3 ml-auto">
                 @auth
-                    <!-- User Profile Pill -->
-                    <a href="{{ route('profile') }}" class="flex items-center gap-2 group hover:opacity-85 transition-opacity" title="Buka Profil Developer">
+                    <!-- User Profile Pill (Desktop Saja karena di Mobile Profil sudah di Bottom Nav) -->
+                    <a href="{{ route('profile') }}" class="hidden sm:flex items-center gap-2 group hover:opacity-85 transition-opacity" title="Buka Profil Developer">
                         <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center border-2 border-red-500 shadow-xs flex-shrink-0">
                             @if(auth()->user()->avatar)
                                 <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
@@ -409,7 +415,7 @@
                                 {{ substr(auth()->user()->name, 0, 2) }}
                             @endif
                         </div>
-                        <div class="hidden sm:block text-left">
+                        <div class="text-left">
                             <div class="text-xs font-bold text-slate-900 leading-tight uppercase group-hover:text-red-600 transition-colors">{{ auth()->user()->name }}</div>
                             <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }} <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? auth()->user()->id }})</span></div>
                         </div>
@@ -418,7 +424,15 @@
                     <!-- Logout Button (Desktop) -->
                     <form action="{{ route('logout') }}" method="POST" class="hidden sm:inline">
                         @csrf
-                        <button type="submit" title="Keluar" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1">
+                        <button type="submit" title="Keluar" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors ml-1 cursor-pointer">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+
+                    <!-- Quick Logout Button on Mobile (Icon di pojok kanan atas) -->
+                    <form action="{{ route('logout') }}" method="POST" class="sm:hidden">
+                        @csrf
+                        <button type="submit" title="Keluar / Logout" class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
                             <i data-lucide="log-out" class="w-4 h-4"></i>
                         </button>
                     </form>
@@ -431,7 +445,7 @@
         </header>
 
         <!-- Main Body Content (With comfortable mobile bottom padding for bottom nav) -->
-        <main class="flex-1 p-4 sm:p-8 pb-24 md:pb-8">
+        <main class="flex-1 p-4 sm:p-8 pb-24 md:pb-8 min-w-0">
             @if(session('success'))
                 <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-xs">
                     <span class="flex items-center gap-2">
@@ -524,10 +538,10 @@
                 <i data-lucide="award" class="w-5 h-5"></i>
                 <span class="text-[10px]">Rapor</span>
             </a>
-            <button onclick="document.getElementById('mobile-drawer-toggle').click()" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-500">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-                <span class="text-[10px]">Menu</span>
-            </button>
+            <a href="{{ route('profile') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('profile*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="user" class="w-5 h-5"></i>
+                <span class="text-[10px]">Profil</span>
+            </a>
         @elseif($role === 'admin_tms')
             <!-- Admin Mobile Bottom Bar -->
             <a href="{{ route('admin.dashboard') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
@@ -546,10 +560,10 @@
                 <i data-lucide="archive" class="w-5 h-5"></i>
                 <span class="text-[10px]">Arsip</span>
             </a>
-            <button onclick="document.getElementById('mobile-drawer-toggle').click()" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-slate-500">
-                <i data-lucide="menu" class="w-5 h-5"></i>
-                <span class="text-[10px]">Menu</span>
-            </button>
+            <a href="{{ route('profile') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ request()->routeIs('profile*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="user" class="w-5 h-5"></i>
+                <span class="text-[10px]">Profil</span>
+            </a>
         @endif
     </nav>
 
@@ -1076,36 +1090,34 @@
             if (confPassInput) confPassInput.addEventListener('input', validatePasswordCriteria);
 
             // Mobile Drawer Logic
-            const toggleBtn = document.getElementById('mobile-drawer-toggle');
-            const closeBtn = document.getElementById('mobile-drawer-close');
-            const backdrop = document.getElementById('mobile-backdrop');
-            const drawer = document.getElementById('mobile-drawer');
-
-            function openDrawer() {
+            window.openMobileDrawer = function() {
+                const backdrop = document.getElementById('mobile-backdrop');
+                const drawer = document.getElementById('mobile-drawer');
                 if (backdrop && drawer) {
                     backdrop.classList.remove('hidden');
                     drawer.classList.remove('-translate-x-full');
                     document.body.classList.add('overflow-hidden');
+                    setTimeout(() => lucide.createIcons(), 50);
                 }
-            }
+            };
 
-            function closeDrawer() {
+            window.closeMobileDrawer = function() {
+                const backdrop = document.getElementById('mobile-backdrop');
+                const drawer = document.getElementById('mobile-drawer');
                 if (backdrop && drawer) {
                     backdrop.classList.add('hidden');
                     drawer.classList.add('-translate-x-full');
                     document.body.classList.remove('overflow-hidden');
                 }
-            }
+            };
 
-            if (toggleBtn) toggleBtn.addEventListener('click', openDrawer);
-            if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
-            if (backdrop) backdrop.addEventListener('click', closeDrawer);
+            const toggleBtn = document.getElementById('mobile-drawer-toggle');
+            const closeBtn = document.getElementById('mobile-drawer-close');
+            const backdrop = document.getElementById('mobile-backdrop');
 
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function () {
-                    setTimeout(() => lucide.createIcons(), 50);
-                });
-            }
+            if (toggleBtn) toggleBtn.addEventListener('click', window.openMobileDrawer);
+            if (closeBtn) closeBtn.addEventListener('click', window.closeMobileDrawer);
+            if (backdrop) backdrop.addEventListener('click', window.closeMobileDrawer);
         });
 
         function toggleActionDropdown(btn, event) {

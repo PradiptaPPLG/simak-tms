@@ -159,6 +159,7 @@
                     </div>
                 </div>
 
+                @if($user->role === 'siswa')
                 <!-- Career Badges (Ala GitHub Achievements) -->
                 <div class="mt-5 pt-4 border-t border-slate-100 space-y-2.5">
                     <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pencapaian Magang (Badges):</div>
@@ -204,71 +205,10 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
             </div>
 
-            <!-- ============================================================== -->
-            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI RESMI (Scan & Cetak Langsung)-->
-            <!-- ============================================================== -->
-            @php
-                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
-                $verifyUrl = route('verify.show', $certNumber);
-                $printUrl = route('certificate.print', $certNumber);
-            @endphp
-            <div class="mas-card p-5 space-y-4 border-2 border-red-500/20 bg-gradient-to-b from-white to-red-50/20 relative overflow-hidden">
-                <!-- Top Accent Line -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-600"></div>
-
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/25">
-                            <i data-lucide="award" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-black text-slate-900 leading-tight">E-Sertifikat & QR Verifikasi</h3>
-                            <p class="text-[10px] text-slate-400 font-semibold">Standar Kelulusan Industri PT. TMS</p>
-                        </div>
-                    </div>
-                    <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Otentik
-                    </span>
-                </div>
-
-                <!-- QR Code Box -->
-                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-center space-y-2.5 shadow-xs">
-                    <div class="w-36 h-36 mx-auto bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-center">
-                        <img 
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" 
-                            alt="QR Code Verifikasi Sertifikat" 
-                            class="w-full h-full object-contain">
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor Sertifikat Resmi:</div>
-                        <div class="text-xs font-black text-slate-900 font-mono tracking-wider">{{ $certNumber }}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">
-                            Predikat: <b class="text-red-600">A (Sangat Memuaskan)</b> &bull; Skor: <b class="text-slate-900">{{ $evaluation->final_score ?? '95.8' }}</b>
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-slate-400 leading-snug">
-                        Orang atau instansi tinggal scan QR di atas dengan kamera HP untuk memvalidasi kelulusan di portal publik PT. TMS.
-                    </p>
-                </div>
-
-                <!-- Action Buttons: Cetak Sertif & Link Verifikasi -->
-                <div class="space-y-2">
-                    <a href="{{ $printUrl }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shadow-red-600/25">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                        <span>Cetak E-Sertifikat (PDF)</span>
-                    </a>
-
-                    <a href="{{ $verifyUrl }}" target="_blank" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-xs">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>Buka Halaman Verifikasi Publik</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Ganti Password Card -->
             <div class="mas-card p-5 space-y-3">
                 <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
                     <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
@@ -356,12 +296,18 @@
                         <div class="text-xl font-black text-red-600 font-mono">{{ $totalJournals }}</div>
                     </div>
                     <div class="bg-white p-3 rounded-xl border border-slate-100 text-center">
-                        <div class="text-[10px] uppercase font-bold text-slate-400">Skor Evaluasi</div>
-                        <div class="text-xl font-black text-slate-900 font-mono">{{ $evaluation->final_score ?? 94 }}</div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400">{{ $user->role === 'siswa' ? 'Skor Evaluasi' : 'Role Akses' }}</div>
+                        <div class="text-xl font-black text-slate-900 font-mono">{{ $user->role === 'siswa' ? ($evaluation->final_score ?? 94) : strtoupper($user->role) }}</div>
                     </div>
                 </div>
             </div>
 
+            @if($user->role === 'siswa')
+            @php
+                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
+                $verifyUrl = route('verify.show', $certNumber);
+                $printUrl = route('certificate.print', $certNumber);
+            @endphp
             <!-- ============================================================== -->
             <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI (Fitur Unggulan Siswa)       -->
             <!-- ============================================================== -->
@@ -411,6 +357,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             <!-- 2. PINNED REPOSITORIES & PROJECTS (Proyek Unggulan Ala GitHub) -->
             <div class="mas-card p-6 space-y-4">
@@ -620,85 +567,6 @@
                 </form>
             </div>
 
-            <!-- ============================================================== -->
-            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI RESMI (Scan & Cetak Langsung)-->
-            <!-- ============================================================== -->
-            @php
-                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
-                $verifyUrl = route('verify.show', $certNumber);
-                $printUrl = route('certificate.print', $certNumber);
-            @endphp
-            <div class="mas-card p-5 space-y-4 border-2 border-red-500/20 bg-gradient-to-b from-white to-red-50/20 relative overflow-hidden">
-                <!-- Top Accent Line -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-600"></div>
-
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/25">
-                            <i data-lucide="award" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xs font-black text-slate-900 leading-tight">E-Sertifikat & QR Verifikasi</h3>
-                            <p class="text-[10px] text-slate-400 font-semibold">Standar Kelulusan Industri PT. TMS</p>
-                        </div>
-                    </div>
-                    <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Otentik
-                    </span>
-                </div>
-
-                <!-- QR Code Box -->
-                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-center space-y-2.5 shadow-xs">
-                    <div class="w-36 h-36 mx-auto bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-center">
-                        <img 
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" 
-                            alt="QR Code Verifikasi Sertifikat" 
-                            class="w-full h-full object-contain">
-                    </div>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor Sertifikat Resmi:</div>
-                        <div class="text-xs font-black text-slate-900 font-mono tracking-wider">{{ $certNumber }}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">
-                            Predikat: <b class="text-red-600">A (Sangat Memuaskan)</b> &bull; Skor: <b class="text-slate-900">{{ $evaluation->final_score ?? '95.8' }}</b>
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-slate-400 leading-snug">
-                        Orang atau instansi tinggal scan QR di atas dengan kamera HP untuk memvalidasi kelulusan di portal publik PT. TMS.
-                    </p>
-                </div>
-
-                <!-- Action Buttons: Cetak Sertif & Link Verifikasi -->
-                <div class="space-y-2">
-                    <a href="{{ $printUrl }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shadow-red-600/25">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-                        <span>Cetak E-Sertifikat (PDF)</span>
-                    </a>
-
-                    <a href="{{ $verifyUrl }}" target="_blank" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-xs">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>Buka Halaman Verifikasi Publik</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Ganti Password Card -->
-            <div class="mas-card p-5 space-y-3">
-                <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-black text-slate-900">Keamanan & Password Akun</h3>
-                        <p class="text-[10px] text-slate-400">Kelola kata sandi akun SIMAK-TMS Anda</p>
-                    </div>
-                </div>
-                <button type="button" onclick="openChangePasswordModal()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
-                    <i data-lucide="lock" class="w-3.5 h-3.5 text-red-400"></i>
-                    <span>Ubah Kata Sandi Akun</span>
-                </button>
-            </div>
-
-        </div>
 
     </div>
 

@@ -3,7 +3,7 @@
 @section('title', 'Data Angkatan & Project DUDI • Admin TMS')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 min-w-0 max-w-full">
 
     <!-- Flash Notification -->
     @if(session('success'))
@@ -20,56 +20,57 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                Manajemen Angkatan & Portofolio Karya Industri PT. TMS
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                <span class="hidden sm:inline">Manajemen Angkatan & Portofolio Karya Industri PT. TMS</span>
+                <span class="sm:hidden">Manajemen Angkatan & Project DUDI</span>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Data Angkatan & Project per Angkatan</h1>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Data Angkatan & Project per Angkatan</h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola angkatan magang (cohort/batch) serta produk software yang dibangun siswa PKL (1 angkatan dapat mengerjakan &gt;1 project).</p>
         </div>
 
-        <div class="flex items-center gap-2.5 flex-wrap">
-            <button onclick="openCreateProjectModal()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>Tambah Project Baru</span>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="openCreateProjectModal()" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="plus-circle" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">Tambah Project</span>
             </button>
-            <button onclick="openCreateBatchModal()" class="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="calendar-plus" class="w-4 h-4 text-red-400"></i>
-                <span>Tambah Angkatan Baru</span>
+            <button onclick="openCreateBatchModal()" class="px-3 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="calendar-plus" class="w-4 h-4 text-red-400 shrink-0"></i>
+                <span class="truncate">Tambah Angkatan</span>
             </button>
         </div>
     </div>
 
-    <!-- Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="mas-card p-5 border-l-4 border-l-slate-900 flex items-center justify-between">
+    <!-- Quick Stats Cards (Compact 3-Cols on Mobile to Save Vertical Space) -->
+    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Total Angkatan Terdaftar</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $batches->count() }} <span class="text-xs font-normal text-slate-500">Angkatan</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Total Angkatan</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $batches->count() }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Batch</span></h3>
             </div>
-            <div class="w-11 h-11 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-slate-100 text-slate-900 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="layers" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-red-600 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-red-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Project Digital Dibangun</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ \App\Models\ShowcaseProject::count() }} <span class="text-xs font-normal text-slate-500">Aplikasi / Web</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Project Digital</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ \App\Models\ShowcaseProject::count() }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">App</span></h3>
             </div>
-            <div class="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-red-50 text-red-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="folder-git-2" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-emerald-600 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Rata-rata Project / Angkatan</p>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Rata-rata/Batch</p>
                 @php
                     $avg = $batches->count() > 0 ? round(\App\Models\ShowcaseProject::count() / $batches->count(), 1) : 0;
                 @endphp
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $avg }} <span class="text-xs font-normal text-slate-500">Project / Batch</span></h3>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $avg }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Proj</span></h3>
             </div>
-            <div class="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="git-branch" class="w-5 h-5"></i>
             </div>
         </div>
@@ -79,7 +80,7 @@
     <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         @foreach($batches as $batch)
             <a href="{{ route('admin.batches', ['batch_id' => $batch->id]) }}" 
-               class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap {{ ($selectedBatchId == $batch->id) ? 'bg-red-600 text-white shadow-md shadow-red-600/25' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+               class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap {{ ($selectedBatchId == $batch->id) ? 'bg-red-600 text-white shadow-md shadow-red-600/25' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' }}">
                 <i data-lucide="folder" class="w-3.5 h-3.5 {{ ($selectedBatchId == $batch->id) ? 'text-white' : 'text-slate-400' }}"></i>
                 <span>{{ $batch->batch_name }}</span>
                 <span class="px-1.5 py-0.5 rounded-md text-[10px] font-mono {{ ($selectedBatchId == $batch->id) ? 'bg-black/20 text-white' : 'bg-slate-100 text-slate-600' }}">
@@ -91,30 +92,30 @@
 
     <!-- Selected Batch Details Card -->
     @if($selectedBatch)
-        <div class="mas-card p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="mas-card p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-600 text-white">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-600 text-white shrink-0">
                         Batch {{ $selectedBatch->period_year }}
                     </span>
-                    <span class="text-xs text-slate-300">Periode Pelaksanaan: <b>{{ \Carbon\Carbon::parse($selectedBatch->start_date)->translatedFormat('d M Y') }} – {{ \Carbon\Carbon::parse($selectedBatch->end_date)->translatedFormat('d M Y') }}</b></span>
+                    <span class="text-[11px] sm:text-xs text-slate-300">Periode Pelaksanaan: <b>{{ \Carbon\Carbon::parse($selectedBatch->start_date)->translatedFormat('d M Y') }} – {{ \Carbon\Carbon::parse($selectedBatch->end_date)->translatedFormat('d M Y') }}</b></span>
                 </div>
-                <h2 class="text-xl font-black mt-1">{{ $selectedBatch->batch_name }}</h2>
+                <h2 class="text-lg sm:text-xl font-black mt-1.5">{{ $selectedBatch->batch_name }}</h2>
                 <p class="text-xs text-slate-300 mt-0.5">Seluruh project perangkat lunak yang dikerjakan oleh siswa PKL di bawah bimbingan mentor industri PT. TMS pada batch ini.</p>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 w-full sm:w-auto">
                 <button 
                     onclick="openEditBatchModal({{ json_encode($selectedBatch) }})" 
-                    class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md transition-all flex items-center gap-1.5 border border-white/10">
-                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400"></i>
-                    <span>Edit Angkatan</span>
+                    class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-md transition-all flex items-center justify-center gap-1.5 border border-white/10 text-center">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                    <span class="truncate">Edit Angkatan</span>
                 </button>
                 <button 
                     onclick="openCreateProjectModal({{ $selectedBatch->id }})" 
-                    class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>Tambah Project ke Batch Ini</span>
+                    class="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 text-center">
+                    <i data-lucide="plus" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span class="truncate">+ Project Batch</span>
                 </button>
             </div>
         </div>
@@ -122,9 +123,9 @@
 
     <!-- Projects Table & Cards in this Batch -->
     <div class="mas-card overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
                     <i data-lucide="folder-git-2" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -132,23 +133,23 @@
                     <p class="text-[11px] text-slate-400">1 angkatan dapat mempublikasikan lebih dari 1 project nyata.</p>
                 </div>
             </div>
-            <span class="text-[11px] font-mono text-slate-500 font-semibold">
+            <span class="text-[11px] font-mono text-slate-500 font-semibold shrink-0">
                 {{ $selectedBatch->batch_name ?? 'Batch' }}
             </span>
         </div>
 
-        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
             @forelse($projects as $project)
-                <div class="p-5 rounded-2xl border border-slate-200 bg-white hover:border-red-400/50 hover:shadow-md transition-all flex flex-col justify-between space-y-3 relative group">
+                <div class="p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white hover:border-red-400/50 hover:shadow-md transition-all flex flex-col justify-between space-y-3 relative group">
                     <div>
-                        <!-- Header: Kategori & Status -->
-                        <div class="flex items-center justify-between gap-2 mb-2">
-                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                        <!-- Header: Kategori & Status (Anti-collision on Mobile) -->
+                        <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 truncate max-w-[190px] sm:max-w-none">
                                 {{ $project->project_category ?? 'Web Application' }}
                             </span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                {{ $project->status ?? 'Completed & Deployed' }}
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                                <span>{{ $project->status ?? 'Completed & Deployed' }}</span>
                             </span>
                         </div>
 
@@ -230,7 +231,7 @@
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center">
+                <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 aspect-square">
                     <i data-lucide="folder-plus" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -328,7 +329,7 @@
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 aspect-square">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                 </div>
                 <div>

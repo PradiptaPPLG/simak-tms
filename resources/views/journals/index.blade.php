@@ -6,26 +6,26 @@
 <div class="space-y-6">
 
     <!-- Header Section (Hitam - Putih - Merah TMS) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Jurnal Kegiatan PKL</h1>
-            <p class="text-xs text-slate-500 mt-1">Catat setiap aktivitas pengerjaan atau pembelajaran di industri secara mandiri.</p>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Jurnal Kegiatan PKL</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Catat setiap aktivitas pengerjaan atau pembelajaran di industri secara mandiri.</p>
         </div>
 
-        <div class="flex items-center gap-3">
-            <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer">
-                <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
-                <span>Cetak Jurnal</span>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span class="truncate">Cetak Jurnal</span>
             </button>
-            <a href="{{ route('showcase.index') }}" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="book" class="w-4 h-4"></i>
-                <span>Cetak Portofolio</span>
+            <a href="{{ route('showcase.index') }}" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="book" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">Cetak Portofolio</span>
             </a>
         </div>
     </div>
 
     <!-- 1. Interactive Monthly Calendar Grid (November 2026) -->
-    <div class="mas-card p-6">
+    <div class="mas-card p-4 sm:p-6">
         <!-- Calendar Header -->
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2">
@@ -182,7 +182,7 @@
             <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-2.5 shadow-2xs">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0 aspect-square">
                             <i data-lucide="message-square-quote" class="w-4 h-4"></i>
                         </div>
                         <div>

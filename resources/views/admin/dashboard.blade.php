@@ -3,103 +3,104 @@
 @section('title', 'Pusat Monitoring Global & Arsip Master • Admin TMS')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 min-w-0 max-w-full">
 
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                Monitoring Global Seluruh Angkatan & Master Arsip Perusahaan
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                <span class="hidden sm:inline">Monitoring Global Seluruh Angkatan & Master Arsip Perusahaan</span>
+                <span class="sm:hidden">Monitoring Global & Master Arsip</span>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Pusat Monitoring Global & Arsip Master</h1>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Pusat Monitoring Global & Arsip Master</h1>
             <p class="text-xs text-slate-500 mt-0.5">Memonitoring komprehensif seluruh siswa lintas angkatan, repositori master karya proyek digital, dan rekapitulasi nilai DUDI.</p>
         </div>
 
-        <div class="flex items-center gap-2.5">
-            <button onclick="document.getElementById('form-register-user').scrollIntoView({behavior: 'smooth'})" class="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="user-plus" class="w-4 h-4 text-red-500"></i>
-                <span>Daftarkan Siswa/Mentor</span>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="document.getElementById('form-register-user').scrollIntoView({behavior: 'smooth'})" class="col-span-2 sm:col-auto px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4 text-red-500 shrink-0"></i>
+                <span>Daftarkan Siswa / Mentor</span>
             </button>
-            <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
-                <span>Cetak Rekap</span>
+            <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span class="truncate">Cetak Rekap</span>
             </button>
-            <a href="{{ route('showcase.index') }}" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="folder-git-2" class="w-4 h-4"></i>
-                <span>Galeri Karya Proyek</span>
+            <a href="{{ route('showcase.index') }}" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-2">
+                <i data-lucide="folder-git-2" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">Galeri Karya</span>
             </a>
         </div>
     </div>
 
-    <!-- 1. Top 4 Global KPI Cards (Semua Angkatan & Master Arsip) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 1. Top 4 Global KPI Cards: Formasi 2x2 (2 Atas, 2 Bawah) -->
+    <div class="grid grid-cols-2 gap-3 sm:gap-4">
         
-        <!-- Card 1: Total Seluruh Siswa Magang -->
-        <div class="mas-card p-5 border-l-4 border-l-red-600 flex flex-col justify-between">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Siswa Terdaftar (Semua Batch)</p>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">{{ $totalInterns }} <span class="text-xs font-normal text-slate-500">Peserta</span></h3>
+        <!-- Card 1: Total Seluruh Siswa Magang (Atas Kiri) -->
+        <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-red-600 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Siswa Terdaftar (Semua Batch)</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{{ $totalInterns }} <span class="text-xs sm:text-sm font-normal text-slate-500">Peserta</span></h3>
                 </div>
-                <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="users" class="w-5 h-5"></i>
-                </div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>Mitra: SMKN 1 Ciamis</span>
-                <span class="text-emerald-600 font-bold">100% Terverifikasi</span>
-            </div>
-        </div>
-
-        <!-- Card 2: Total Tim Pembimbing / Mentor TMS -->
-        <div class="mas-card p-5 border-l-4 border-l-slate-900 flex flex-col justify-between">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Staff Mentor TMS</p>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">{{ $totalMentors }} <span class="text-xs font-normal text-slate-500">Lead Dev</span></h3>
-                </div>
-                <div class="w-10 h-10 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center">
-                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                <div class="w-8 h-8 sm:w-11 sm:h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
             </div>
-            <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>Lab Software Banjar</span>
-                <span class="text-slate-700 font-bold">Aktif Membimbing</span>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span class="truncate">Mitra: SMKN 1 Ciamis</span>
+                <span class="text-emerald-600 font-bold shrink-0">100% Terverifikasi</span>
             </div>
         </div>
 
-        <!-- Card 3: Master Arsip Seluruh Portofolio Karya -->
-        <div class="mas-card p-5 border-l-4 border-l-red-500 flex flex-col justify-between">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Master Arsip Portofolio</p>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">{{ $totalProjects }} <span class="text-xs font-normal text-slate-500">Proyek Digital</span></h3>
+        <!-- Card 2: Total Tim Pembimbing / Mentor TMS (Atas Kanan) -->
+        <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-slate-900 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Staff Mentor TMS</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{{ $totalMentors }} <span class="text-xs sm:text-sm font-normal text-slate-500">Lead Dev</span></h3>
                 </div>
-                <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="archive" class="w-5 h-5"></i>
+                <div class="w-8 h-8 sm:w-11 sm:h-11 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="user-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
             </div>
-            <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>Seluruh Angkatan:</span>
-                <span class="font-bold text-red-600">Arsip Permanen</span>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span class="truncate">Lab Software Banjar</span>
+                <span class="text-slate-700 font-bold shrink-0">Aktif Membimbing</span>
             </div>
         </div>
 
-        <!-- Card 4: Total Logbook & Kelulusan DUDI -->
-        <div class="mas-card p-5 border-l-4 border-l-slate-800 flex flex-col justify-between">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Rekapitulasi Nilai</p>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">100% <span class="text-xs font-normal text-emerald-600 font-bold">Lulus [ A ]</span></h3>
+        <!-- Card 3: Master Arsip Seluruh Portofolio Karya (Bawah Kiri) -->
+        <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-red-500 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Master Arsip Portofolio</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{{ $totalProjects }} <span class="text-xs sm:text-sm font-normal text-slate-500 whitespace-nowrap">Proyek</span></h3>
                 </div>
-                <div class="w-10 h-10 bg-slate-100 text-slate-800 rounded-xl flex items-center justify-center">
-                    <i data-lucide="award" class="w-5 h-5"></i>
+                <div class="w-8 h-8 sm:w-11 sm:h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="archive" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
             </div>
-            <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>Total Logbook:</span>
-                <span class="font-bold text-slate-800">{{ $totalJournals }} Jurnal</span>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span class="truncate">Seluruh Angkatan:</span>
+                <span class="font-bold text-red-600 shrink-0">Arsip Permanen</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Total Logbook & Kelulusan DUDI (Bawah Kanan) -->
+        <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-slate-800 flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Rekapitulasi Nilai & Lulus</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">100% <span class="text-xs sm:text-sm font-normal text-emerald-600 font-bold whitespace-nowrap">Lulus [A]</span></h3>
+                </div>
+                <div class="w-8 h-8 sm:w-11 sm:h-11 bg-slate-100 text-slate-800 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="award" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <span class="truncate">Total Logbook: {{ $totalJournals }} Jurnal</span>
+                <span class="font-bold text-slate-800 shrink-0">Siap Cetak Rapor</span>
             </div>
         </div>
 
@@ -111,11 +112,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Tren Monitoring Aktivitas & Siswa (Bar & Line Combo) -->
-        <div class="mas-card p-6 lg:col-span-2 flex flex-col justify-between">
+        <div class="mas-card p-4 sm:p-6 lg:col-span-2 flex flex-col justify-between overflow-hidden">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
                 <div>
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
                             <i data-lucide="activity" class="w-4 h-4"></i>
                         </div>
                         <h2 class="text-base font-black text-slate-900 tracking-tight">Tren Monitoring Aktivitas Siswa</h2>
@@ -130,24 +131,24 @@
                 </div>
             </div>
 
-            <!-- Metric Telemetry Badges -->
-            <div class="grid grid-cols-3 gap-3 my-4">
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Siswa Aktif</div>
-                    <div class="text-lg font-black text-slate-900 font-mono mt-0.5">{{ $totalInterns }} <span class="text-[11px] font-normal text-slate-500">Peserta</span></div>
+            <!-- Metric Telemetry Badges (Compact & Truncate Safe on Mobile) -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3 my-4">
+                <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
+                    <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Total Siswa</div>
+                    <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalInterns }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Peserta</span></div>
                 </div>
-                <div class="p-3 rounded-xl bg-red-50/50 border border-red-100">
-                    <div class="text-[10px] font-bold text-red-600 uppercase tracking-wider">Jurnal Terkumpul</div>
-                    <div class="text-lg font-black text-red-600 font-mono mt-0.5">{{ $totalJournals }} <span class="text-[11px] font-normal text-red-400">Logbook</span></div>
+                <div class="p-2 sm:p-3 rounded-xl bg-red-50/50 border border-red-100 min-w-0">
+                    <div class="text-[9px] sm:text-[10px] font-bold text-red-600 uppercase tracking-wider truncate">Jurnal Masuk</div>
+                    <div class="text-base sm:text-lg font-black text-red-600 font-mono mt-0.5 truncate">{{ $totalJournals }} <span class="text-[10px] sm:text-[11px] font-normal text-red-400">Logbook</span></div>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Portofolio Karya</div>
-                    <div class="text-lg font-black text-slate-900 font-mono mt-0.5">{{ $totalProjects ?? 2 }} <span class="text-[11px] font-normal text-slate-500">Proyek</span></div>
+                <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
+                    <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Portofolio</div>
+                    <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalProjects ?? 2 }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Proyek</span></div>
                 </div>
             </div>
 
             <!-- Canvas Container -->
-            <div class="relative w-full h-64">
+            <div class="relative w-full max-w-full h-64 overflow-hidden">
                 <canvas id="adminMonitoringChart"></canvas>
             </div>
 
@@ -164,10 +165,10 @@
         </div>
 
         <!-- Chart 2: Komposisi & Distribusi Status Siswa (Doughnut Chart) -->
-        <div class="mas-card p-6 flex flex-col justify-between">
+        <div class="mas-card p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
             <div class="pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0 aspect-square">
                         <i data-lucide="pie-chart" class="w-4 h-4"></i>
                     </div>
                     <h2 class="text-base font-black text-slate-900 tracking-tight">Status & Kelulusan Siswa</h2>
@@ -176,7 +177,7 @@
             </div>
 
             <!-- Canvas Doughnut Container with centered counter -->
-            <div class="relative w-full h-52 my-3 flex items-center justify-center">
+            <div class="relative w-full max-w-full h-52 my-3 flex items-center justify-center overflow-hidden">
                 <canvas id="adminStatusDonutChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span class="text-2xl font-black text-slate-900 font-mono leading-none">{{ $totalInterns }}</span>
@@ -222,7 +223,7 @@
     </div>
 
     <!-- 2. Section: Master Data Siswa Magang (Semua Batch / Angkatan) -->
-    <div id="tabel-siswa" class="mas-card p-6 space-y-4">
+    <div id="tabel-siswa" class="mas-card p-4 sm:p-6 space-y-4 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -355,11 +356,11 @@
     </div>
 
     <!-- 3. Section: Master Arsip Seluruh Portofolio Proyek (Semua Angkatan) -->
-    <div class="mas-card p-6 space-y-4">
+    <div class="mas-card p-4 sm:p-6 space-y-4 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
             <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <i data-lucide="archive" class="w-5 h-5 text-red-600"></i>
+                    <i data-lucide="archive" class="w-5 h-5 text-red-600 shrink-0"></i>
                     <span>Master Arsip Portofolio Proyek (Semua Angkatan)</span>
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">Seluruh karya aplikasi dan produk digital yang telah dihasilkan siswa magang PT. TMS.</p>
@@ -371,31 +372,33 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @forelse($allProjects as $proj)
-                <div class="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3">
+                <div class="p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between space-y-3 min-w-0 overflow-hidden">
                     <div>
-                        <div class="flex items-center justify-between gap-2">
-                            <h3 class="text-xs font-bold text-slate-900 font-mono">{{ $proj->title }}</h3>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                        <div class="flex items-center justify-between gap-2 min-w-0">
+                            <h3 class="text-xs font-bold text-slate-900 font-mono truncate min-w-0 flex-1">{{ $proj->title }}</h3>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 whitespace-nowrap shrink-0">
                                 {{ $proj->batch->name ?? 'Angkatan 2026' }}
                             </span>
                         </div>
                         <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">{{ $proj->short_description ?? $proj->description }}</p>
-                        <div class="text-[11px] text-slate-400 mt-2">
+                        <div class="text-[11px] text-slate-400 mt-2 truncate">
                             Pengembang: <b class="text-slate-700">{{ $proj->creator->name ?? 'Pradipta Endra Maulana' }}</b> ({{ $proj->creator->school_origin ?? 'SMKN 1 Ciamis' }})
                         </div>
                     </div>
 
-                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span class="text-[10px] font-mono text-slate-500">{{ $proj->tech_stack }}</span>
-                        <div class="flex items-center gap-2">
+                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                        <span class="text-[10px] font-mono text-slate-500 truncate min-w-0 flex-1">{{ $proj->tech_stack }}</span>
+                        <div class="flex items-center gap-2 shrink-0">
                             @if($proj->repo_url)
-                                <a href="{{ $proj->repo_url }}" target="_blank" class="text-slate-700 hover:text-red-600 font-mono text-[11px] font-bold">
-                                    Git Repo
+                                <a href="{{ $proj->repo_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-mono font-medium flex items-center gap-1.5 shadow-2xs transition-colors shrink-0">
+                                    <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                                    <span>Repo</span>
                                 </a>
                             @endif
                             @if($proj->live_url)
-                                <a href="{{ $proj->live_url }}" target="_blank" class="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold transition-colors">
-                                    Live Demo
+                                <a href="{{ $proj->live_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors shrink-0">
+                                    <i data-lucide="external-link" class="w-3 h-3 shrink-0"></i>
+                                    <span>Live</span>
                                 </a>
                             @endif
                         </div>
@@ -410,7 +413,7 @@
     </div>
 
     <!-- 4. Section: Pendaftaran Akun Baru oleh Admin (Mentor & Siswa) -->
-    <div id="form-register-user" class="mas-card p-6 sm:p-8 space-y-5">
+    <div id="form-register-user" class="mas-card p-4 sm:p-8 space-y-4 sm:space-y-5 overflow-hidden">
         <div class="border-b border-slate-100 pb-4">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
                 Hak Akses Admin
@@ -498,10 +501,10 @@
                 </div>
             </div>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span class="text-[11px] text-slate-400">Password standar akun baru: <b class="font-mono text-slate-700">password</b></span>
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center gap-2">
-                    <i data-lucide="check" class="w-4 h-4"></i>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i data-lucide="check" class="w-4 h-4 shrink-0"></i>
                     <span>Daftarkan Akun Pengguna</span>
                 </button>
             </div>
@@ -509,26 +512,26 @@
     </div>
 
     <!-- 6. Section: Rekapitulasi Nilai & Laporan Resmi DUDI -->
-    <div id="rekapitulasi-laporan" class="mas-card p-6 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+    <div id="rekapitulasi-laporan" class="mas-card p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-red-600"></i>
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-red-600 shrink-0"></i>
                     <span>Rekapitulasi Laporan Resmi PKL untuk Sekolah Mitra</span>
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">Ekspor transkrip nilai 4 pilar industri dan sertifikat kelulusan magang untuk SMKN 1 Ciamis.</p>
             </div>
-            <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+            <button onclick="window.print()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 whitespace-nowrap">
+                <i data-lucide="download" class="w-4 h-4 text-emerald-400 shrink-0"></i>
                 <span>Ekspor Rekap Nilai (PDF / Print)</span>
             </button>
         </div>
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
-            <div>
-                <div class="font-bold text-slate-800">Status Rekapitulasi: 1 Siswa Terdaftar (Batch 2026/2027)</div>
-                <div class="text-[11px] text-slate-500">Nilai Akhir: 94.0 [ Predikat A ] • No. Sertifikat: TMS-PKL-2026-001</div>
+        <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between gap-3">
+            <div class="min-w-0 flex-1">
+                <div class="font-bold text-slate-800 text-[11px] sm:text-xs truncate">Status Rekapitulasi: 1 Siswa Terdaftar (Batch 2026/2027)</div>
+                <div class="text-[10px] sm:text-[11px] text-slate-500 truncate">Nilai Akhir: 94.0 [ Predikat A ] • No. Sertifikat: TMS-PKL-2026-001</div>
             </div>
-            <span class="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+            <span class="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px] whitespace-nowrap shrink-0">
                 Siap Diterbitkan
             </span>
         </div>
@@ -539,7 +542,7 @@
         <div class="mas-card p-6 bg-white w-full max-w-lg shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
                         <i data-lucide="edit-3" class="w-4 h-4"></i>
                     </div>
                     <div>

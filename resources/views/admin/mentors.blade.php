@@ -3,59 +3,60 @@
 @section('title', 'Master Data Staff Mentor & Pembimbing • Admin TMS')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 min-w-0 max-w-full">
 
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-                Manajemen Staff & Pembimbing Industri PT. TMS
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                <span class="hidden sm:inline">Manajemen Staff & Pembimbing Industri PT. TMS</span>
+                <span class="sm:hidden">Staff Mentor & Pembimbing</span>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Master Data Staff Mentor & Pembimbing</h1>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Master Data Staff Mentor & Pembimbing</h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola data seluruh staff mentor teknis lab software, pembagian siswa bimbingan, kontak koordinasi, dan pendaftaran mentor baru.</p>
         </div>
 
-        <div class="flex items-center gap-2.5">
-            <button onclick="document.getElementById('form-register-mentor').scrollIntoView({behavior: 'smooth'})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>Daftarkan Mentor Baru</span>
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <button onclick="document.getElementById('form-register-mentor').scrollIntoView({behavior: 'smooth'})" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="user-plus" class="w-4 h-4 shrink-0"></i>
+                <span class="truncate">Daftar Mentor</span>
             </button>
-            <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-2">
-                <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
-                <span>Cetak Rekap</span>
+            <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span class="truncate">Cetak Rekap</span>
             </button>
         </div>
     </div>
 
-    <!-- 1. Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="mas-card p-5 border-l-4 border-l-slate-900 flex items-center justify-between">
+    <!-- 1. Quick Stats Cards (Compact 3-Cols on Mobile) -->
+    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Total Staff Mentor TMS</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $totalMentors }} <span class="text-xs font-normal text-slate-500">Staff Aktif</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Total Mentor</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $totalMentors }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Staff</span></h3>
             </div>
-            <div class="w-11 h-11 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-slate-100 text-slate-900 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="user-check" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-red-600 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-red-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Siswa Terhubung Bimbingan</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">{{ $assignedStudentsCount }} <span class="text-xs font-normal text-slate-500">Siswa Aktif</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Siswa Bimbingan</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $assignedStudentsCount }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Siswa</span></h3>
             </div>
-            <div class="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-red-50 text-red-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="users" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-5 border-l-4 border-l-emerald-600 flex items-center justify-between">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Rasio Bimbingan Lab</p>
-                <h3 class="text-2xl font-black text-slate-900 font-mono">1 : {{ $ratio }} <span class="text-xs font-normal text-slate-500">Siswa/Mentor</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Rasio Lab</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">1 : {{ $ratio }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Rasio</span></h3>
             </div>
-            <div class="w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+            <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="git-pull-request" class="w-5 h-5"></i>
             </div>
         </div>
@@ -85,17 +86,17 @@
 
     <!-- 3. Tabel Master Data Staff Mentor -->
     <div class="mas-card overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0 aspect-square mt-0.5">
                     <i data-lucide="user-check" class="w-4 h-4"></i>
                 </div>
-                <div>
+                <div class="min-w-0">
                     <h2 class="text-sm font-black text-slate-900">Daftar Staff Mentor & Pembimbing TMS ({{ $mentors->count() }})</h2>
                     <p class="text-[11px] text-slate-400">Seluruh mentor teknis lab software PT. Teknologi Multi Sistem yang berwenang membimbing siswa.</p>
                 </div>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono self-start sm:self-auto shrink-0">
                 Periode: 2026/2027
             </span>
         </div>
@@ -334,7 +335,7 @@
     <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0 aspect-square">
                     <i data-lucide="user-check" class="w-4 h-4"></i>
                 </div>
                 <div>

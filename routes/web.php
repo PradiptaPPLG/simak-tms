@@ -118,6 +118,12 @@ Route::get('/preview/profile', function () {
     return redirect()->route('profile');
 })->name('preview.profile');
 
+Route::get('/preview/admin/profile', function () {
+    $admin = \App\Models\User::where('role', 'admin_tms')->first();
+    \Illuminate\Support\Facades\Auth::login($admin);
+    return redirect()->route('profile');
+})->name('preview.admin.profile');
+
 Route::get('/preview/admin', function () {
     $admin = \App\Models\User::where('role', 'admin_tms')->first();
     \Illuminate\Support\Facades\Auth::login($admin);
