@@ -146,6 +146,12 @@
                         <span>Monitoring Batch Sekarang</span>
                     </a>
 
+                    <!-- Siswa Bimbingan (Inspect & Stats Performa) -->
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                        <i data-lucide="users" class="w-4 h-4 {{ request()->routeIs('mentor.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span>Siswa Bimbingan</span>
+                    </a>
+
                     <!-- Validasi Jurnal Masuk (Review Hari Ini) -->
                     <a href="{{ route('mentor.review') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('mentor.review') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <div class="flex items-center gap-3">
@@ -270,6 +276,10 @@
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('dashboard') || request()->routeIs('mentor.dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>Monitoring Batch Sekarang</span>
+                    </a>
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Siswa Bimbingan</span>
                     </a>
                     <a href="{{ route('mentor.review') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('mentor.review') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="check-check" class="w-4 h-4"></i>
@@ -457,15 +467,15 @@
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 <span class="text-[10px]">Monitor</span>
             </a>
+            <a href="{{ route('mentor.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('mentor.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span class="text-[10px]">Siswa</span>
+            </a>
             <a href="{{ route('mentor.review') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('mentor.review') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center -mt-3 shadow-md">
                     <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
                 </div>
                 <span class="text-[10px] font-bold">Review</span>
-            </a>
-            <a href="{{ route('showcase.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('showcase.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
-                <i data-lucide="folder-git-2" class="w-5 h-5"></i>
-                <span class="text-[10px]">Karya</span>
             </a>
             <a href="{{ route('evaluation.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('evaluation.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="award" class="w-5 h-5"></i>

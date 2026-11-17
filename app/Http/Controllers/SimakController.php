@@ -507,32 +507,56 @@ class SimakController extends Controller
         return back()->with('success', "Akun {$roleLabel} baru berhasil didaftarkan dan langsung terhubung di sistem!");
     }
 
-    // 2. Mentor: Hanya bisa mendaftarkan Siswa bimbingannya
-    public function mentorStoreStudent(Request $request)
+    // ==========================================
+    // MENTOR STUDENTS INSPECT & STATS
+    // ==========================================
+    public function mentorStudents()
     {
+        $mentor = Auth::user() ?? User::where('role', 'mentor')->first();
+        $students = User::where('role', 'siswa')
+            ->with(['journals' => function($q) {
+                $q->latest();
+            }, 'showcaseProjects', 'evaluation', 'mentor'])
+            ->get();
+        
+        $totalStudents = $students->count();
+        $totalApprovedJournals = DailyJournal::where('status', 'approved')->count();
+
+        return view('mentor.students', compact('mentor', 'students', 'totalStudents', 'totalApprovedJournals'));
+    }
+
+    // ==========================================
+    // ADMIN STUDENT MANAGEMENT (EDIT & DELETE)
+    // ==========================================
+    public function adminUpdateStudent(Request $request, $id)
+    {
+        $student = User::where('role', 'siswa')->findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email,' . $student->id,
             'school_origin' => 'nullable|string|max:150',
             'major' => 'nullable|string|max:100',
+            'mentor_id' => 'nullable|exists:users,id',
         ]);
 
-        $mentor = Auth::user();
-        $activeBatch = Batch::where('is_active', true)->first() ?? Batch::first();
+        $student->update($validated);
 
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt('password'),
-            'role' => 'siswa',
-            'school_origin' => $validated['school_origin'] ?? 'SMKN 1 Ciamis',
-            'major' => $validated['major'] ?? 'PPLG',
-            'mentor_id' => $mentor->id,
-            'batch_id' => $activeBatch ? $activeBatch->id : 1,
-            'username' => strtolower(str_replace(' ', '', $validated['name'])) . rand(10, 99),
-            'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=ef4444&color=ffffff&bold=true&size=256',
-        ]);
+        return back()->with('success', "Data siswa {$student->name} berhasil diperbarui oleh Admin!");
+    }
 
-        return back()->with('success', "Siswa bimbingan {$validated['name']} berhasil didaftarkan! Data langsung terhubung ke akun Anda dan tersinkronisasi otomatis ke panel Admin.");
+    public function adminDeleteStudent($id)
+    {
+        $student = User::where('role', 'siswa')->findOrFail($id);
+        $name = $student->name;
+        
+        // Clean up related records
+        $student->journals()->delete();
+        $student->submissions()->delete();
+        if ($student->evaluation) {
+            $student->evaluation()->delete();
+        }
+        $student->delete();
+
+        return back()->with('success', "Data siswa {$name} berhasil dihapus dari sistem oleh Admin.");
     }
 }

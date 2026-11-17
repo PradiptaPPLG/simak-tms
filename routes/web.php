@@ -57,6 +57,12 @@ Route::get('/preview/mentor', function () {
     return redirect()->route('mentor.dashboard');
 })->name('preview.mentor');
 
+Route::get('/preview/mentor/siswa', function () {
+    $mentor = \App\Models\User::where('role', 'mentor')->first();
+    \Illuminate\Support\Facades\Auth::login($mentor);
+    return redirect()->route('mentor.students');
+})->name('preview.mentor.students');
+
 Route::get('/preview/profile', function () {
     $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
@@ -105,10 +111,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Mentor Review & Monitoring Hub
     Route::get('/mentor/monitoring', [SimakController::class, 'mentorDashboard'])->name('mentor.dashboard');
+    Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
     Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
     Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
     Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
-    Route::post('/mentor/students', [SimakController::class, 'mentorStoreStudent'])->name('mentor.students.store');
 
     // Developer Profile ala GitHub
     Route::get('/profil', [SimakController::class, 'profile'])->name('profile');
@@ -117,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
     // Admin TMS Management Hub
     Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
+    Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
+    Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
     Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
     Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
 });
