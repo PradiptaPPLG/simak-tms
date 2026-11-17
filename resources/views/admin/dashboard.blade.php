@@ -25,10 +25,10 @@
                 <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
                 <span>Cetak Rekap</span>
             </button>
-            <button onclick="document.getElementById('form-create-task').scrollIntoView({behavior: 'smooth'})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span>Buat Modul Tugas</span>
-            </button>
+            <a href="{{ route('showcase.index') }}" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-2">
+                <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+                <span>Galeri Karya Proyek</span>
+            </a>
         </div>
     </div>
 
@@ -120,7 +120,7 @@
                         </div>
                         <h2 class="text-base font-black text-slate-900 tracking-tight">Tren Monitoring Aktivitas Siswa</h2>
                     </div>
-                    <p class="text-xs text-slate-400 mt-1">Volume pengisian jurnal kegiatan harian dan submit modul koding oleh seluruh siswa.</p>
+                    <p class="text-xs text-slate-400 mt-1">Volume pengisian jurnal kegiatan harian dan presensi kehadiran seluruh siswa.</p>
                 </div>
 
                 <!-- Toggle Timeframe: Minggu Ini / Bulan Ini -->
@@ -141,8 +141,8 @@
                     <div class="text-lg font-black text-red-600 font-mono mt-0.5">{{ $totalJournals }} <span class="text-[11px] font-normal text-red-400">Logbook</span></div>
                 </div>
                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Modul Koding Terbit</div>
-                    <div class="text-lg font-black text-slate-900 font-mono mt-0.5">{{ $totalTasks }} <span class="text-[11px] font-normal text-slate-500">Modul</span></div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Portofolio Karya</div>
+                    <div class="text-lg font-black text-slate-900 font-mono mt-0.5">{{ $totalProjects ?? 2 }} <span class="text-[11px] font-normal text-slate-500">Proyek</span></div>
                 </div>
             </div>
 
@@ -154,7 +154,7 @@
             <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
                 <div class="flex items-center gap-4">
                     <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-600 inline-block"></span> Jurnal Harian (Logbook)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-900 inline-block"></span> Submit Modul Koding</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-900 inline-block"></span> Presensi Masuk Lab</span>
                 </div>
                 <span class="text-emerald-600 font-semibold flex items-center gap-1">
                     <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
@@ -249,7 +249,7 @@
                         <th class="py-3 px-4">Siswa & Developer</th>
                         <th class="py-3 px-4">Sekolah & Jurusan</th>
                         <th class="py-3 px-4">Pembimbing TMS</th>
-                        <th class="py-3 px-4">Modul Disubmit</th>
+                        <th class="py-3 px-4">Karya Proyek</th>
                         <th class="py-3 px-4">Status & Nilai Akhir</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
@@ -285,16 +285,16 @@
                                 @endif
                             </td>
                             <td class="py-3.5 px-4">
-                                <span class="font-bold text-slate-900 font-mono">{{ $intern->submissions->count() }} Modul</span>
-                                <div class="text-[10px] text-slate-400">Terkumpul di LMS</div>
+                                <span class="font-bold text-slate-900 font-mono">{{ $intern->projects->count() ?? 1 }} Proyek</span>
+                                <div class="text-[10px] text-slate-400">Portofolio Digital</div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-3.5 px-4 whitespace-nowrap">
                                 @if($intern->evaluation)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px]">
-                                        Nilai: {{ $intern->evaluation->final_score }} [ A ]
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
+                                        Nilai: {{ $intern->evaluation->final_score }} [A]
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
                                         ✓ Aktif Magang
                                     </span>
                                 @endif
@@ -376,58 +376,7 @@
         </div>
     </div>
 
-    <!-- 4. Section: Penerbitan Modul Tugas Kurikulum LMS -->
-    <div id="form-create-task" class="mas-card p-6 sm:p-8 space-y-5">
-        <div class="border-b border-slate-100 pb-4">
-            <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-5 h-5 text-red-600"></i>
-                <span>Penerbitan Modul Tugas Kurikulum LMS Baru</span>
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Admin atau Lead Mentor dapat membuat penugasan teknis baru yang otomatis muncul pada modul seluruh siswa.</p>
-        </div>
-
-        <form action="{{ route('admin.tasks.store') }}" method="POST" class="space-y-4">
-            @csrf
-
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Judul Modul Sprint Koding</label>
-                <input type="text" name="title" required placeholder="Contoh: Modul 03: Optimasi Query Database & Caching Redis"
-                       class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Deskripsi & Syarat Pengumpulan (Pull Request Git)</label>
-                <textarea name="description" rows="3" required placeholder="Jelaskan instruksi pengerjaan, branch standar, dan kriteria acceptance test modul..."
-                          class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 leading-relaxed"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Batas Waktu Pengumpulan (Deadline)</label>
-                    <input type="datetime-local" name="deadline" required value="{{ now()->addDays(5)->format('Y-m-d\TH:i') }}"
-                           class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Tingkat Prioritas</label>
-                    <select name="priority" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                        <option value="sedang">Sedang</option>
-                        <option value="tinggi" selected>Tinggi (Wajib Selesai Pekan Ini)</option>
-                        <option value="rendah">Rendah (Eksplorasi Tambahan)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 flex items-center justify-end">
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                    <span>Terbitkan Modul Sprint ke Siswa</span>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- 5. Section: Pendaftaran Akun Baru oleh Admin (Mentor & Siswa) -->
+    <!-- 4. Section: Pendaftaran Akun Baru oleh Admin (Mentor & Siswa) -->
     <div id="form-register-user" class="mas-card p-6 sm:p-8 space-y-5">
         <div class="border-b border-slate-100 pb-4">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
@@ -591,7 +540,7 @@
                         },
                         {
                             type: 'line',
-                            label: 'Submit Modul LMS',
+                            label: 'Presensi Masuk Lab',
                             data: chartDataWeekly.tasks,
                             borderColor: '#0f172a',
                             backgroundColor: 'rgba(15, 23, 42, 0.08)',

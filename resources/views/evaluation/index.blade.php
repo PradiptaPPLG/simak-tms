@@ -67,7 +67,7 @@
             <div class="mas-card p-5 space-y-1">
                 <div class="text-[10px] uppercase font-bold text-slate-400">Kedisiplinan & SOP</div>
                 <div class="text-2xl font-black text-slate-900 font-mono">{{ $evaluation->discipline }}<span class="text-xs text-slate-400 font-normal">/100</span></div>
-                <p class="text-xs text-slate-500 leading-snug">Kedisiplinan jam kerja, kepatuhan POS, dan etika lab.</p>
+                <p class="text-xs text-slate-500 leading-snug">Penilaian profesional mentor industri atas kedisiplinan jam kerja & SOP (bukan kalkulasi otomatis kalender/libur).</p>
             </div>
         </div>
 

@@ -109,15 +109,6 @@
                         <span>Dashboard Siswa</span>
                     </a>
 
-                    <!-- LMS Modul Tugas -->
-                    <a href="{{ route('tasks.index') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="code" class="w-4 h-4 {{ request()->routeIs('tasks.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                            <span>Modul Tugas LMS</span>
-                        </div>
-                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-600 text-white">Sprint</span>
-                    </a>
-
                     <!-- Jurnal Kegiatan (Khusus Siswa) -->
                     <a href="{{ route('journals.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('journals.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <i data-lucide="book-open" class="w-4 h-4 {{ request()->routeIs('journals.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
@@ -164,12 +155,6 @@
                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-600 text-white">Review</span>
                     </a>
 
-                    <!-- Penilaian Modul & Code Audit -->
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
-                        <i data-lucide="git-pull-request" class="w-4 h-4 {{ request()->routeIs('tasks.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                        <span>Modul & Code Review</span>
-                    </a>
-
                     <!-- Evaluasi Nilai Siswa Bimbingan -->
                     <a href="{{ route('evaluation.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <i data-lucide="award" class="w-4 h-4 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
@@ -196,12 +181,6 @@
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <i data-lucide="users" class="w-4 h-4 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span>Data Siswa (Semua Batch)</span>
-                    </a>
-
-                    <!-- Kurikulum Modul LMS -->
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
-                        <i data-lucide="book-marked" class="w-4 h-4 {{ request()->routeIs('tasks.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                        <span>Kurikulum Modul LMS</span>
                     </a>
 
                     <!-- Master Arsip Portofolio (Semua Angkatan) -->
@@ -271,10 +250,6 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>Dashboard Siswa</span>
                     </a>
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
-                        <i data-lucide="code" class="w-4 h-4"></i>
-                        <span>Modul Tugas LMS</span>
-                    </a>
                     <a href="{{ route('journals.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('journals.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="book-open" class="w-4 h-4"></i>
                         <span>Jurnal Kegiatan</span>
@@ -300,10 +275,6 @@
                         <i data-lucide="check-check" class="w-4 h-4"></i>
                         <span>Validasi Jurnal Masuk</span>
                     </a>
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
-                        <i data-lucide="git-pull-request" class="w-4 h-4"></i>
-                        <span>Modul & Code Review</span>
-                    </a>
                     <a href="{{ route('evaluation.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="award" class="w-4 h-4"></i>
                         <span>Penilaian & Rapor</span>
@@ -320,10 +291,6 @@
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>Data Siswa (Semua Batch)</span>
-                    </a>
-                    <a href="{{ route('tasks.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('tasks.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
-                        <i data-lucide="book-marked" class="w-4 h-4"></i>
-                        <span>Kurikulum Modul LMS</span>
                     </a>
                     <a href="{{ route('showcase.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="archive" class="w-4 h-4"></i>
@@ -388,7 +355,7 @@
             <div class="hidden sm:flex items-center gap-4 flex-1 max-w-md">
                 <div class="relative w-full">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                    <input type="text" placeholder="Cari penugasan, logbook, modul..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                    <input type="text" placeholder="Cari jurnal, logbook, karya siswa..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
                 </div>
             </div>
 
@@ -466,9 +433,9 @@
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 <span class="text-[10px]">Dasbor</span>
             </a>
-            <a href="{{ route('tasks.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('tasks.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
-                <i data-lucide="code" class="w-5 h-5"></i>
-                <span class="text-[10px]">Tugas</span>
+            <a href="{{ route('evaluation.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('evaluation.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="award" class="w-5 h-5"></i>
+                <span class="text-[10px]">Rapor</span>
             </a>
             <a href="{{ route('journals.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('journals.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center -mt-3 shadow-md shadow-red-600/30">
@@ -496,9 +463,9 @@
                 </div>
                 <span class="text-[10px] font-bold">Review</span>
             </a>
-            <a href="{{ route('tasks.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('tasks.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
-                <i data-lucide="git-pull-request" class="w-5 h-5"></i>
-                <span class="text-[10px]">Modul</span>
+            <a href="{{ route('showcase.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('showcase.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="folder-git-2" class="w-5 h-5"></i>
+                <span class="text-[10px]">Karya</span>
             </a>
             <a href="{{ route('evaluation.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('evaluation.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="award" class="w-5 h-5"></i>
@@ -518,10 +485,6 @@
                 <i data-lucide="users" class="w-5 h-5"></i>
                 <span class="text-[10px]">Siswa</span>
             </a>
-            <a href="{{ route('tasks.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('tasks.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
-                <i data-lucide="book-marked" class="w-5 h-5"></i>
-                <span class="text-[10px]">Modul</span>
-            </a>
             <a href="{{ route('showcase.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('showcase.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="archive" class="w-5 h-5"></i>
                 <span class="text-[10px]">Arsip</span>
@@ -530,6 +493,10 @@
                 <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                 <span class="text-[10px]">Nilai</span>
             </a>
+            <button onclick="document.getElementById('mobile-drawer-toggle').click()" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-500">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+                <span class="text-[10px]">Menu</span>
+            </button>
         @endif
     </nav>
 

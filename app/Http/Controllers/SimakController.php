@@ -85,10 +85,23 @@ class SimakController extends Controller
         $todayJournal = DailyJournal::where('user_id', $user->id)
             ->whereDate('journal_date', today())
             ->first();
+        $totalJournalsCount = DailyJournal::where('user_id', $user->id)->count();
+        $approvedJournalsCount = DailyJournal::where('user_id', $user->id)->where('status', 'approved')->count();
+        $pendingJournalsCount = DailyJournal::where('user_id', $user->id)->where('status', 'pending')->count();
         $showcaseCount = ShowcaseProject::count();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
 
-        return view('dashboard', compact('user', 'tasks', 'pendingTasksCount', 'todayJournal', 'showcaseCount', 'evaluation'));
+        return view('dashboard', compact(
+            'user',
+            'tasks',
+            'pendingTasksCount',
+            'todayJournal',
+            'totalJournalsCount',
+            'approvedJournalsCount',
+            'pendingJournalsCount',
+            'showcaseCount',
+            'evaluation'
+        ));
     }
 
     // ==========================================
@@ -336,7 +349,7 @@ class SimakController extends Controller
         
         // Siswa aktif bimbingan saat ini (Yang Sekarang)
         $activeInterns = User::where('role', 'siswa')
-            ->with(['submissions.task', 'evaluation', 'journals' => function ($q) {
+            ->with(['submissions.task', 'evaluation', 'showcaseProjects', 'journals' => function ($q) {
                 $q->latest()->take(1);
             }])
             ->get();
@@ -370,7 +383,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminDashboard()
     {
-        $interns = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'submissions'])->get();
+        $interns = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'showcaseProjects', 'submissions'])->get();
         $mentors = User::where('role', 'mentor')->get();
         $batches = Batch::withCount('showcaseProjects')->get();
         $tasks = Task::with('mentor')->latest()->get();
@@ -400,7 +413,7 @@ class SimakController extends Controller
 
     public function adminStudents(Request $request)
     {
-        $query = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'submissions']);
+        $query = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'showcaseProjects', 'submissions']);
 
         if ($request->filled('search')) {
             $search = $request->search;

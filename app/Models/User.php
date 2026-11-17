@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasMany(ShowcaseProject::class, 'creator_id');
     }
 
+    public function projects()
+    {
+        return $this->hasMany(ShowcaseProject::class, 'creator_id');
+    }
+
     public function evaluation()
     {
         return $this->hasOne(Evaluation::class);

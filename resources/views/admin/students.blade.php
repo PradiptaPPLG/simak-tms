@@ -110,7 +110,7 @@
                         <th class="py-3 px-4">Siswa & Developer</th>
                         <th class="py-3 px-4">Sekolah & Jurusan</th>
                         <th class="py-3 px-4">Pembimbing TMS</th>
-                        <th class="py-3 px-4">Modul Disubmit</th>
+                        <th class="py-3 px-4">Karya Proyek</th>
                         <th class="py-3 px-4">Status & Nilai Akhir</th>
                         <th class="py-3 px-4 text-right">Aksi</th>
                     </tr>
@@ -146,16 +146,16 @@
                                 @endif
                             </td>
                             <td class="py-3.5 px-4">
-                                <span class="font-bold text-slate-900 font-mono">{{ $intern->submissions->count() }} Modul</span>
-                                <div class="text-[10px] text-slate-400">Terkumpul di LMS</div>
+                                <span class="font-bold text-slate-900 font-mono">{{ $intern->projects->count() ?? 1 }} Proyek</span>
+                                <div class="text-[10px] text-slate-400">Portofolio Digital</div>
                             </td>
-                            <td class="py-3.5 px-4">
+                            <td class="py-3.5 px-4 whitespace-nowrap">
                                 @if($intern->evaluation)
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px]">
-                                        Nilai: {{ $intern->evaluation->final_score }} [ A ]
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
+                                        Nilai: {{ $intern->evaluation->final_score }} [A]
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
                                         ✓ Aktif Magang
                                     </span>
                                 @endif

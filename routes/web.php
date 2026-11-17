@@ -24,7 +24,7 @@ Route::get('/preview/informasi', function () {
 Route::get('/preview/tugas', function () {
     $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('tasks.index');
+    return redirect()->route('showcase.index');
 })->name('preview.tugas');
 
 Route::get('/preview/jurnal', function () {
@@ -88,9 +88,10 @@ Route::middleware(['auth'])->group(function () {
     // Informasi KOCI/TMS (FAQ & Hotline)
     Route::get('/informasi', [SimakController::class, 'informasi'])->name('informasi');
 
-    // LMS & Tasks
-    Route::get('/tugas', [SimakController::class, 'tasks'])->name('tasks.index');
-    Route::post('/tugas/{id}/submit', [SimakController::class, 'submitTask'])->name('tasks.submit');
+    // LMS & Tasks (Deprecated - Redirected to Showcase Portofolio)
+    Route::get('/tugas', function () {
+        return redirect()->route('showcase.index');
+    })->name('tasks.index');
 
     // Daily Journals (Logbook)
     Route::get('/jurnal', [SimakController::class, 'journals'])->name('journals.index');

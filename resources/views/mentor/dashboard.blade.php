@@ -72,20 +72,20 @@
             </div>
         </div>
 
-        <!-- Card 3: Pull Request Modul LMS -->
+        <!-- Card 3: Karya Portofolio Siswa -->
         <div class="mas-card p-5 border-l-4 border-l-red-500 flex flex-col justify-between">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Pull Request Koding</p>
-                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">{{ $pendingSubmissions->count() }} <span class="text-xs font-normal text-slate-500">PR Menunggu</span></h3>
+                    <p class="text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-1">Karya Portofolio</p>
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight font-mono">2 <span class="text-xs font-normal text-slate-500">Proyek Digital</span></h3>
                 </div>
                 <div class="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+                    <i data-lucide="folder-git-2" class="w-5 h-5"></i>
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-                <span>Code Audit:</span>
-                <span class="font-bold text-slate-800">Branch Review</span>
+                <span>Showcase:</span>
+                <span class="font-bold text-slate-800">Aktif & Publik</span>
             </div>
         </div>
 
@@ -123,13 +123,13 @@
                 </div>
             </a>
 
-            <a href="{{ route('tasks.index') }}" class="mas-card mas-card-hover p-4 flex flex-col items-center justify-center gap-2.5 text-center group">
+            <a href="{{ route('profile') }}" class="mas-card mas-card-hover p-4 flex flex-col items-center justify-center gap-2.5 text-center group">
                 <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-900 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+                    <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-slate-900 transition-colors">Code Review & Nilai</div>
-                    <div class="text-[10px] text-slate-400">Modul koding siswa</div>
+                    <div class="text-xs font-bold text-slate-800 group-hover:text-slate-900 transition-colors">Profil Siswa</div>
+                    <div class="text-[10px] text-slate-400">Developer & Aktivitas</div>
                 </div>
             </a>
 
@@ -254,12 +254,12 @@
                             <span class="font-semibold text-slate-800">{{ $intern->school_origin }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Modul Sprint Disubmit:</span>
-                            <span class="font-bold text-red-600 font-mono">{{ $intern->submissions->count() }} Modul</span>
+                            <span class="text-slate-400">Portofolio Karya:</span>
+                            <span class="font-bold text-red-600 font-mono">{{ $intern->projects->count() ?? 1 }} Proyek</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between items-center">
                             <span class="text-slate-400">Skor Evaluasi:</span>
-                            <span class="font-black text-slate-900 font-mono">{{ $intern->evaluation->final_score ?? 94 }} [ A ]</span>
+                            <span class="font-black text-slate-900 font-mono whitespace-nowrap">{{ $intern->evaluation->final_score ?? 94 }} [A]</span>
                         </div>
                     </div>
 
@@ -269,7 +269,7 @@
                             <span>Profil GitHub</span>
                         </a>
                         <a href="{{ route('mentor.review') }}" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold transition-colors">
-                            Review Koding
+                            Validasi Jurnal
                         </a>
                     </div>
                 </div>
