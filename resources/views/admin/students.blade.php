@@ -176,8 +176,16 @@
                                                 <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Lihat Profil</span>
                                             </a>
+                                            <a href="{{ route('certificate.print', 'TMS-CERT-2026-' . ($intern->account_id ?? $intern->id)) }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                                <i data-lucide="printer" class="w-3.5 h-3.5 text-red-500"></i>
+                                                <span>Cetak Sertifikat</span>
+                                            </a>
+                                            <a href="{{ route('verify.show', 'TMS-CERT-2026-' . ($intern->account_id ?? $intern->id)) }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                                <span>Verifikasi QR</span>
+                                            </a>
                                             <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                                                <i data-lucide="award" class="w-3.5 h-3.5 text-red-500"></i>
+                                                <i data-lucide="award" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Rapor & Nilai</span>
                                             </a>
                                         </div>

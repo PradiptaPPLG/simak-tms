@@ -78,9 +78,9 @@
     @endphp
 
     <!-- ============================================================== -->
-    <!-- 1. DESKTOP LEFT SIDEBAR (Hitam - Putih - Merah TMS Style)       -->
+    <!-- 1. DESKTOP LEFT SIDEBAR (Hitam - Putih - Merah TMS Style - FIXED)-->
     <!-- ============================================================== -->
-    <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col justify-between flex-shrink-0 z-30">
+    <aside class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200 hidden md:flex flex-col justify-between z-30 overflow-y-auto no-scrollbar">
         <div>
             <!-- App Brand Header -->
             <div class="h-16 flex items-center px-6 border-b border-slate-100 gap-3">
@@ -189,10 +189,22 @@
                         <span>Data Siswa (Semua Batch)</span>
                     </a>
 
-                    <!-- Data Mentor & Staff Pembimbing (BARU) -->
+                    <!-- Data Mentor & Staff Pembimbing -->
                     <a href="{{ route('admin.mentors') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <i data-lucide="user-check" class="w-4 h-4 {{ request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span>Data Mentor & Staff</span>
+                    </a>
+
+                    <!-- Data Angkatan & Project per Angkatan (BARU: 1 Angkatan > 1 Project) -->
+                    <a href="{{ route('admin.batches') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.batches*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                        <i data-lucide="folder-git-2" class="w-4 h-4 {{ request()->routeIs('admin.batches*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span>Angkatan & Project DUDI</span>
+                    </a>
+
+                    <!-- Data Asal Instansi: Sekolah & Kampus Mitra (BARU) -->
+                    <a href="{{ route('admin.institutions') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.institutions*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                        <i data-lucide="building-2" class="w-4 h-4 {{ request()->routeIs('admin.institutions*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span>Sekolah & Kampus Mitra</span>
                     </a>
 
                     <!-- Master Arsip Portofolio (Semua Angkatan) -->
@@ -211,14 +223,18 @@
                     </a>
                 @endif
 
-                <!-- Layanan Bantuan & SOP (Semua Role) -->
+                <!-- Layanan: Panduan & Verifikasi In-Page (Semua Role) -->
                 <div class="pt-3 pb-1 px-3">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan</span>
                 </div>
-                <a href="{{ route('faq') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('faq') || request()->routeIs('informasi') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
-                    <i data-lucide="help-circle" class="w-4 h-4 {{ request()->routeIs('faq') || request()->routeIs('informasi') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                    <span>Pusat Bantuan & SOP</span>
+                <a href="{{ route('guide.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                    <i data-lucide="book-open-check" class="w-4 h-4 {{ request()->routeIs('guide.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                    <span>Panduan & Tutorial</span>
                 </a>
+                <button type="button" onclick="openVerifyModal()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium cursor-pointer text-left">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-slate-400"></i>
+                    <span>Verifikasi Sertifikat</span>
+                </button>
             </nav>
         </div>
     </aside>
@@ -245,18 +261,8 @@
                 </button>
             </div>
 
-            <!-- Mobile Role Quick Switcher -->
-            <div class="p-4 border-b border-slate-100 bg-slate-50">
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Ganti Peran (Demo):</div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <a href="{{ route('login.quick', 'siswa') }}" class="py-1.5 text-center text-[11px] font-bold rounded-lg {{ $role === 'siswa' ? 'bg-red-600 text-white' : 'bg-white border border-slate-200 text-slate-700' }}">Siswa</a>
-                    <a href="{{ route('login.quick', 'mentor') }}" class="py-1.5 text-center text-[11px] font-bold rounded-lg {{ $role === 'mentor' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-700' }}">Mentor</a>
-                    <a href="{{ route('login.quick', 'admin_tms') }}" class="py-1.5 text-center text-[11px] font-bold rounded-lg {{ $role === 'admin_tms' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-700' }}">Admin</a>
-                </div>
-            </div>
-
             <!-- Mobile Navigation Links (Same logic, role-aware) -->
-            <nav class="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-220px)]">
+            <nav class="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-140px)]">
                 @if($role === 'siswa')
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('dashboard') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
@@ -312,6 +318,14 @@
                         <i data-lucide="user-check" class="w-4 h-4"></i>
                         <span>Data Mentor & Staff</span>
                     </a>
+                    <a href="{{ route('admin.batches') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.batches*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+                        <span>Angkatan & Project DUDI</span>
+                    </a>
+                    <a href="{{ route('admin.institutions') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.institutions*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <i data-lucide="building-2" class="w-4 h-4"></i>
+                        <span>Sekolah & Kampus Mitra</span>
+                    </a>
                     <a href="{{ route('showcase.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="archive" class="w-4 h-4"></i>
                         <span>Master Arsip Portofolio</span>
@@ -321,10 +335,14 @@
                         <span>Rekap Nilai & Laporan DUDI</span>
                     </a>
                 @endif
-                <a href="{{ route('faq') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('faq') || request()->routeIs('informasi') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
-                    <i data-lucide="help-circle" class="w-4 h-4"></i>
-                    <span>Pusat Bantuan & SOP</span>
+                <a href="{{ route('guide.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    <span>Panduan & Tutorial</span>
                 </a>
+                <button type="button" onclick="closeDrawer(); openVerifyModal();" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100 text-left cursor-pointer">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-slate-500"></i>
+                    <span>Verifikasi Sertifikat</span>
+                </button>
             </nav>
         </div>
 
@@ -353,9 +371,9 @@
     </div>
 
     <!-- ============================================================== -->
-    <!-- 3. MAIN CONTENT AREA                                           -->
+    <!-- 3. MAIN CONTENT AREA (Offset by fixed sidebar on desktop)      -->
     <!-- ============================================================== -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto min-h-screen">
+    <div class="flex-1 flex flex-col min-w-0 md:pl-64 min-h-screen">
 
         <!-- Top Header (Hitam - Putih - Merah) -->
         <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
@@ -379,25 +397,11 @@
                 </div>
             </div>
 
-            <!-- Right Controls: Role Switcher Demo, Notif, Profile & Logout -->
+            <!-- Right Controls: Profile & Logout -->
             <div class="flex items-center gap-2 sm:gap-3 ml-auto">
                 @auth
-                    <!-- Demo Role Switcher (Desktop) -->
-                    <div class="hidden lg:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
-                        <span class="text-slate-400 px-1 text-[11px]">Role:</span>
-                        <a href="{{ route('login.quick', 'siswa') }}" class="px-2.5 py-0.5 rounded-lg {{ auth()->user()->role === 'siswa' ? 'bg-red-600 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900' }}">Siswa</a>
-                        <a href="{{ route('login.quick', 'mentor') }}" class="px-2.5 py-0.5 rounded-lg {{ auth()->user()->role === 'mentor' ? 'bg-slate-900 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900' }}">Mentor</a>
-                        <a href="{{ route('login.quick', 'admin_tms') }}" class="px-2.5 py-0.5 rounded-lg {{ auth()->user()->role === 'admin_tms' ? 'bg-slate-900 text-white shadow-xs font-bold' : 'text-slate-600 hover:text-slate-900' }}">Admin</a>
-                    </div>
-
-                    <!-- Notification Bell -->
-                    <button class="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors relative">
-                        <i data-lucide="bell" class="w-4 h-4"></i>
-                        <span class="w-2 h-2 rounded-full bg-red-600 absolute top-2 right-2"></span>
-                    </button>
-
                     <!-- User Profile Pill -->
-                    <a href="{{ route('profile') }}" class="flex items-center gap-2 pl-2 border-l border-slate-200 group hover:opacity-85 transition-opacity" title="Buka Profil Developer">
+                    <a href="{{ route('profile') }}" class="flex items-center gap-2 group hover:opacity-85 transition-opacity" title="Buka Profil Developer">
                         <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center border-2 border-red-500 shadow-xs flex-shrink-0">
                             @if(auth()->user()->avatar)
                                 <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
@@ -750,8 +754,192 @@
         </div>
     @endif
 
+    <!-- ============================================================== -->
+    <!-- MODAL VERIFIKASI SERTIFIKAT DIGITAL IN-PAGE (Tanpa Pindah Page)  -->
+    <!-- ============================================================== -->
+    <div id="verify-cert-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-600/30 border border-red-500/40 flex items-center justify-center text-red-400">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black tracking-tight text-white">Verifikasi Sertifikat Digital PT. TMS</h3>
+                        <p class="text-[11px] text-slate-300">Cek keaslian e-sertifikat langsung tanpa meninggalkan halaman aktif</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeVerifyModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" title="Tutup">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 space-y-4">
+                <!-- Search Input Form -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Sertifikat / NIS Siswa</label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="modal-cert-query" placeholder="Contoh: TMS-CERT-2026-XI-0001 atau 19364" 
+                                   class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                        </div>
+                        <button type="button" id="btn-modal-do-verify" onclick="executeModalVerification()" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>Cek</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-2 text-[10px] text-slate-400">
+                        <span>Contoh Uji:</span>
+                        <button type="button" onclick="setModalCertInput('TMS-CERT-2026-XI-0001')" class="underline hover:text-red-600 font-mono">TMS-CERT-2026-XI-0001</button>
+                        <span>&bull;</span>
+                        <button type="button" onclick="setModalCertInput('19364')" class="underline hover:text-red-600 font-mono">NIS 19364</button>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="modal-verify-loading" class="hidden py-8 text-center space-y-2">
+                    <div class="w-8 h-8 border-3 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p class="text-xs text-slate-500 font-medium">Memverifikasi basis data sertifikat industri...</p>
+                </div>
+
+                <!-- Result Card (Populated Dynamically) -->
+                <div id="modal-verify-result" class="hidden"></div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span class="text-slate-400 text-[11px] flex items-center gap-1">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>Tervalidasi Database Resmi TMS</span>
+                </span>
+                <button type="button" onclick="closeVerifyModal()" class="px-4 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold transition-colors cursor-pointer">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Vanilla JS for Modal Logic, Live Password Checklist & Mobile Drawer -->
     <script>
+        // In-Page Certificate Verification Modal
+        function openVerifyModal() {
+            const modal = document.getElementById('verify-cert-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                const input = document.getElementById('modal-cert-query');
+                if (input) {
+                    input.focus();
+                }
+                setTimeout(() => lucide.createIcons(), 50);
+            }
+        }
+
+        function closeVerifyModal() {
+            const modal = document.getElementById('verify-cert-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function setModalCertInput(code) {
+            const input = document.getElementById('modal-cert-query');
+            if (input) {
+                input.value = code;
+                executeModalVerification();
+            }
+        }
+
+        async function executeModalVerification() {
+            const input = document.getElementById('modal-cert-query');
+            const loading = document.getElementById('modal-verify-loading');
+            const resultBox = document.getElementById('modal-verify-result');
+            const query = input ? input.value.trim() : '';
+
+            if (!query) {
+                if (input) input.focus();
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            resultBox.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/verify/' + encodeURIComponent(query));
+                const data = await res.json();
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+
+                if (res.ok && data.found) {
+                    resultBox.innerHTML = `
+                        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/70 space-y-3">
+                            <div class="flex items-center justify-between pb-2 border-b border-emerald-200">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px] uppercase tracking-wider flex items-center gap-1">
+                                    <i data-lucide="check-circle" class="w-3 h-3"></i> Terverifikasi Asli & Sah
+                                </span>
+                                <span class="font-mono text-[11px] text-emerald-900 font-bold">${data.certificate_number}</span>
+                            </div>
+                            <div class="space-y-1.5 text-xs text-slate-700">
+                                <div class="flex justify-between"><span class="text-slate-500">Nama Penerima:</span> <b class="text-slate-900">${data.student_name}</b></div>
+                                <div class="flex justify-between"><span class="text-slate-500">NIS / NIM:</span> <span class="font-mono font-bold text-slate-800">${data.nis_nim}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Asal Instansi:</span> <span class="font-medium">${data.school_origin}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Angkatan:</span> <span class="font-medium">${data.batch_name}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Predikat / Nilai:</span> <span class="font-bold text-emerald-700">${data.predicate} (${data.final_score})</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">Tanggal Terbit:</span> <span>${data.issue_date}</span></div>
+                            </div>
+                            <div class="pt-2 border-t border-emerald-200 flex items-center gap-2">
+                                <a href="${data.verify_url}" target="_blank" class="flex-1 py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-bold text-center transition-colors flex items-center justify-center gap-1">
+                                    <span>Buka Portal Publik</span>
+                                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                                </a>
+                                <a href="${data.print_url}" target="_blank" class="flex-1 py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold text-center transition-colors flex items-center justify-center gap-1 shadow-2xs">
+                                    <i data-lucide="printer" class="w-3 h-3"></i>
+                                    <span>Cetak PDF</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultBox.innerHTML = `
+                        <div class="p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs space-y-2">
+                            <div class="flex items-center gap-2 font-bold text-red-800">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i>
+                                <span>Sertifikat Tidak Ditemukan!</span>
+                            </div>
+                            <p class="text-[11px] text-red-600 leading-relaxed">
+                                Nomor atau NIS <b>"${query}"</b> tidak terdaftar di database resmi PT. Teknologi Multi Sistem. Pastikan nomor sertifikat diketik dengan benar.
+                            </p>
+                        </div>
+                    `;
+                }
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = `
+                    <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                        Terjadi kendala saat memeriksa sertifikat. Silakan periksa koneksi.
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('modal-cert-query');
+            if (input) {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        executeModalVerification();
+                    }
+                });
+            }
+        });
         // Modal Change Password Helpers
         function openChangePasswordModal() {
             const modal = document.getElementById('modal-change-password');
@@ -814,10 +1002,30 @@
             lucide.createIcons();
         }
 
+        // Bulletproof Lucide Icons Initializer & Brand Polyfill
+        function initIcons() {
+            // Brand icons polyfill for Lucide (Lucide latest deprecated brand icons)
+            document.querySelectorAll('i[data-lucide="github"]').forEach(el => {
+                const w = el.classList.contains('w-4') ? 'w-4 h-4' : (el.classList.contains('w-3') ? 'w-3 h-3' : 'w-3.5 h-3.5');
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('viewBox', '0 0 24 24');
+                svg.setAttribute('aria-hidden', 'true');
+                svg.setAttribute('class', `${w} fill-current shrink-0 ${el.className.replace(/w-\S+|h-\S+/g, '')}`);
+                svg.innerHTML = '<path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>';
+                el.replaceWith(svg);
+            });
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initIcons);
+        window.addEventListener('load', initIcons);
+        setTimeout(initIcons, 100);
+        setTimeout(initIcons, 500);
+
         // Live Password Checklist Validation
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Lucide Icons
-            lucide.createIcons();
+            initIcons();
 
             const newPassInput = document.getElementById('new_password_input');
             const confPassInput = document.getElementById('confirm_password_input');

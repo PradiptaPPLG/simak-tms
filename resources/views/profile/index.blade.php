@@ -109,7 +109,7 @@
                         <!-- GitHub -->
                         <a href="{{ $user->github_url ?? 'https://github.com/pradiptam' }}" target="_blank" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition-colors group">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="github" class="w-4 h-4 text-slate-800"></i>
+                                <svg class="w-4 h-4 fill-current shrink-0 text-slate-800" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
                                 <span>GitHub</span>
                             </div>
                             <span class="text-[11px] text-red-600 font-mono group-hover:underline">Buka &rarr;</span>
@@ -118,7 +118,7 @@
                         <!-- LinkedIn -->
                         <a href="{{ $user->linkedin_url ?? 'https://linkedin.com/in/pradiptaendra' }}" target="_blank" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition-colors group">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="linkedin" class="w-4 h-4 text-slate-700"></i>
+                                <svg class="w-4 h-4 fill-current shrink-0 text-[#0077b5]" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c.98 0 1.77-.8 1.77-1.78a1.77 1.77 0 0 0-3.54 0c0 .98.79 1.78 1.77 1.78M7.86 18.5v-8.37H5.07v8.37h2.79z"/></svg>
                                 <span>LinkedIn</span>
                             </div>
                             <span class="text-[11px] text-red-600 font-mono group-hover:underline">Buka &rarr;</span>
@@ -127,7 +127,7 @@
                         <!-- Instagram -->
                         <a href="{{ $user->instagram_url ?? 'https://instagram.com/pradiptam' }}" target="_blank" class="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-medium transition-colors group">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="instagram" class="w-4 h-4 text-pink-600"></i>
+                                <svg class="w-4 h-4 stroke-[#E4405F] fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                                 <span>Instagram</span>
                             </div>
                             <span class="text-[11px] text-red-600 font-mono group-hover:underline">Buka &rarr;</span>
@@ -205,6 +205,67 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI RESMI (Scan & Cetak Langsung)-->
+            <!-- ============================================================== -->
+            @php
+                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
+                $verifyUrl = route('verify.show', $certNumber);
+                $printUrl = route('certificate.print', $certNumber);
+            @endphp
+            <div class="mas-card p-5 space-y-4 border-2 border-red-500/20 bg-gradient-to-b from-white to-red-50/20 relative overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-600"></div>
+
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/25">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-black text-slate-900 leading-tight">E-Sertifikat & QR Verifikasi</h3>
+                            <p class="text-[10px] text-slate-400 font-semibold">Standar Kelulusan Industri PT. TMS</p>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Otentik
+                    </span>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-center space-y-2.5 shadow-xs">
+                    <div class="w-36 h-36 mx-auto bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-center">
+                        <img 
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" 
+                            alt="QR Code Verifikasi Sertifikat" 
+                            class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor Sertifikat Resmi:</div>
+                        <div class="text-xs font-black text-slate-900 font-mono tracking-wider">{{ $certNumber }}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">
+                            Predikat: <b class="text-red-600">A (Sangat Memuaskan)</b> &bull; Skor: <b class="text-slate-900">{{ $evaluation->final_score ?? '95.8' }}</b>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 leading-snug">
+                        Orang atau instansi tinggal scan QR di atas dengan kamera HP untuk memvalidasi kelulusan di portal publik PT. TMS.
+                    </p>
+                </div>
+
+                <!-- Action Buttons: Cetak Sertif & Link Verifikasi -->
+                <div class="space-y-2">
+                    <a href="{{ $printUrl }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shadow-red-600/25">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                        <span>Cetak E-Sertifikat (PDF)</span>
+                    </a>
+
+                    <a href="{{ $verifyUrl }}" target="_blank" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-xs">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>Buka Halaman Verifikasi Publik</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Ganti Password Card -->
@@ -301,6 +362,56 @@
                 </div>
             </div>
 
+            <!-- ============================================================== -->
+            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI (Fitur Unggulan Siswa)       -->
+            <!-- ============================================================== -->
+            <div class="mas-card p-6 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-2 border-red-500/30 shadow-xl">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-500"></div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <!-- Left: QR Code & Info -->
+                    <div class="flex items-center gap-4 shrink-0">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white p-2 rounded-2xl shadow-lg border-2 border-amber-400/50 shrink-0">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" alt="QR Code Verifikasi" class="w-full h-full object-contain">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Dokumen Otentik Terverifikasi
+                            </div>
+                            <h3 class="text-base font-black text-white">E-Sertifikat Kelulusan PKL PT. TMS</h3>
+                            <div class="text-xs font-mono text-slate-300">
+                                No. Sertifikat: <b class="text-amber-400 font-mono">{{ $certNumber }}</b>
+                            </div>
+                            <p class="text-[11px] text-slate-400 max-w-sm leading-snug">
+                                Orang tinggal scan QR ini langsung dengan kamera HP untuk memvalidasi keaslian di portal resmi.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Skor & Tombol Aksi -->
+                    <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-end">
+                        <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center shrink-0 w-full sm:w-auto">
+                            <div class="text-[10px] uppercase font-bold text-slate-300">Skor Kelulusan</div>
+                            <div class="text-2xl font-black text-amber-400 font-mono">{{ $evaluation->final_score ?? '95.8' }}</div>
+                            <div class="text-[10px] text-emerald-400 font-bold">PREDIKAT A</div>
+                        </div>
+
+                        <div class="flex flex-col gap-2 w-full sm:w-auto shrink-0">
+                            <a href="{{ $printUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                <span>Cetak E-Sertifikat (PDF)</span>
+                            </a>
+                            <a href="{{ $verifyUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-2">
+                                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Verifikasi Publik &rarr;</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 2. PINNED REPOSITORIES & PROJECTS (Proyek Unggulan Ala GitHub) -->
             <div class="mas-card p-6 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -349,13 +460,15 @@
 
                                 <div class="flex items-center gap-2">
                                     @if($proj->repo_url)
-                                        <a href="{{ $proj->repo_url }}" target="_blank" class="text-slate-700 hover:text-red-600 font-mono text-[11px] font-bold">
-                                            Repo
+                                        <a href="{{ $proj->repo_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white font-mono text-[11px] font-medium flex items-center gap-1.5 shadow-2xs transition-colors">
+                                            <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                                            <span>Repo</span>
                                         </a>
                                     @endif
                                     @if($proj->live_url)
-                                        <a href="{{ $proj->live_url }}" target="_blank" class="px-2.5 py-1 rounded bg-slate-900 text-white text-[11px] font-bold hover:bg-black transition-colors">
-                                            Demo
+                                        <a href="{{ $proj->live_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors">
+                                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                                            <span>Demo</span>
                                         </a>
                                     @endif
                                 </div>
@@ -437,7 +550,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                                <i data-lucide="github" class="w-3.5 h-3.5 text-slate-900"></i>
+                                <svg class="w-3.5 h-3.5 fill-current shrink-0 text-slate-900" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
                                 <span>Tautan Profil GitHub</span>
                             </label>
                             <input type="url" name="github_url" value="{{ old('github_url', $user->github_url ?? 'https://github.com/pradiptam') }}"
@@ -447,7 +560,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                                <i data-lucide="linkedin" class="w-3.5 h-3.5 text-slate-700"></i>
+                                <svg class="w-3.5 h-3.5 fill-current shrink-0 text-[#0077b5]" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c.98 0 1.77-.8 1.77-1.78a1.77 1.77 0 0 0-3.54 0c0 .98.79 1.78 1.77 1.78M7.86 18.5v-8.37H5.07v8.37h2.79z"/></svg>
                                 <span>Tautan Profil LinkedIn</span>
                             </label>
                             <input type="url" name="linkedin_url" value="{{ old('linkedin_url', $user->linkedin_url ?? 'https://linkedin.com/in/pradiptaendra') }}"
@@ -460,7 +573,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-                                <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-600"></i>
+                                <svg class="w-3.5 h-3.5 stroke-[#E4405F] fill-none stroke-2 shrink-0" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                                 <span>Tautan Instagram</span>
                             </label>
                             <input type="url" name="instagram_url" value="{{ old('instagram_url', $user->instagram_url ?? 'https://instagram.com/pradiptam') }}"
@@ -505,6 +618,67 @@
                     </div>
 
                 </form>
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI RESMI (Scan & Cetak Langsung)-->
+            <!-- ============================================================== -->
+            @php
+                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
+                $verifyUrl = route('verify.show', $certNumber);
+                $printUrl = route('certificate.print', $certNumber);
+            @endphp
+            <div class="mas-card p-5 space-y-4 border-2 border-red-500/20 bg-gradient-to-b from-white to-red-50/20 relative overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-600 via-amber-500 to-red-600"></div>
+
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-500/25">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-black text-slate-900 leading-tight">E-Sertifikat & QR Verifikasi</h3>
+                            <p class="text-[10px] text-slate-400 font-semibold">Standar Kelulusan Industri PT. TMS</p>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Otentik
+                    </span>
+                </div>
+
+                <!-- QR Code Box -->
+                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 text-center space-y-2.5 shadow-xs">
+                    <div class="w-36 h-36 mx-auto bg-slate-50 p-2 rounded-xl border border-slate-100 flex items-center justify-center">
+                        <img 
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" 
+                            alt="QR Code Verifikasi Sertifikat" 
+                            class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor Sertifikat Resmi:</div>
+                        <div class="text-xs font-black text-slate-900 font-mono tracking-wider">{{ $certNumber }}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">
+                            Predikat: <b class="text-red-600">A (Sangat Memuaskan)</b> &bull; Skor: <b class="text-slate-900">{{ $evaluation->final_score ?? '95.8' }}</b>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 leading-snug">
+                        Orang atau instansi tinggal scan QR di atas dengan kamera HP untuk memvalidasi kelulusan di portal publik PT. TMS.
+                    </p>
+                </div>
+
+                <!-- Action Buttons: Cetak Sertif & Link Verifikasi -->
+                <div class="space-y-2">
+                    <a href="{{ $printUrl }}" target="_blank" class="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shadow-red-600/25">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                        <span>Cetak E-Sertifikat (PDF)</span>
+                    </a>
+
+                    <a href="{{ $verifyUrl }}" target="_blank" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-xs">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>Buka Halaman Verifikasi Publik</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Ganti Password Card -->

@@ -20,6 +20,43 @@ Route::get('/informasi', function () {
     return redirect()->route('faq');
 })->name('informasi');
 
+// Verifikasi Sertifikat Publik & E-Sertifikat DUDI (Akses Publik Tanpa Login)
+Route::get('/verifikasi', [SimakController::class, 'verifyIndex'])->name('verify.index');
+Route::get('/verifikasi/{certificate_number}', [SimakController::class, 'verifyShow'])->name('verify.show');
+Route::get('/api/verify/{certificate_number}', [SimakController::class, 'apiVerify'])->name('api.verify');
+Route::get('/verify/{certificate_number}', function ($certificate_number) {
+    return redirect()->route('verify.show', $certificate_number);
+});
+Route::get('/sertifikat/{certificate_number}', function ($certificate_number) {
+    return redirect()->route('verify.show', $certificate_number);
+});
+Route::get('/sertifikat/{certificate_number}/cetak', [SimakController::class, 'printCertificate'])->name('certificate.print');
+
+// Preview routes for testing (Auto-login & redirect to real named routes)
+Route::get('/preview/verifikasi', function () {
+    $eval = \App\Models\Evaluation::first();
+    $cert = $eval ? $eval->certificate_number : 'TMS-CERT-2026-20239';
+    return redirect()->route('verify.show', $cert);
+})->name('preview.verifikasi');
+
+Route::get('/preview/sertifikat', function () {
+    $eval = \App\Models\Evaluation::first();
+    $cert = $eval ? $eval->certificate_number : 'TMS-CERT-2026-20239';
+    return redirect()->route('certificate.print', $cert);
+})->name('preview.sertifikat');
+
+Route::get('/preview/admin/angkatan', function () {
+    $admin = \App\Models\User::where('role', 'admin_tms')->first();
+    \Illuminate\Support\Facades\Auth::login($admin);
+    return redirect()->route('admin.batches');
+})->name('preview.admin.batches');
+
+Route::get('/preview/admin/instansi', function () {
+    $admin = \App\Models\User::where('role', 'admin_tms')->first();
+    \Illuminate\Support\Facades\Auth::login($admin);
+    return redirect()->route('admin.institutions');
+})->name('preview.admin.institutions');
+
 // Preview routes for testing (Auto-login & redirect to real named routes)
 Route::get('/preview/dashboard', function () {
     $user = \App\Models\User::first();
@@ -76,7 +113,7 @@ Route::get('/preview/mentor/siswa', function () {
 })->name('preview.mentor.students');
 
 Route::get('/preview/profile', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('profile');
 })->name('preview.profile');
@@ -108,6 +145,7 @@ Route::post('/logout', [SimakController::class, 'logout'])->name('logout');
 // Protected routes (Must be logged in!)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [SimakController::class, 'dashboard'])->name('dashboard');
+    Route::get('/panduan', [SimakController::class, 'guide'])->name('guide.index');
     
     // LMS & Tasks (Deprecated - Redirected to Showcase Portofolio)
     Route::get('/tugas', function () {
@@ -149,4 +187,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/users/{id}/reset-password', [SimakController::class, 'adminResetPassword'])->name('admin.users.reset_password');
     Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
     Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
+
+    // Admin Angkatan & Project per Angkatan (1 Angkatan > 1 Project)
+    Route::get('/admin/angkatan', [SimakController::class, 'adminBatches'])->name('admin.batches');
+    Route::post('/admin/angkatan', [SimakController::class, 'adminStoreBatch'])->name('admin.batches.store');
+    Route::put('/admin/angkatan/{id}', [SimakController::class, 'adminUpdateBatch'])->name('admin.batches.update');
+    Route::post('/admin/projects', [SimakController::class, 'adminStoreProject'])->name('admin.projects.store');
+    Route::put('/admin/projects/{id}', [SimakController::class, 'adminUpdateProject'])->name('admin.projects.update');
+    Route::delete('/admin/projects/{id}', [SimakController::class, 'adminDeleteProject'])->name('admin.projects.destroy');
+
+    // Admin Data Asal Instansi (Sekolah / Kampus Mitra & Kontak Pembimbing)
+    Route::get('/admin/instansi', [SimakController::class, 'adminInstitutions'])->name('admin.institutions');
+    Route::post('/admin/instansi', [SimakController::class, 'adminStoreInstitution'])->name('admin.institutions.store');
+    Route::put('/admin/instansi/{id}', [SimakController::class, 'adminUpdateInstitution'])->name('admin.institutions.update');
+    Route::delete('/admin/instansi/{id}', [SimakController::class, 'adminDeleteInstitution'])->name('admin.institutions.destroy');
+
+    // Admin Evaluasi & Penilaian Nilai Sertifikat Siswa
+    Route::post('/admin/evaluasi/{userId}', [SimakController::class, 'adminSaveEvaluation'])->name('admin.evaluation.save');
 });

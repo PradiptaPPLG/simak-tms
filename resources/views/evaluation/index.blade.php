@@ -13,8 +13,18 @@
         </div>
 
         @if($evaluation && $evaluation->certificate_number)
-            <div class="bg-red-50 border border-red-200 text-red-700 text-xs font-mono font-bold px-3.5 py-1.5 rounded-xl self-start sm:self-auto shadow-xs">
-                No. Sertifikat: {{ $evaluation->certificate_number }}
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="bg-red-50 border border-red-200 text-red-700 text-xs font-mono font-bold px-3 py-1.5 rounded-xl self-start sm:self-auto shadow-xs">
+                    No. Sertifikat: {{ $evaluation->certificate_number }}
+                </div>
+                <a href="{{ route('certificate.print', $evaluation->certificate_number) }}" target="_blank" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-1.5">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                    <span>Cetak E-Sertifikat</span>
+                </a>
+                <a href="{{ route('verify.show', $evaluation->certificate_number) }}" target="_blank" class="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span>Verifikasi QR</span>
+                </a>
             </div>
         @endif
     </div>

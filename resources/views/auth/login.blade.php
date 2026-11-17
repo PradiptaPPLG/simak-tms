@@ -45,24 +45,6 @@
         <!-- Card Form Login -->
         <div class="mas-card p-6 sm:p-8 space-y-5">
             
-            <!-- Quick 1-Click Role Access (For Easy Testing) -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">
-                    Akses Cepat Demo (1-Klik):
-                </div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <a href="{{ route('login.quick', 'siswa') }}" class="py-1.5 text-center text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-xs transition-colors">
-                        Siswa
-                    </a>
-                    <a href="{{ route('login.quick', 'mentor') }}" class="py-1.5 text-center text-xs font-bold rounded-lg bg-slate-900 text-white hover:bg-black transition-colors">
-                        Mentor
-                    </a>
-                    <a href="{{ route('login.quick', 'admin_tms') }}" class="py-1.5 text-center text-xs font-bold rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors">
-                        Admin
-                    </a>
-                </div>
-            </div>
-
             @if(session('success'))
                 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold flex items-center gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
@@ -119,9 +101,9 @@
                         <input type="checkbox" name="remember" id="remember" value="1" checked class="w-3.5 h-3.5 rounded border-slate-300 text-red-600 focus:ring-red-500">
                         <span class="text-xs text-slate-600 font-medium">Ingat sesi saya</span>
                     </label>
-                    <a href="{{ route('faq') }}" class="text-xs text-red-600 hover:text-red-700 hover:underline font-bold flex items-center gap-1">
+                    <a href="{{ route('faq') }}" class="text-xs text-red-600 hover:text-red-700 hover:underline font-bold flex items-center gap-1.5" title="Buka Pusat Bantuan & Aturan Akun">
                         <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
-                        <span>Bantuan?</span>
+                        <span>Pusat Bantuan & SOP Login</span>
                     </a>
                 </div>
 
