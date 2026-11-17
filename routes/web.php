@@ -3,44 +3,54 @@
 use App\Http\Controllers\SimakController;
 use Illuminate\Support\Facades\Route;
 
-// Root URL ALWAYS goes to Login!
+// Root URL: Jika sesi sudah tersimpan / aktif, langsung buka dashboard; jika belum, ke login
 Route::get('/', function () {
+    if (\Illuminate\Support\Facades\Auth::check()) {
+        return redirect()->route('dashboard');
+    }
     return redirect()->route('login');
 });
 
+// Pusat Bantuan, SOP & FAQ Resmi SIMAK-TMS (Aman, Solutif, Publik & Bebas Akses)
+Route::get('/faq', [SimakController::class, 'faq'])->name('faq');
+Route::get('/support', function () {
+    return redirect()->route('faq');
+})->name('support');
+Route::get('/informasi', function () {
+    return redirect()->route('faq');
+})->name('informasi');
+
 // Preview routes for testing (Auto-login & redirect to real named routes)
 Route::get('/preview/dashboard', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('dashboard');
 })->name('preview.dashboard');
 
 Route::get('/preview/informasi', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('informasi');
+    return redirect()->route('faq');
 })->name('preview.informasi');
 
 Route::get('/preview/tugas', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('showcase.index');
 })->name('preview.tugas');
 
 Route::get('/preview/jurnal', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('journals.index');
 })->name('preview.jurnal');
 
 Route::get('/preview/arsip', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('showcase.index');
 })->name('preview.arsip');
 
 Route::get('/preview/evaluasi', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('evaluation.index');
 })->name('preview.evaluasi');
@@ -64,7 +74,7 @@ Route::get('/preview/mentor/siswa', function () {
 })->name('preview.mentor.students');
 
 Route::get('/preview/profile', function () {
-    $user = \App\Models\User::first();
+    $user = \App\Models\User::where('role', 'siswa')->first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('profile');
 })->name('preview.profile');
@@ -97,9 +107,6 @@ Route::post('/logout', [SimakController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [SimakController::class, 'dashboard'])->name('dashboard');
     
-    // Informasi KOCI/TMS (FAQ & Hotline)
-    Route::get('/informasi', [SimakController::class, 'informasi'])->name('informasi');
-
     // LMS & Tasks (Deprecated - Redirected to Showcase Portofolio)
     Route::get('/tugas', function () {
         return redirect()->route('showcase.index');
@@ -120,6 +127,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
     Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
     Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
+    Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
     Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
 
     // Developer Profile ala GitHub
@@ -136,6 +144,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
     Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
     Route::delete('/admin/mentor/{id}', [SimakController::class, 'adminDeleteMentor'])->name('admin.mentors.destroy');
+    Route::post('/admin/users/{id}/reset-password', [SimakController::class, 'adminResetPassword'])->name('admin.users.reset_password');
     Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
     Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
 });

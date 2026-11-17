@@ -77,7 +77,7 @@
                 </div>
             @endif
 
-            @if ($errors->any())
+            @if (isset($errors) && $errors->any())
                 <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
                     {{ $errors->first() }}
                 </div>
@@ -112,16 +112,17 @@
                                placeholder="tmshebatsukses">
                     </div>
                 </div>
-                    </div>
-                </div>
 
                 <!-- Remember Me -->
                 <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="remember" checked class="w-3.5 h-3.5 rounded border-slate-300 text-red-600 focus:ring-red-500">
-                        <span class="text-xs text-slate-600">Ingat sesi saya</span>
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" name="remember" id="remember" value="1" checked class="w-3.5 h-3.5 rounded border-slate-300 text-red-600 focus:ring-red-500">
+                        <span class="text-xs text-slate-600 font-medium">Ingat sesi saya</span>
                     </label>
-                    <a href="{{ route('informasi') }}" class="text-xs text-red-600 hover:underline font-medium">Bantuan?</a>
+                    <a href="{{ route('faq') }}" class="text-xs text-red-600 hover:text-red-700 hover:underline font-bold flex items-center gap-1">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+                        <span>Bantuan?</span>
+                    </a>
                 </div>
 
                 <!-- Submit Button -->

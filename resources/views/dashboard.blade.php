@@ -33,9 +33,15 @@
                     <i data-lucide="activity" class="w-5 h-5"></i>
                 </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500">
-                <i data-lucide="building-2" class="w-4 h-4 text-slate-400"></i>
-                <span>PT. Teknologi Multi Sistem</span>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="building-2" class="w-4 h-4 text-slate-400"></i>
+                    <span>PT. Teknologi Multi Sistem</span>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-700 text-[10px] font-bold border border-red-200">
+                    <i data-lucide="briefcase" class="w-3 h-3 text-red-600"></i>
+                    <span>Divisi {{ $user->mentor->location ?? 'IT / Software Engineering' }}</span>
+                </span>
             </div>
         </div>
 

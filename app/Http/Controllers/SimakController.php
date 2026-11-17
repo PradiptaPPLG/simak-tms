@@ -41,8 +41,10 @@ class SimakController extends Controller
                     ->orWhere('email', $loginId)
                     ->first();
 
+        $remember = $request->boolean('remember') || $request->filled('remember');
+
         if ($user && Hash::check($request->password, $user->password)) {
-            Auth::login($user, $request->boolean('remember'));
+            Auth::login($user, $remember);
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
@@ -66,7 +68,7 @@ class SimakController extends Controller
     {
         $user = User::where('role', $role)->first();
         if ($user) {
-            Auth::login($user);
+            Auth::login($user, true);
             request()->session()->regenerate();
             return redirect()->route('dashboard')->with('success', 'Selamat datang, ' . $user->name . ' (' . strtoupper($user->role) . ')');
         }
@@ -178,7 +180,7 @@ class SimakController extends Controller
     // ==========================================
     // JURNAL HARIAN (LOGBOOK)
     // ==========================================
-    public function journals()
+    public function journals(Request $request)
     {
         $user = Auth::user();
         $journals = DailyJournal::with('mentor')
@@ -186,11 +188,17 @@ class SimakController extends Controller
             ->orderBy('journal_date', 'desc')
             ->get();
 
-        $todayJournal = DailyJournal::where('user_id', $user->id)
-            ->whereDate('journal_date', today())
-            ->first();
+        $journalsByDate = $journals->keyBy(function($j) {
+            return $j->journal_date instanceof \Carbon\Carbon 
+                ? $j->journal_date->toDateString() 
+                : substr((string)$j->journal_date, 0, 10);
+        });
 
-        return view('journals.index', compact('user', 'journals', 'todayJournal'));
+        $selectedDate = $request->get('date', now()->toDateString());
+        $selectedJournal = $journalsByDate->get($selectedDate);
+        $todayJournal = $journalsByDate->get(now()->toDateString());
+
+        return view('journals.index', compact('user', 'journals', 'journalsByDate', 'selectedDate', 'selectedJournal', 'todayJournal'));
     }
 
     public function storeJournal(Request $request)
@@ -199,13 +207,15 @@ class SimakController extends Controller
             'journal_date' => 'required|date',
             'activity_title' => 'required|string|max:200',
             'activity_detail' => 'required|string',
-            'challenges' => 'nullable|string',
-            'solution' => 'nullable|string',
             'commit_url' => 'nullable|string',
         ]);
 
         $user = Auth::user();
-        $mentor = User::where('role', 'mentor')->first();
+        $mentorId = $user->mentor_id ?? User::where('role', 'mentor')->value('id');
+
+        $existing = DailyJournal::where('user_id', $user->id)
+            ->where('journal_date', $request->journal_date)
+            ->first();
 
         DailyJournal::updateOrCreate(
             [
@@ -215,15 +225,14 @@ class SimakController extends Controller
             [
                 'activity_title' => $request->activity_title,
                 'activity_detail' => $request->activity_detail,
-                'challenges' => $request->challenges,
-                'solution' => $request->solution,
                 'commit_url' => $request->commit_url,
-                'status' => 'pending',
-                'mentor_id' => $mentor ? $mentor->id : null,
+                'mentor_id' => $existing ? $existing->mentor_id : $mentorId,
+                'mentor_feedback' => $existing ? $existing->mentor_feedback : null,
+                'status' => ($existing && $existing->mentor_feedback) ? 'approved' : 'pending',
             ]
         );
 
-        return back()->with('success', 'Jurnal harian berhasil disimpan!');
+        return redirect()->route('journals.index', ['date' => $request->journal_date])->with('success', 'Catatan jurnal kegiatan berhasil disimpan!');
     }
 
     // ==========================================
@@ -257,14 +266,33 @@ class SimakController extends Controller
     }
 
     // ==========================================
-    // REVIEW KHUSUS MENTOR
+    // REVIEW & SISIPKAN CATATAN KHUSUS MENTOR
     // ==========================================
     public function mentorReview()
     {
-        $pendingJournals = DailyJournal::with('user')->where('status', 'pending')->latest()->get();
+        $journals = DailyJournal::with(['user', 'mentor'])->latest('journal_date')->get();
+        $pendingJournalsCount = DailyJournal::whereNull('mentor_feedback')->orWhere('mentor_feedback', '')->count();
+        $reviewedJournalsCount = DailyJournal::whereNotNull('mentor_feedback')->where('mentor_feedback', '!=', '')->count();
         $pendingSubmissions = TaskSubmission::with(['task', 'user'])->where('status', 'submitted')->latest()->get();
 
-        return view('mentor.review', compact('pendingJournals', 'pendingSubmissions'));
+        return view('mentor.review', compact('journals', 'pendingJournalsCount', 'reviewedJournalsCount', 'pendingSubmissions'));
+    }
+
+    public function mentorAddNote(Request $request, $id)
+    {
+        $request->validate([
+            'mentor_feedback' => 'required|string',
+        ]);
+
+        $journal = DailyJournal::findOrFail($id);
+        $mentor = Auth::user();
+        $journal->update([
+            'mentor_id' => $mentor ? $mentor->id : $journal->mentor_id,
+            'mentor_feedback' => $request->mentor_feedback,
+            'status' => 'approved',
+        ]);
+
+        return back()->with('success', 'Catatan & arahan bimbingan mentor berhasil disisipkan untuk siswa!');
     }
 
     public function approveJournal($id)
@@ -273,11 +301,11 @@ class SimakController extends Controller
         $mentor = Auth::user();
         $journal->update([
             'status' => 'approved',
-            'mentor_id' => $mentor->id,
-            'mentor_feedback' => 'Aktivitas terverifikasi dan memenuhi standar dokumentasi kerja PT. Teknologi Multi Sistem.',
+            'mentor_id' => $mentor ? $mentor->id : $journal->mentor_id,
+            'mentor_feedback' => $journal->mentor_feedback ?: 'Aktivitas terverifikasi dan memenuhi standar dokumentasi kerja PT. Teknologi Multi Sistem.',
         ]);
 
-        return back()->with('success', 'Jurnal berhasil disetujui (Approved)!');
+        return back()->with('success', 'Jurnal berhasil ditandai dan disetujui!');
     }
 
     public function gradeSubmission(Request $request, $id)
@@ -294,7 +322,12 @@ class SimakController extends Controller
 
     public function informasi()
     {
-        return view('informasi');
+        return redirect()->route('faq');
+    }
+
+    public function faq()
+    {
+        return view('help.faq');
     }
 
     // ==========================================
@@ -527,6 +560,7 @@ class SimakController extends Controller
             'major' => $validated['major'] ?? ($validated['role'] === 'mentor' ? 'Software Engineering' : 'PPLG'),
             'mentor_id' => $validated['role'] === 'siswa' ? ($validated['mentor_id'] ?? null) : null,
             'batch_id' => $validated['batch_id'] ?? ($batch ? $batch->id : 1),
+            'must_change_password' => 1,
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=' . $avatarBg . '&color=ffffff&bold=true&size=256',
         ]);
 
@@ -628,6 +662,7 @@ class SimakController extends Controller
             'headline' => 'nullable|string|max:150',
             'phone_number' => 'nullable|string|max:30',
             'bio' => 'nullable|string',
+            'location' => 'nullable|string|max:100',
         ]);
 
         $batch = Batch::first();
@@ -649,12 +684,13 @@ class SimakController extends Controller
             'headline' => $validated['headline'] ?? 'Senior Software Engineer',
             'phone_number' => $validated['phone_number'] ?? '081234567890',
             'bio' => $validated['bio'] ?? 'Staff Mentor Pembimbing Industri PT. TMS',
-            'location' => 'Lab Software TMS',
+            'location' => $validated['location'] ?? 'IT / Software Engineering',
             'batch_id' => $batch ? $batch->id : 1,
+            'must_change_password' => 1,
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=090d16&color=ffffff&bold=true&size=256',
         ]);
 
-        return back()->with('success', "Akun Staff Mentor {$mentor->name} ({$accountId}) berhasil didaftarkan! ID Login: {$accountId} | Kata Sandi: tmshebatsukses");
+        return back()->with('success', "Akun Staff Mentor {$mentor->name} ({$accountId}) berhasil didaftarkan! ID Login: {$accountId} | Divisi: {$mentor->location} | Kata Sandi: tmshebatsukses");
     }
 
     public function adminUpdateMentor(Request $request, $id)
@@ -666,6 +702,7 @@ class SimakController extends Controller
             'headline' => 'nullable|string|max:150',
             'phone_number' => 'nullable|string|max:30',
             'bio' => 'nullable|string',
+            'location' => 'nullable|string|max:100',
         ]);
 
         $mentor->update([
@@ -675,6 +712,7 @@ class SimakController extends Controller
             'headline' => $validated['headline'] ?? $mentor->headline,
             'phone_number' => $validated['phone_number'] ?? $mentor->phone_number,
             'bio' => $validated['bio'] ?? $mentor->bio,
+            'location' => $validated['location'] ?? $mentor->location ?? 'IT / Software Engineering',
         ]);
 
         return back()->with('success', "Data mentor {$mentor->name} berhasil diperbarui oleh Admin!");
@@ -691,6 +729,25 @@ class SimakController extends Controller
         $mentor->delete();
 
         return back()->with('success', "Akun mentor {$name} berhasil dihapus dari sistem.");
+    }
+
+    // ==========================================
+    // RESET PASSWORD PENGGUNA OLEH ADMIN TMS
+    // ==========================================
+    public function adminResetPassword($id)
+    {
+        if (Auth::user()->role !== 'admin_tms') {
+            abort(403, 'Akses terbatas khusus Administrator TMS.');
+        }
+
+        $target = User::findOrFail($id);
+        $target->update([
+            'password' => Hash::make('tmshebatsukses'),
+            'must_change_password' => 1,
+        ]);
+
+        $roleLabel = $target->role === 'mentor' ? 'Staff Mentor' : ($target->role === 'siswa' ? 'Siswa Magang' : 'Pengguna');
+        return back()->with('success', "Kata sandi {$roleLabel} {$target->name} ({$target->account_id}) berhasil direset ke default: tmshebatsukses! Akun akan diminta memperbarui kata sandi saat masuk.");
     }
 
     // ==========================================
@@ -711,11 +768,12 @@ class SimakController extends Controller
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak cocok.']);
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini tidak cocok dengan akun Anda.']);
         }
 
         $user->update([
             'password' => Hash::make($request->password),
+            'must_change_password' => 0,
         ]);
 
         return back()->with('success', 'Kata sandi akun Anda berhasil diperbarui!');

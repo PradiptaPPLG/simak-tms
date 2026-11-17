@@ -248,36 +248,36 @@
                                             </div>
 
                                             <div>
-                                                @if($journal->status === 'approved')
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                                                        ✓ Disetujui Mentor
+                                                @if(!empty($journal->mentor_feedback))
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                                                        <i data-lucide="check" class="w-3 h-3"></i> Ada Catatan Mentor
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
-                                                        ⏳ Menunggu Validasi
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]">
+                                                        <i data-lucide="clock" class="w-3 h-3"></i> Belum Diberi Catatan
                                                     </span>
                                                 @endif
                                             </div>
                                         </div>
 
-                                        <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
+                                        <div>
+                                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Deskripsi Kegiatan / Catatan Siswa:</div>
+                                            <p class="text-xs text-slate-700 leading-relaxed">{{ $journal->activity_detail }}</p>
+                                        </div>
 
-                                        @if($journal->challenges || $journal->solution)
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
-                                                @if($journal->challenges)
-                                                    <div class="p-2 rounded-lg bg-red-50/50 border border-red-100 text-red-900">
-                                                        <b class="text-red-700 block text-[10px] uppercase">Kendala Koding:</b>
-                                                        {{ $journal->challenges }}
-                                                    </div>
-                                                @endif
-                                                @if($journal->solution)
-                                                    <div class="p-2 rounded-lg bg-emerald-50/50 border border-emerald-100 text-emerald-900">
-                                                        <b class="text-emerald-700 block text-[10px] uppercase">Solusi:</b>
-                                                        {{ $journal->solution }}
-                                                    </div>
-                                                @endif
+                                        @if(!empty($journal->mentor_feedback))
+                                            <div class="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200 text-emerald-900 text-xs space-y-0.5">
+                                                <div class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Catatan Pembimbing:</div>
+                                                <p class="font-medium text-emerald-950">"{{ $journal->mentor_feedback }}"</p>
                                             </div>
                                         @endif
+
+                                        <div class="flex items-center justify-end pt-1">
+                                            <a href="{{ route('mentor.review') }}" class="text-[11px] text-red-600 font-bold hover:underline flex items-center gap-1">
+                                                <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                                <span>{{ !empty($journal->mentor_feedback) ? 'Edit Catatan di Review Hub' : 'Sisipkan Catatan di Review Hub' }}</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>

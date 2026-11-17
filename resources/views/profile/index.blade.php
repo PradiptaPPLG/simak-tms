@@ -80,7 +80,13 @@
                 <div class="mt-5 space-y-2.5 text-xs text-slate-600 border-t border-slate-100 pt-4">
                     <div class="flex items-center gap-2.5">
                         <i data-lucide="building-2" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
-                        <span>PT. Teknologi Multi Sistem (Lab Software)</span>
+                        <span>PT. Teknologi Multi Sistem</span>
+                        @if($user->mentor)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-bold border border-red-200">
+                                <i data-lucide="briefcase" class="w-3 h-3 text-red-600"></i>
+                                <span>Divisi {{ $user->mentor->location ?? 'IT / Software Engineering' }}</span>
+                            </span>
+                        @endif
                     </div>
                     <div class="flex items-center gap-2.5">
                         <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
@@ -209,10 +215,10 @@
                     </div>
                     <div>
                         <h3 class="text-xs font-black text-slate-900">Keamanan & Password Akun</h3>
-                        <p class="text-[10px] text-slate-400">Password Universal Awal: <code class="font-mono text-red-600 font-bold">tmshebatsukses</code></p>
+                        <p class="text-[10px] text-slate-400">Kelola kata sandi akun SIMAK-TMS Anda</p>
                     </div>
                 </div>
-                <button type="button" onclick="document.getElementById('modal-change-password').classList.remove('hidden')" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+                <button type="button" onclick="openChangePasswordModal()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-red-400"></i>
                     <span>Ubah Kata Sandi Akun</span>
                 </button>
@@ -509,10 +515,10 @@
                     </div>
                     <div>
                         <h3 class="text-xs font-black text-slate-900">Keamanan & Password Akun</h3>
-                        <p class="text-[10px] text-slate-400">Password Universal Awal: <code class="font-mono text-red-600 font-bold">tmshebatsukses</code></p>
+                        <p class="text-[10px] text-slate-400">Kelola kata sandi akun SIMAK-TMS Anda</p>
                     </div>
                 </div>
-                <button type="button" onclick="document.getElementById('modal-change-password').classList.remove('hidden')" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+                <button type="button" onclick="openChangePasswordModal()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
                     <i data-lucide="lock" class="w-3.5 h-3.5 text-red-400"></i>
                     <span>Ubah Kata Sandi Akun</span>
                 </button>
