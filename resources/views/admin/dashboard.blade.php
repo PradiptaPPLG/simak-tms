@@ -112,111 +112,138 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Chart 1: Tren Monitoring Aktivitas & Siswa (Bar & Line Combo) -->
-        <div class="mas-card p-4 sm:p-6 lg:col-span-2 flex flex-col justify-between overflow-hidden">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
-                            <i data-lucide="activity" class="w-4 h-4"></i>
+        <div class="mas-card p-4 sm:p-6 lg:col-span-2 flex flex-col justify-between overflow-hidden self-start w-full transition-all">
+            <div id="chart-trend-header" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 transition-all">
+                <div class="flex items-center justify-between gap-2 w-full sm:w-auto">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
+                                <i data-lucide="activity" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-sm sm:text-base font-black text-slate-900 tracking-tight">Tren Monitoring Aktivitas Siswa</h2>
                         </div>
-                        <h2 class="text-base font-black text-slate-900 tracking-tight">Tren Monitoring Aktivitas Siswa</h2>
+                        <p id="chart-trend-sub" class="text-xs text-slate-400 mt-1">Volume pengisian jurnal kegiatan harian dan presensi kehadiran seluruh siswa.</p>
                     </div>
-                    <p class="text-xs text-slate-400 mt-1">Volume pengisian jurnal kegiatan harian dan presensi kehadiran seluruh siswa.</p>
+
+                    <!-- Tombol Panah Mobile (Sisi Kanan Atas) -->
+                    <button type="button" onclick="toggleChartCard('chart-trend')" class="sm:hidden w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all cursor-pointer shrink-0" title="Sembunyikan Grafik">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
                 </div>
 
-                <!-- Toggle Timeframe: Minggu Ini / Bulan Ini -->
-                <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-bold flex-shrink-0 self-start sm:self-auto">
-                    <button id="btn-chart-weekly" onclick="switchTimeframe('weekly')" class="px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all">Minggu Ini</button>
-                    <button id="btn-chart-monthly" onclick="switchTimeframe('monthly')" class="px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all">Bulan Ini</button>
+                <!-- Kontrol Timeframe & Tombol Panah Desktop -->
+                <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+                    <div id="chart-trend-controls" class="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                        <button id="btn-chart-weekly" onclick="switchTimeframe('weekly')" class="px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all">Minggu Ini</button>
+                        <button id="btn-chart-monthly" onclick="switchTimeframe('monthly')" class="px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all">Bulan Ini</button>
+                    </div>
+
+                    <!-- Tombol Panah Desktop (Sisi Kanan Atas Kecil Warna Abu) -->
+                    <button type="button" onclick="toggleChartCard('chart-trend')" class="hidden sm:flex w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 items-center justify-center transition-all cursor-pointer shrink-0" title="Sembunyikan Grafik">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Metric Telemetry Badges (Compact & Truncate Safe on Mobile) -->
-            <div class="grid grid-cols-3 gap-2 sm:gap-3 my-4">
-                <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
-                    <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Total Siswa</div>
-                    <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalInterns }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Peserta</span></div>
+            <!-- Konten Grafik (Bisa Disembunyikan) -->
+            <div id="chart-trend-body" class="space-y-4">
+                <!-- Metric Telemetry Badges (Compact & Truncate Safe on Mobile) -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-4 mb-2">
+                    <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
+                        <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Total Siswa</div>
+                        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalInterns }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Peserta</span></div>
+                    </div>
+                    <div class="p-2 sm:p-3 rounded-xl bg-red-50/50 border border-red-100 min-w-0">
+                        <div class="text-[9px] sm:text-[10px] font-bold text-red-600 uppercase tracking-wider truncate">Jurnal Masuk</div>
+                        <div class="text-base sm:text-lg font-black text-red-600 font-mono mt-0.5 truncate">{{ $totalJournals }} <span class="text-[10px] sm:text-[11px] font-normal text-red-400">Logbook</span></div>
+                    </div>
+                    <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
+                        <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Portofolio</div>
+                        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalProjects ?? 2 }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Proyek</span></div>
+                    </div>
                 </div>
-                <div class="p-2 sm:p-3 rounded-xl bg-red-50/50 border border-red-100 min-w-0">
-                    <div class="text-[9px] sm:text-[10px] font-bold text-red-600 uppercase tracking-wider truncate">Jurnal Masuk</div>
-                    <div class="text-base sm:text-lg font-black text-red-600 font-mono mt-0.5 truncate">{{ $totalJournals }} <span class="text-[10px] sm:text-[11px] font-normal text-red-400">Logbook</span></div>
-                </div>
-                <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
-                    <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Portofolio</div>
-                    <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalProjects ?? 2 }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Proyek</span></div>
-                </div>
-            </div>
 
-            <!-- Canvas Container -->
-            <div class="relative w-full max-w-full h-64 overflow-hidden">
-                <canvas id="adminMonitoringChart"></canvas>
-            </div>
-
-            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
-                <div class="flex items-center gap-4">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-600 inline-block"></span> Jurnal Harian (Logbook)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-900 inline-block"></span> Presensi Masuk Lab</span>
+                <!-- Canvas Container -->
+                <div class="relative w-full max-w-full h-64 overflow-hidden">
+                    <canvas id="adminMonitoringChart"></canvas>
                 </div>
-                <span class="text-emerald-600 font-semibold flex items-center gap-1">
-                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                    Aktivitas 100% Real-Time
-                </span>
+
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-600 inline-block"></span> Jurnal Harian (Logbook)</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-slate-900 inline-block"></span> Presensi Masuk Lab</span>
+                    </div>
+                    <span class="text-emerald-600 font-semibold flex items-center gap-1">
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                        Aktivitas 100% Real-Time
+                    </span>
+                </div>
             </div>
         </div>
 
         <!-- Chart 2: Komposisi & Distribusi Status Siswa (Doughnut Chart) -->
-        <div class="mas-card p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
-            <div class="pb-4 border-b border-slate-100">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0 aspect-square">
-                        <i data-lucide="pie-chart" class="w-4 h-4"></i>
+        <div class="mas-card p-4 sm:p-6 flex flex-col justify-between overflow-hidden self-start w-full transition-all">
+            <div id="chart-status-header" class="flex items-center justify-between gap-3 pb-4 border-b border-slate-100 transition-all">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-900 flex items-center justify-center shrink-0 aspect-square">
+                            <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                        </div>
+                        <h2 class="text-sm xl:text-base font-black text-slate-900 tracking-tight whitespace-nowrap">Status & Kelulusan Siswa</h2>
                     </div>
-                    <h2 class="text-base font-black text-slate-900 tracking-tight">Status & Kelulusan Siswa</h2>
+                    <p id="chart-status-sub" class="text-xs text-slate-400 mt-1">Proporsi status pembimbingan, penugasan, dan kelulusan industri.</p>
                 </div>
-                <p class="text-xs text-slate-400 mt-1">Proporsi status pembimbingan, penugasan, dan kelulusan industri.</p>
+
+                <!-- Tombol Panah (Sisi Kanan Atas Kecil Warna Abu) -->
+                <button type="button" onclick="toggleChartCard('chart-status')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all cursor-pointer shrink-0" title="Sembunyikan Grafik">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </button>
             </div>
 
-            <!-- Canvas Doughnut Container with centered counter -->
-            <div class="relative w-full max-w-full h-52 my-3 flex items-center justify-center overflow-hidden">
-                <canvas id="adminStatusDonutChart"></canvas>
-                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span class="text-2xl font-black text-slate-900 font-mono leading-none">{{ $totalInterns }}</span>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Siswa</span>
-                </div>
-            </div>
-
-            <!-- Custom Clean Legend List with Values -->
-            <div class="space-y-2 pt-2 border-t border-slate-100">
-                <div class="flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
-                        <span class="text-slate-700 font-medium">Siswa Aktif Magang</span>
+            <!-- Konten Grafik Donut (Bisa Disembunyikan) -->
+            <div id="chart-status-body" class="space-y-3">
+                <!-- Canvas Doughnut Container with centered counter -->
+                <div class="relative w-full max-w-full h-52 my-3 flex items-center justify-center overflow-hidden">
+                    <canvas id="adminStatusDonutChart"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-2xl font-black text-slate-900 font-mono leading-none">{{ $totalInterns }}</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Total Siswa</span>
                     </div>
-                    <span class="font-mono font-bold text-slate-900">{{ $totalInterns }} Siswa</span>
                 </div>
 
-                <div class="flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
-                        <span class="text-slate-700 font-medium">Terhubung Pembimbing</span>
+                <!-- Custom Clean Legend List with Values -->
+                <div class="space-y-2 pt-2 border-t border-slate-100">
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
+                            <span class="text-slate-700 font-medium">Siswa Aktif Magang</span>
+                        </div>
+                        <span class="font-mono font-bold text-slate-900">{{ $totalInterns }} Siswa</span>
                     </div>
-                    <span class="font-mono font-bold text-red-600">{{ $interns->whereNotNull('mentor_id')->count() }} Siswa</span>
-                </div>
 
-                <div class="flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        <span class="text-slate-700 font-medium">Evaluasi Selesai [A]</span>
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+                            <span class="text-slate-700 font-medium">Terhubung Pembimbing</span>
+                        </div>
+                        <span class="font-mono font-bold text-red-600">{{ $interns->whereNotNull('mentor_id')->count() }} Siswa</span>
                     </div>
-                    <span class="font-mono font-bold text-emerald-600">{{ $interns->filter(fn($i) => $i->evaluation)->count() }} Siswa</span>
-                </div>
-            </div>
 
-            <div class="mt-4 pt-3 border-t border-slate-100 text-center">
-                <a href="{{ route('admin.students') }}" class="text-[11px] font-bold text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-1">
-                    <span>Buka Rincian Siswa Magang</span>
-                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </a>
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-slate-700 font-medium">Evaluasi Selesai [A]</span>
+                        </div>
+                        <span class="font-mono font-bold text-emerald-600">{{ $interns->filter(fn($i) => $i->evaluation)->count() }} Siswa</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 text-center">
+                    <a href="{{ route('admin.students') }}" class="text-[11px] font-bold text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-1">
+                        <span>Buka Rincian Siswa Magang</span>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -625,6 +652,47 @@
         if (siswaFields) {
             siswaFields.style.display = (role === 'mentor') ? 'none' : 'block';
         }
+    }
+
+    // Toggle Collapse / Expand Chart Cards
+    function toggleChartCard(name) {
+        const body = document.getElementById(name + '-body');
+        const sub = document.getElementById(name + '-sub');
+        const controls = document.getElementById(name + '-controls');
+        const header = document.getElementById(name + '-header');
+        if (!body) return;
+
+        const isHidden = body.classList.contains('hidden');
+        const btns = document.querySelectorAll(`button[onclick*="'${name}'"]`);
+
+        if (isHidden) {
+            // Expand (tampil penuh kembali)
+            body.classList.remove('hidden');
+            if (sub) sub.classList.remove('hidden');
+            if (controls) controls.classList.remove('hidden');
+            if (header) {
+                header.classList.add('border-b', 'pb-4');
+                header.classList.remove('pb-0');
+            }
+            btns.forEach(b => {
+                b.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4"></i>';
+                b.setAttribute('title', 'Sembunyikan Grafik');
+            });
+        } else {
+            // Collapse (sembunyi menjadi satu bar judul dengan arrow up)
+            body.classList.add('hidden');
+            if (sub) sub.classList.add('hidden');
+            if (controls) controls.classList.add('hidden');
+            if (header) {
+                header.classList.remove('border-b', 'pb-4');
+                header.classList.add('pb-0');
+            }
+            btns.forEach(b => {
+                b.innerHTML = '<i data-lucide="chevron-up" class="w-4 h-4"></i>';
+                b.setAttribute('title', 'Tampilkan Grafik');
+            });
+        }
+        lucide.createIcons();
     }
 
     document.addEventListener('DOMContentLoaded', function () {

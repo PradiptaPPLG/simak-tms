@@ -73,25 +73,24 @@
                 <div>
                     <label for="login_id" class="block text-xs font-bold text-slate-700 mb-1.5">ID Pengguna (5-Digit) / Email Akun</label>
                     <div class="relative">
-                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                        <input type="text" id="login_id" name="login_id" value="{{ old('login_id', 'admin@tms.co.id') }}" required
+                        <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input type="text" id="login_id" name="login_id" value="{{ old('login_id') }}" required autofocus
                                class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono"
                                placeholder="Contoh: 19364 atau admin@tms.co.id">
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Siswa & Mentor login menggunakan ID 5-digit otomatis yang diterbitkan Admin.</p>
                 </div>
 
                 <!-- Password -->
                 <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label for="password" class="block text-xs font-bold text-slate-700">Kata Sandi</label>
-                        <span class="text-[10px] text-red-600 font-bold font-mono bg-red-50 px-2 py-0.5 rounded border border-red-200">Default: tmshebatsukses</span>
-                    </div>
+                    <label for="password" class="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi</label>
                     <div class="relative">
-                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                        <input type="password" id="password" name="password" value="tmshebatsukses" required
-                               class="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono"
-                               placeholder="tmshebatsukses">
+                        <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input type="password" id="password" name="password" required
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono"
+                               placeholder="Masukkan kata sandi">
+                        <button type="button" onclick="togglePasswordVisibility('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-colors" title="Lihat/Sembunyikan Kata Sandi">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -103,7 +102,7 @@
                     </label>
                     <a href="{{ route('faq') }}" class="text-xs text-red-600 hover:text-red-700 hover:underline font-bold flex items-center gap-1.5" title="Buka Pusat Bantuan & Aturan Akun">
                         <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
-                        <span>Pusat Bantuan & SOP Login</span>
+                        <span>Bantuan</span>
                     </a>
                 </div>
 
@@ -116,13 +115,6 @@
 
         </div>
 
-        <!-- Credentials Quick Info -->
-        <div class="mt-4 p-3.5 bg-white/90 backdrop-blur-xs rounded-xl border border-slate-200 text-center text-[11px] text-slate-500 shadow-2xs space-y-1">
-            <div><b class="text-slate-800">Kata Sandi Universal:</b> <code class="bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-mono font-bold text-xs">tmshebatsukses</code></div>
-            <div class="text-[10px]"><b class="text-slate-700">Siswa & Mentor:</b> Menggunakan ID 5-digit dari admin (contoh: <span class="font-mono font-bold text-red-600">19364</span>)</div>
-            <div class="text-[10px]"><b class="text-slate-700">Admin TMS:</b> <code class="font-mono font-bold text-slate-800">admin@tms.co.id</code> / ID: <code class="font-mono font-bold text-slate-800">99999</code></div>
-        </div>
-
         <!-- Partnership Footer -->
         <div class="text-center mt-6 text-xs text-slate-400">
             <span>Kerjasama: <b class="text-slate-700">SMKN 1 Ciamis (PPLG)</b> &times; <b class="text-slate-700">PT. Teknologi Multi Sistem</b></span>
@@ -132,6 +124,15 @@
 
     <script>
         lucide.createIcons();
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPass = input.type === 'password';
+            input.type = isPass ? 'text' : 'password';
+            btn.innerHTML = `<i data-lucide="${isPass ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>

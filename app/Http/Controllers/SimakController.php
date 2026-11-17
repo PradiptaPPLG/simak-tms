@@ -51,7 +51,7 @@ class SimakController extends Controller
         }
 
         return back()->withErrors([
-            'login_id' => 'ID Pengguna / Email atau Kata Sandi salah. Gunakan ID 5-digit Anda (contoh: 19364) dan kata sandi: tmshebatsukses.',
+            'login_id' => 'ID Pengguna atau Kata Sandi salah.',
         ])->onlyInput('login_id');
     }
 
