@@ -559,4 +559,104 @@ class SimakController extends Controller
 
         return back()->with('success', "Data siswa {$name} berhasil dihapus dari sistem oleh Admin.");
     }
+
+    // ==========================================
+    // ADMIN MENTOR MANAGEMENT (MASTER DATA MENTOR)
+    // ==========================================
+    public function adminMentors(Request $request)
+    {
+        $query = User::where('role', 'mentor')->with(['students.evaluation', 'tasks']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('major', 'like', "%{$search}%")
+                  ->orWhere('headline', 'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%");
+            });
+        }
+
+        $mentors = $query->latest()->get();
+        $totalMentors = User::where('role', 'mentor')->count();
+        $totalStudents = User::where('role', 'siswa')->count();
+        $assignedStudentsCount = User::where('role', 'siswa')->whereNotNull('mentor_id')->count();
+        $ratio = $totalMentors > 0 ? round($totalStudents / $totalMentors, 1) : 0;
+
+        return view('admin.mentors', compact(
+            'mentors',
+            'totalMentors',
+            'totalStudents',
+            'assignedStudentsCount',
+            'ratio'
+        ));
+    }
+
+    public function adminStoreMentor(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email',
+            'headline' => 'nullable|string|max:150',
+            'phone_number' => 'nullable|string|max:30',
+            'bio' => 'nullable|string',
+        ]);
+
+        $batch = Batch::first();
+
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt('password'),
+            'role' => 'mentor',
+            'school_origin' => 'PT. Teknologi Multi Sistem',
+            'major' => $validated['headline'] ?? 'Senior Software Engineer',
+            'headline' => $validated['headline'] ?? 'Senior Software Engineer',
+            'phone_number' => $validated['phone_number'] ?? '081234567890',
+            'bio' => $validated['bio'] ?? 'Staff Mentor Pembimbing Industri PT. TMS',
+            'location' => 'Lab Software TMS',
+            'batch_id' => $batch ? $batch->id : 1,
+            'username' => strtolower(str_replace([' ', '.', ','], '', $validated['name'])) . rand(10, 99),
+            'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($validated['name']) . '&background=090d16&color=ffffff&bold=true&size=256',
+        ]);
+
+        return back()->with('success', "Akun Mentor {$validated['name']} berhasil didaftarkan dan aktif membimbing!");
+    }
+
+    public function adminUpdateMentor(Request $request, $id)
+    {
+        $mentor = User::where('role', 'mentor')->findOrFail($id);
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,' . $mentor->id,
+            'headline' => 'nullable|string|max:150',
+            'phone_number' => 'nullable|string|max:30',
+            'bio' => 'nullable|string',
+        ]);
+
+        $mentor->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'major' => $validated['headline'] ?? $mentor->major,
+            'headline' => $validated['headline'] ?? $mentor->headline,
+            'phone_number' => $validated['phone_number'] ?? $mentor->phone_number,
+            'bio' => $validated['bio'] ?? $mentor->bio,
+        ]);
+
+        return back()->with('success', "Data mentor {$mentor->name} berhasil diperbarui oleh Admin!");
+    }
+
+    public function adminDeleteMentor($id)
+    {
+        $mentor = User::where('role', 'mentor')->findOrFail($id);
+        $name = $mentor->name;
+
+        // Reassign or unassign students who have this mentor
+        User::where('mentor_id', $mentor->id)->update(['mentor_id' => null]);
+
+        $mentor->delete();
+
+        return back()->with('success', "Akun mentor {$name} berhasil dihapus dari sistem.");
+    }
 }

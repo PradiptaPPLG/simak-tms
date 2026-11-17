@@ -301,6 +301,18 @@
                             </td>
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
+                                    <button onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}')" class="px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-semibold transition-colors flex items-center gap-1 shadow-2xs">
+                                        <i data-lucide="edit-2" class="w-3 h-3 text-slate-500"></i>
+                                        <span>Edit</span>
+                                    </button>
+                                    <form action="{{ route('admin.students.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa {{ $intern->name }}? Tindakan ini permanen jika siswa dipulangkan atau pindah.');" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="px-2 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-[11px] font-bold transition-colors flex items-center gap-1 border border-red-200">
+                                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </form>
                                     <a href="{{ route('profile') }}" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-semibold transition-colors flex items-center gap-1">
                                         <i data-lucide="user" class="w-3 h-3 text-red-400"></i>
                                         <span>Profil</span>
@@ -497,9 +509,89 @@
         </div>
     </div>
 
+    <!-- Modal Edit Data Siswa (Khusus Hak Akses Admin) -->
+    <div id="modal-edit-student" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="mas-card p-6 bg-white w-full max-w-lg shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">Edit Data Siswa Magang</h3>
+                        <p class="text-[11px] text-slate-400">Kelola mutasi sekolah, ganti pembimbing, atau update biodata siswa.</p>
+                    </div>
+                </div>
+                <button onclick="closeEditModal()" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center text-lg">&times;</button>
+            </div>
+
+            <form id="form-edit-student" method="POST" class="space-y-3.5">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                    <input type="text" id="edit-name" name="name" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Email / Akun</label>
+                    <input type="email" id="edit-email" name="email" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Asal Sekolah</label>
+                        <input type="text" id="edit-school" name="school_origin" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Jurusan</label>
+                        <input type="text" id="edit-major" name="major" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Staff Mentor Pembimbing</label>
+                    <select id="edit-mentor-id" name="mentor_id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                        <option value="">-- Belum Diassign --</option>
+                        @foreach($mentors as $mentor)
+                            <option value="{{ $mentor->id }}">{{ $mentor->name }} (Mentor TMS)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/30 flex items-center gap-1.5">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                        <span>Simpan Perubahan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 <script>
+    function openEditModal(id, name, email, school, major, mentorId) {
+        const modal = document.getElementById('modal-edit-student');
+        const form = document.getElementById('form-edit-student');
+        form.action = "{{ url('/admin/siswa') }}/" + id;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-email').value = email;
+        document.getElementById('edit-school').value = school;
+        document.getElementById('edit-major').value = major;
+        document.getElementById('edit-mentor-id').value = mentorId || '';
+        modal.classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('modal-edit-student').classList.add('hidden');
+    }
+
     function toggleAdminForm(role) {
         const siswaFields = document.getElementById('siswa-fields');
         if (siswaFields) {

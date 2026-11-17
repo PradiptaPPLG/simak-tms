@@ -178,8 +178,8 @@
                     <div class="px-3 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Area Admin TMS</div>
 
                     <!-- Monitoring Global & Arsip Master (Bersih tanpa Hash Anchor!) -->
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
-                        <i data-lucide="shield-check" class="w-4 h-4 {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                        <i data-lucide="shield-check" class="w-4 h-4 {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span>Monitoring Global & Arsip</span>
                     </a>
 
@@ -187,6 +187,12 @@
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
                         <i data-lucide="users" class="w-4 h-4 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span>Data Siswa (Semua Batch)</span>
+                    </a>
+
+                    <!-- Data Mentor & Staff Pembimbing (BARU) -->
+                    <a href="{{ route('admin.mentors') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-black border-l-4 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium' }}">
+                        <i data-lucide="user-check" class="w-4 h-4 {{ request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span>Data Mentor & Staff</span>
                     </a>
 
                     <!-- Master Arsip Portofolio (Semua Angkatan) -->
@@ -294,13 +300,17 @@
                         <span>Showcase Batch Sekarang</span>
                     </a>
                 @elseif($role === 'admin_tms')
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
                         <span>Monitoring Global & Arsip</span>
                     </a>
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>Data Siswa (Semua Batch)</span>
+                    </a>
+                    <a href="{{ route('admin.mentors') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        <span>Data Mentor & Staff</span>
                     </a>
                     <a href="{{ route('showcase.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="archive" class="w-4 h-4"></i>
@@ -487,23 +497,23 @@
             </button>
         @elseif($role === 'admin_tms')
             <!-- Admin Mobile Bottom Bar -->
-            <a href="{{ route('admin.dashboard') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            <a href="{{ route('admin.dashboard') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                 <span class="text-[10px]">Global</span>
             </a>
-            <a href="{{ route('admin.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('admin.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            <a href="{{ route('admin.students') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ request()->routeIs('admin.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="users" class="w-5 h-5"></i>
                 <span class="text-[10px]">Siswa</span>
             </a>
-            <a href="{{ route('showcase.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('showcase.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            <a href="{{ route('admin.mentors') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ request()->routeIs('admin.mentors*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+                <span class="text-[10px]">Mentor</span>
+            </a>
+            <a href="{{ route('showcase.index') }}" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors {{ request()->routeIs('showcase.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="archive" class="w-5 h-5"></i>
                 <span class="text-[10px]">Arsip</span>
             </a>
-            <a href="{{ route('evaluation.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('evaluation.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
-                <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
-                <span class="text-[10px]">Nilai</span>
-            </a>
-            <button onclick="document.getElementById('mobile-drawer-toggle').click()" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-500">
+            <button onclick="document.getElementById('mobile-drawer-toggle').click()" class="flex flex-col items-center gap-1 py-1 px-2 rounded-xl text-slate-500">
                 <i data-lucide="menu" class="w-5 h-5"></i>
                 <span class="text-[10px]">Menu</span>
             </button>

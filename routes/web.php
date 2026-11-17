@@ -81,6 +81,12 @@ Route::get('/preview/admin/siswa', function () {
     return redirect()->route('admin.students');
 })->name('preview.admin.students');
 
+Route::get('/preview/admin/mentor', function () {
+    $admin = \App\Models\User::where('role', 'admin_tms')->first();
+    \Illuminate\Support\Facades\Auth::login($admin);
+    return redirect()->route('admin.mentors');
+})->name('preview.admin.mentors');
+
 // Authentication routes
 Route::get('/login', [SimakController::class, 'showLogin'])->name('login');
 Route::post('/login', [SimakController::class, 'login'])->name('login.post');
@@ -125,6 +131,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
     Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
     Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
+    Route::get('/admin/mentor', [SimakController::class, 'adminMentors'])->name('admin.mentors');
+    Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
+    Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
+    Route::delete('/admin/mentor/{id}', [SimakController::class, 'adminDeleteMentor'])->name('admin.mentors.destroy');
     Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
     Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
 });
