@@ -419,21 +419,5 @@
     function closeEditMentorModal() {
         document.getElementById('modal-edit-mentor').classList.add('hidden');
     }
-
-    function toggleActionDropdown(btn, event) {
-        event.stopPropagation();
-        const dropdown = btn.nextElementSibling;
-        const isHidden = dropdown.classList.contains('hidden');
-        document.querySelectorAll('.action-dropdown').forEach(d => d.classList.add('hidden'));
-        if (isHidden) {
-            dropdown.classList.remove('hidden');
-        }
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.dropdown-container')) {
-            document.querySelectorAll('.action-dropdown').forEach(d => d.classList.add('hidden'));
-        }
-    });
 </script>
 @endsection

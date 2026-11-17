@@ -903,19 +903,65 @@
         function toggleActionDropdown(btn, event) {
             event.stopPropagation();
             const dropdown = btn.nextElementSibling;
-            const isHidden = dropdown.classList.contains('hidden');
-            document.querySelectorAll('.action-dropdown').forEach(d => d.classList.add('hidden'));
-            if (isHidden) {
+            if (!dropdown) return;
+
+            const isCurrentlyHidden = dropdown.classList.contains('hidden');
+            
+            // Close all open dropdowns first
+            closeAllActionDropdowns();
+
+            if (isCurrentlyHidden) {
+                // Calculate button bounding rect in viewport
+                const rect = btn.getBoundingClientRect();
+                const dropdownWidth = 176;
+
+                dropdown.style.position = 'fixed';
+                dropdown.style.zIndex = '99999';
+                dropdown.style.margin = '0';
+
+                // Horizontal placement (aligned to right of button)
+                let left = rect.right - dropdownWidth;
+                if (left < 10) left = 10;
+                dropdown.style.left = left + 'px';
+                dropdown.style.right = 'auto';
+
+                // Vertical placement (check space below vs space above)
+                const spaceBelow = window.innerHeight - rect.bottom;
+                if (spaceBelow < 220 && rect.top > 220) {
+                    dropdown.style.top = 'auto';
+                    dropdown.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+                } else {
+                    dropdown.style.top = (rect.bottom + 6) + 'px';
+                    dropdown.style.bottom = 'auto';
+                }
+
                 dropdown.classList.remove('hidden');
-                lucide.createIcons();
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }
+        }
+
+        function closeAllActionDropdowns() {
+            document.querySelectorAll('.action-dropdown').forEach(d => {
+                d.classList.add('hidden');
+                d.style.position = '';
+                d.style.top = '';
+                d.style.bottom = '';
+                d.style.left = '';
+                d.style.right = '';
+                d.style.zIndex = '';
+            });
         }
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.dropdown-container')) {
-                document.querySelectorAll('.action-dropdown').forEach(d => d.classList.add('hidden'));
+                closeAllActionDropdowns();
             }
         });
+
+        window.addEventListener('scroll', closeAllActionDropdowns, { passive: true });
+        window.addEventListener('resize', closeAllActionDropdowns);
     </script>
 </body>
 </html>

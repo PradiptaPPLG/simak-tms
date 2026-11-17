@@ -22,35 +22,37 @@ Route::get('/informasi', function () {
 
 // Preview routes for testing (Auto-login & redirect to real named routes)
 Route::get('/preview/dashboard', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('dashboard');
 })->name('preview.dashboard');
 
 Route::get('/preview/informasi', function () {
-    return redirect()->route('faq');
+    $user = \App\Models\User::first();
+    \Illuminate\Support\Facades\Auth::login($user);
+    return redirect()->route('informasi');
 })->name('preview.informasi');
 
 Route::get('/preview/tugas', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('showcase.index');
 })->name('preview.tugas');
 
 Route::get('/preview/jurnal', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('journals.index');
 })->name('preview.jurnal');
 
 Route::get('/preview/arsip', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('showcase.index');
 })->name('preview.arsip');
 
 Route::get('/preview/evaluasi', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('evaluation.index');
 })->name('preview.evaluasi');
@@ -74,7 +76,7 @@ Route::get('/preview/mentor/siswa', function () {
 })->name('preview.mentor.students');
 
 Route::get('/preview/profile', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
+    $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
     return redirect()->route('profile');
 })->name('preview.profile');
