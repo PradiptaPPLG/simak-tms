@@ -557,5 +557,161 @@
             siswaFields.style.display = (role === 'mentor') ? 'none' : 'block';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Dataset for Monitoring Activity Chart
+        const chartDataWeekly = {
+            labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+            journals: [2, 2, 1, 2, 2, 0],
+            tasks: [1, 0, 2, 1, 1, 0]
+        };
+
+        const chartDataMonthly = {
+            labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+            journals: [10, 12, 11, 8],
+            tasks: [4, 6, 5, 3]
+        };
+
+        // 2. Initialize Combined Bar & Line Chart
+        const ctxMonitoring = document.getElementById('adminMonitoringChart');
+        if (ctxMonitoring) {
+            const monitoringChart = new Chart(ctxMonitoring.getContext('2d'), {
+                data: {
+                    labels: chartDataWeekly.labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: 'Jurnal Harian (Logbook)',
+                            data: chartDataWeekly.journals,
+                            backgroundColor: '#ef4444',
+                            hoverBackgroundColor: '#dc2626',
+                            borderRadius: 6,
+                            barThickness: 18,
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Submit Modul LMS',
+                            data: chartDataWeekly.tasks,
+                            borderColor: '#0f172a',
+                            backgroundColor: 'rgba(15, 23, 42, 0.08)',
+                            borderWidth: 2.5,
+                            tension: 0.35,
+                            fill: false,
+                            pointBackgroundColor: '#0f172a',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: "'Outfit', sans-serif", size: 11, weight: '500' },
+                                color: '#64748b'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 3,
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                font: { family: "'Outfit', sans-serif", size: 11 },
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Outfit', sans-serif", size: 12, weight: '700' },
+                            bodyFont: { family: "'Outfit', sans-serif", size: 11 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            boxPadding: 4
+                        }
+                    }
+                }
+            });
+
+            // Interactive Timeframe Switcher
+            window.switchTimeframe = function(tf) {
+                const btnW = document.getElementById('btn-chart-weekly');
+                const btnM = document.getElementById('btn-chart-monthly');
+
+                if (tf === 'weekly') {
+                    monitoringChart.data.labels = chartDataWeekly.labels;
+                    monitoringChart.data.datasets[0].data = chartDataWeekly.journals;
+                    monitoringChart.data.datasets[1].data = chartDataWeekly.tasks;
+                    monitoringChart.options.scales.y.suggestedMax = 3;
+                    monitoringChart.options.scales.y.ticks.stepSize = 1;
+
+                    btnW.className = 'px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all';
+                    btnM.className = 'px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all';
+                } else {
+                    monitoringChart.data.labels = chartDataMonthly.labels;
+                    monitoringChart.data.datasets[0].data = chartDataMonthly.journals;
+                    monitoringChart.data.datasets[1].data = chartDataMonthly.tasks;
+                    monitoringChart.options.scales.y.suggestedMax = 15;
+                    monitoringChart.options.scales.y.ticks.stepSize = 3;
+
+                    btnM.className = 'px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all';
+                    btnW.className = 'px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all';
+                }
+                monitoringChart.update();
+            };
+        }
+
+        // 3. Initialize Status Doughnut Chart
+        const ctxDonut = document.getElementById('adminStatusDonutChart');
+        if (ctxDonut) {
+            new Chart(ctxDonut.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Siswa Aktif Magang', 'Terhubung Mentor', 'Evaluasi Selesai'],
+                    datasets: [{
+                        data: [
+                            {{ max($totalInterns, 1) }},
+                            {{ max($interns->whereNotNull('mentor_id')->count(), 1) }},
+                            {{ max($interns->filter(fn($i) => $i->evaluation)->count(), 1) }}
+                        ],
+                        backgroundColor: ['#0f172a', '#ef4444', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: "'Outfit', sans-serif", size: 12, weight: '700' },
+                            bodyFont: { family: "'Outfit', sans-serif", size: 11 },
+                            padding: 10,
+                            cornerRadius: 8
+                        }
+                    },
+                    cutout: '76%'
+                }
+            });
+        }
+    });
 </script>
 @endsection
