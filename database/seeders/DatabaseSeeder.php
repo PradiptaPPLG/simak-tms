@@ -37,9 +37,11 @@ class DatabaseSeeder extends Seeder
         // 2. Users
         $siswaId = DB::table('users')->insertGetId([
             'batch_id' => $batch2026,
-            'name' => 'Pradipta Endra Maulana',
-            'email' => 'pradipta@tms.co.id',
-            'password' => Hash::make('password'),
+            'account_id' => '93777',
+            'username' => '93777',
+            'name' => 'Alyzza Nazwa',
+            'email' => 'alyzza@tms.co.id',
+            'password' => Hash::make('tmshebatsukses'),
             'role' => 'siswa',
             'school_origin' => 'SMKN 1 Ciamis',
             'major' => 'PPLG (Pengembangan Perangkat Lunak & Gim)',
@@ -51,9 +53,11 @@ class DatabaseSeeder extends Seeder
 
         $mentorId = DB::table('users')->insertGetId([
             'batch_id' => null,
+            'account_id' => '16827',
+            'username' => '16827',
             'name' => 'Farhan Ramadhan',
             'email' => 'mentor@tms.co.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('tmshebatsukses'),
             'role' => 'mentor',
             'school_origin' => 'PT. Teknologi Multi Sistem',
             'major' => 'Senior Software Engineer / Tech Lead',
@@ -119,9 +123,11 @@ class DatabaseSeeder extends Seeder
 
         $adminId = DB::table('users')->insertGetId([
             'batch_id' => null,
+            'account_id' => '99999',
+            'username' => 'admin',
             'name' => 'Admin TMS',
             'email' => 'admin@tms.co.id',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('tmshebatsukses'),
             'role' => 'admin_tms',
             'school_origin' => 'PT. Teknologi Multi Sistem',
             'major' => 'Human Resources & Internship Coordinator',

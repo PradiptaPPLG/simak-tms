@@ -338,7 +338,7 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-slate-900 leading-tight">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }}</div>
+                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }} <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? auth()->user()->id }})</span></div>
                         </div>
                     </div>
                     <form action="{{ route('logout') }}" method="POST">
@@ -407,9 +407,14 @@
                         </div>
                         <div class="hidden sm:block text-left">
                             <div class="text-xs font-bold text-slate-900 leading-tight uppercase group-hover:text-red-600 transition-colors">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }}</div>
+                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }} <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? auth()->user()->id }})</span></div>
                         </div>
                     </a>
+
+                    <!-- Change Password Button (Desktop) -->
+                    <button type="button" onclick="document.getElementById('modal-change-password').classList.remove('hidden')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors ml-1" title="Ganti Kata Sandi (Default: tmshebatsukses)">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </button>
 
                     <!-- Logout Button (Desktop) -->
                     <form action="{{ route('logout') }}" method="POST" class="hidden sm:inline">
@@ -519,6 +524,53 @@
             </button>
         @endif
     </nav>
+
+    <!-- Modal Ganti Kata Sandi (Semua Role: Siswa, Mentor, Admin) -->
+    <div id="modal-change-password" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">Ganti Kata Sandi Akun</h3>
+                        <p class="text-[10px] text-slate-500">Universal Awal: <code class="font-mono text-red-600 font-bold">tmshebatsukses</code></p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-change-password').classList.add('hidden')" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('password.update') }}" method="POST" class="space-y-3">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi Saat Ini *</label>
+                    <input type="password" name="current_password" required placeholder="tmshebatsukses" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kata Sandi Baru *</label>
+                    <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Konfirmasi Kata Sandi Baru *</label>
+                    <input type="password" name="password_confirmation" required minlength="6" placeholder="Ulangi kata sandi baru" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="document.getElementById('modal-change-password').classList.add('hidden')" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Vanilla JS for Mobile Drawer Toggle & Lucide Initialization -->
     <script>

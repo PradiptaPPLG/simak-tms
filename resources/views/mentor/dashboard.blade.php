@@ -237,8 +237,8 @@
                                 @endif
                             </div>
                             <div>
-                                <h3 class="text-xs font-bold text-slate-900">{{ $intern->name }}</h3>
-                                <div class="text-[10px] text-slate-400 font-mono">&#64;{{ $intern->username ?? 'siswa' }} • {{ $intern->major }}</div>
+                                <h3 class="text-xs font-bold text-slate-900">{{ $intern->name }} <span class="font-mono text-red-600 font-bold">({{ $intern->account_id ?? $intern->username ?? $intern->id }})</span></h3>
+                                <div class="text-[10px] text-slate-400 font-mono">ID: {{ $intern->account_id ?? $intern->username ?? $intern->id }} • {{ $intern->major }}</div>
                             </div>
                         </div>
 

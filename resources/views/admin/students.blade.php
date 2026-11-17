@@ -73,7 +73,7 @@
                 <select name="mentor_id" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-red-500">
                     <option value="">-- Semua Pembimbing TMS --</option>
                     @foreach($mentors as $m)
-                        <option value="{{ $m->id }}" {{ request('mentor_id') == $m->id ? 'selected' : '' }}>{{ $m->name }} (Mentor)</option>
+                        <option value="{{ $m->id }}" {{ request('mentor_id') == $m->id ? 'selected' : '' }}>{{ $m->name }} ({{ $m->account_id ?? $m->username ?? $m->id }})</option>
                     @endforeach
                 </select>
 
@@ -128,8 +128,8 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-900">{{ $intern->name }}</div>
-                                        <div class="text-[10px] text-slate-400 font-mono">&#64;{{ $intern->username ?? 'siswa' }} • {{ $intern->email }}</div>
+                                        <div class="font-bold text-slate-900 text-xs">{{ $intern->name }} <span class="font-mono text-red-600 font-bold text-[11px]">({{ $intern->account_id ?? $intern->username ?? $intern->id }})</span></div>
+                                        <div class="text-[10px] text-slate-400 font-mono">ID: {{ $intern->account_id ?? $intern->username ?? $intern->id }} • {{ $intern->email }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -139,7 +139,7 @@
                             </td>
                             <td class="py-3.5 px-4">
                                 @if($intern->mentor)
-                                    <span class="font-medium text-slate-800">{{ $intern->mentor->name }}</span>
+                                    <span class="font-medium text-slate-800">{{ $intern->mentor->name }} <span class="font-mono text-red-600 text-[11px] font-bold">({{ $intern->mentor->account_id ?? $intern->mentor->username ?? $intern->mentor->id }})</span></span>
                                     <div class="text-[10px] text-red-600 font-semibold">{{ $intern->mentor->major ?? 'Pembimbing TMS' }}</div>
                                 @else
                                     <span class="text-slate-400 italic">Belum di-assign</span>
@@ -213,17 +213,24 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap Siswa *</label>
-                    <input type="text" name="name" required placeholder="Contoh: Alyzza Enggar" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                    <input type="text" name="name" required placeholder="Contoh: Alyzza Nazwa" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Akun *</label>
-                    <input type="email" name="email" required placeholder="alyzza@smkn1ciamis.sch.id" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Email / Username Siswa (Opsional)</label>
+                    <input type="text" name="email" placeholder="alyzza@smkn1ciamis.sch.id (otomatis jika kosong)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Default *</label>
-                    <input type="text" name="password" required value="tms12345" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono font-bold">
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">ID Login Akun</label>
+                    <input type="text" value="[Auto-Generate 5-Digit]" readonly class="w-full px-3.5 py-2.5 bg-red-50/60 border border-red-200 rounded-xl text-xs text-red-700 font-mono font-bold select-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Diterbitkan otomatis sistem (contoh: 19364).</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Default Universal</label>
+                    <input type="text" value="tmshebatsukses" readonly class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs text-slate-700 font-mono font-bold select-none">
+                    <p class="text-[10px] text-slate-400 mt-1">Siswa dapat mengganti password setelah login.</p>
                 </div>
 
                 <div>
@@ -236,12 +243,12 @@
                     <input type="text" name="major" value="PPLG (Pengembangan Perangkat Lunak & Gim)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
                 </div>
 
-                <div>
+                <div class="sm:col-span-2 lg:col-span-3">
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Staff Mentor Pembimbing *</label>
                     <select name="mentor_id" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
                         <option value="">{{ $mentors->count() > 0 ? '-- Pilih Mentor Pembimbing TMS --' : '-- Belum Ada Staff Mentor Terdaftar --' }}</option>
                         @foreach($mentors as $mentor)
-                            <option value="{{ $mentor->id }}">{{ $mentor->name }} ({{ $mentor->major ?? 'Senior Software Engineer' }})</option>
+                            <option value="{{ $mentor->id }}">{{ $mentor->name }} ({{ $mentor->account_id ?? $mentor->username ?? $mentor->id }}) - {{ $mentor->major ?? 'Senior Software Engineer' }}</option>
                         @endforeach
                     </select>
                     @if($mentors->count() === 0)

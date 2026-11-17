@@ -47,7 +47,9 @@
                     <h1 class="text-xl font-black text-slate-900 tracking-tight leading-snug">
                         {{ $user->name }}
                     </h1>
-                    <div class="text-xs font-mono font-semibold text-slate-500 flex items-center gap-1.5">
+                    <div class="text-xs font-mono font-semibold text-slate-500 flex items-center gap-1.5 flex-wrap">
+                        <span class="text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? $user->username ?? $user->id }}</span>
+                        <span>•</span>
                         <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
                         <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
                             {{ $user->role === 'siswa' ? 'Siswa PKL' : strtoupper($user->role) }}
@@ -197,6 +199,23 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Ganti Password Card -->
+            <div class="mas-card p-5 space-y-3">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-slate-900">Keamanan & Password Akun</h3>
+                        <p class="text-[10px] text-slate-400">Password Universal Awal: <code class="font-mono text-red-600 font-bold">tmshebatsukses</code></p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-change-password').classList.remove('hidden')" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-red-400"></i>
+                    <span>Ubah Kata Sandi Akun</span>
+                </button>
             </div>
 
         </div>
@@ -480,6 +499,23 @@
                     </div>
 
                 </form>
+            </div>
+
+            <!-- Ganti Password Card -->
+            <div class="mas-card p-5 space-y-3">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-slate-900">Keamanan & Password Akun</h3>
+                        <p class="text-[10px] text-slate-400">Password Universal Awal: <code class="font-mono text-red-600 font-bold">tmshebatsukses</code></p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('modal-change-password').classList.remove('hidden')" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-red-400"></i>
+                    <span>Ubah Kata Sandi Akun</span>
+                </button>
             </div>
 
         </div>
