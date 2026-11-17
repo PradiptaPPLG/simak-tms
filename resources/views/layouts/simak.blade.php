@@ -421,6 +421,11 @@
                         </div>
                     </a>
 
+                    <!-- Share Profile Button (Desktop) -->
+                    <button type="button" onclick="openProfileShareModal()" title="Bagikan Profil & QR Code" class="hidden sm:inline-flex p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors ml-1 cursor-pointer">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                    </button>
+
                     <!-- Logout Button (Desktop) -->
                     <form action="{{ route('logout') }}" method="POST" class="hidden sm:inline">
                         @csrf
@@ -429,13 +434,10 @@
                         </button>
                     </form>
 
-                    <!-- Quick Logout Button on Mobile (Icon di pojok kanan atas) -->
-                    <form action="{{ route('logout') }}" method="POST" class="sm:hidden">
-                        @csrf
-                        <button type="submit" title="Keluar / Logout" class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
-                        </button>
-                    </form>
+                    <!-- Tombol Share di Pojok Kanan Atas Mobile (Menggantikan Logout Sesuai Permintaan) -->
+                    <button type="button" onclick="openProfileShareModal()" title="Bagikan Profil & QR Code" class="sm:hidden p-2 rounded-xl text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                    </button>
                 @else
                     <a href="{{ route('login') }}" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm">
                         Masuk
@@ -1183,5 +1185,211 @@
         window.addEventListener('scroll', closeAllActionDropdowns, { passive: true });
         window.addEventListener('resize', closeAllActionDropdowns);
     </script>
+
+    @auth
+    @php
+        $authUser = auth()->user();
+        $authPublicUrl = route('profile.public', $authUser->account_id ?? $authUser->username ?? $authUser->id);
+        $authQrUrl = route('qr.generate', $authUser->account_id ?? $authUser->username ?? $authUser->id);
+    @endphp
+    <!-- ============================================================== -->
+    <!-- MODAL SHARE PROFIL & QR CODE AUTOGENERATE (SIMAK-TMS)          -->
+    <!-- ============================================================== -->
+    <div id="profileShareModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden transition-opacity">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 relative space-y-5 animate-in fade-in zoom-in-95 duration-200">
+            <!-- Close Button -->
+            <button type="button" onclick="closeProfileShareModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-lg font-bold cursor-pointer transition-colors">&times;</button>
+
+            <!-- Modal Header -->
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="share-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-base font-black text-slate-900 tracking-tight">Bagikan Profil SIMAK-TMS</h3>
+                <p class="text-xs text-slate-500">Tautan & QR Code otentik akun <b>{{ $authUser->name }}</b></p>
+            </div>
+
+            <!-- Stylized QR Card Preview (Bisa Diunduh Jadi Gambar) -->
+            <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-5 rounded-2xl text-center text-white border-2 border-red-500/20 shadow-lg relative overflow-hidden">
+                <div class="text-[10px] font-mono tracking-widest text-slate-400 uppercase mb-2">PT. TEKNOLOGI MULTI SISTEM</div>
+                
+                <div class="w-40 h-40 bg-white p-2.5 rounded-2xl mx-auto shadow-md border-2 border-slate-100">
+                    <img id="layoutModalQrImg" src="{{ $authQrUrl }}" alt="QR Code" class="w-full h-full object-contain">
+                </div>
+
+                <div class="mt-3">
+                    <div class="text-sm font-black text-white leading-snug">{{ $authUser->name }}</div>
+                    <div class="text-[11px] font-mono font-semibold text-red-400 mt-0.5">
+                        {{ $authUser->role === 'siswa' ? 'SISWA PKL' : strtoupper($authUser->role) }} • ID: {{ $authUser->account_id ?? $authUser->username ?? $authUser->id }}
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-1">Pindai dengan kamera HP untuk melihat profil publik</div>
+                </div>
+            </div>
+
+            <!-- Copy Link Input -->
+            <div class="space-y-1.5">
+                <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider">Tautan Profil Publik</label>
+                <div class="flex items-center gap-2">
+                    <input id="layoutPublicLinkInput" type="text" readonly value="{{ $authPublicUrl }}" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 select-all focus:outline-none">
+                    <button id="layoutBtnCopyLink" type="button" onclick="copyLayoutPublicLink()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shrink-0 transition-all cursor-pointer">
+                        Salin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons: Download QR & Native Share -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="downloadQRCodeCard('{{ addslashes($authUser->name) }}', '{{ $authUser->account_id ?? $authUser->username ?? $authUser->id }}', '{{ $authUser->role === 'siswa' ? 'Siswa PKL' : strtoupper($authUser->role) }}', '{{ $authQrUrl }}')" class="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Simpan Gambar QR (Galeri / File)</span>
+                </button>
+
+                <button type="button" onclick="shareViaNavigator('{{ addslashes($authUser->name) }}', '{{ $authPublicUrl }}')" class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    <span>Kirim ke WhatsApp / Lainnya</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openProfileShareModal() {
+            const modal = document.getElementById('profileShareModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function closeProfileShareModal() {
+            const modal = document.getElementById('profileShareModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function copyLayoutPublicLink() {
+            const input = document.getElementById('layoutPublicLinkInput');
+            const btn = document.getElementById('layoutBtnCopyLink');
+            if (!input || !btn) return;
+            
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                const orig = btn.innerText;
+                btn.innerText = 'Tersalin! ✓';
+                btn.className = 'px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold shrink-0 transition-all';
+                setTimeout(() => {
+                    btn.innerText = orig;
+                    btn.className = 'px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shrink-0 transition-all cursor-pointer';
+                }, 2000);
+            });
+        }
+
+        function shareViaNavigator(name, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Profil SIMAK-TMS • ' + name,
+                    text: 'Lihat profil portofolio terverifikasi ' + name + ' di SIMAK-TMS PT. Teknologi Multi Sistem:',
+                    url: url
+                }).catch(() => {});
+            } else {
+                copyLayoutPublicLink();
+            }
+        }
+
+        function downloadQRCodeCard(name, accountId, role, qrUrl) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 760;
+            const ctx = canvas.getContext('2d');
+
+            // Draw White Card Background
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 600, 760, 28);
+            ctx.fill();
+
+            // Header Banner (TMS Dark Slate)
+            ctx.fillStyle = '#090d16';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 600, 110, [28, 28, 0, 0]);
+            ctx.fill();
+
+            // Red Stripe
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(0, 106, 600, 4);
+
+            // Header Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('PT. TEKNOLOGI MULTI SISTEM', 300, 45);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText('SIMAK-TMS • VERIFIED DEVELOPER PROFILE', 300, 72);
+
+            // Load and draw QR Image
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function () {
+                // QR Box Background
+                ctx.fillStyle = '#f8fafc';
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(140, 140, 320, 320, 20);
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw QR Code
+                ctx.drawImage(img, 160, 160, 280, 280);
+
+                // User Name
+                ctx.fillStyle = '#0f172a';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(name, 300, 505);
+
+                // Role & ID
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 15px sans-serif';
+                ctx.fillText(role.toUpperCase() + '  •  ID: ' + accountId, 300, 536);
+
+                // Divider Line
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(80, 565);
+                ctx.lineTo(520, 565);
+                ctx.stroke();
+
+                // Authentic Badge
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('✓ Dokumen Otentik Terverifikasi Sistem', 300, 600);
+
+                // Instruction
+                ctx.fillStyle = '#64748b';
+                ctx.font = '13px sans-serif';
+                ctx.fillText('Arahkan kamera HP ke QR Code ini untuk melihat', 300, 630);
+                ctx.fillText('portofolio & rekam aktivitas secara langsung.', 300, 650);
+
+                // Footer
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '11px sans-serif';
+                ctx.fillText('SIMAK-TMS | https://tms.co.id', 300, 715);
+
+                // Download Action
+                const a = document.createElement('a');
+                a.download = `QR-Profil-SIMAK-${accountId}-${name.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+                a.href = canvas.toDataURL('image/png');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            img.src = qrUrl;
+        }
+    </script>
+    @endauth
 </body>
 </html>

@@ -82,6 +82,18 @@ Route::get('/preview/jurnal', function () {
     return redirect()->route('journals.index');
 })->name('preview.jurnal');
 
+Route::get('/preview/jurnal/cetak', function () {
+    $user = \App\Models\User::where('role', 'siswa')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+    return redirect()->route('journals.print');
+})->name('preview.journals.print');
+
+Route::get('/preview/jurnal/portofolio', function () {
+    $user = \App\Models\User::where('role', 'siswa')->first();
+    \Illuminate\Support\Facades\Auth::login($user);
+    return redirect()->route('journals.portfolio.print');
+})->name('preview.journals.portfolio.print');
+
 Route::get('/preview/arsip', function () {
     $user = \App\Models\User::first();
     \Illuminate\Support\Facades\Auth::login($user);
@@ -148,6 +160,10 @@ Route::post('/login', [SimakController::class, 'login'])->name('login.post');
 Route::get('/login/quick/{role}', [SimakController::class, 'quickLogin'])->name('login.quick');
 Route::post('/logout', [SimakController::class, 'logout'])->name('logout');
 
+// Public View-Only Profile Mode & Dynamic QR Code (Aman & Bebas Akses Tanpa Login)
+Route::get('/p/{identifier}', [SimakController::class, 'publicProfile'])->name('profile.public');
+Route::get('/qr/{identifier}', [SimakController::class, 'generateQr'])->name('qr.generate');
+
 // Protected routes (Must be logged in!)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [SimakController::class, 'dashboard'])->name('dashboard');
@@ -160,6 +176,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Daily Journals (Logbook)
     Route::get('/jurnal', [SimakController::class, 'journals'])->name('journals.index');
+    Route::get('/jurnal/cetak', [SimakController::class, 'printJournal'])->name('journals.print');
+    Route::get('/jurnal/portofolio/cetak', [SimakController::class, 'printPortfolio'])->name('journals.portfolio.print');
     Route::post('/jurnal', [SimakController::class, 'storeJournal'])->name('journals.store');
 
     // Showcase & Archive

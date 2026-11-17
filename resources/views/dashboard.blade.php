@@ -26,8 +26,8 @@
         <div class="mas-card p-4 sm:p-5 border-l-2 sm:border-l-4 border-l-red-600 flex flex-col justify-between">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-slate-500 text-xs font-medium mb-1">Status Hari Ini</p>
-                    <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">MASUK KERJA</h3>
+                    <p class="text-slate-500 text-xs font-medium mb-1">Status Magang</p>
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase">SISWA AKTIF</h3>
                 </div>
                 <div class="w-9 h-9 sm:w-11 sm:h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="activity" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -79,10 +79,10 @@
                 </div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Presensi: <b class="text-slate-800">07.54 WIB</b></span>
-                <span class="font-bold text-red-600 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                    Hadir Lab
+                <span>Kategori: <b class="text-slate-800">Software & Web</b></span>
+                <span class="font-bold text-emerald-600 flex items-center gap-1">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                    Arsip Permanen
                 </span>
             </div>
         </div>
@@ -164,109 +164,5 @@
         </div>
     </div>
 
-    <!-- 4. Analytical Charts Section (Hitam & Merah TMS) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        
-        <!-- Chart 1: Status Review Logbook Jurnal (Counting) -->
-        <div class="mas-card p-5">
-            <h3 class="text-xs font-black text-slate-600 uppercase tracking-wider mb-4">
-                STATUS REVIEW LOGBOOK JURNAL
-            </h3>
-            <div class="relative h-56 flex items-center justify-center">
-                <canvas id="jurnalDonutChart"></canvas>
-            </div>
-            <div class="flex items-center justify-center gap-6 mt-3 text-xs">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-red-600"></span>
-                    <span class="text-slate-700 font-bold">Disetujui Mentor ({{ $approvedJournalsCount ?? 1 }})</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-slate-900"></span>
-                    <span class="text-slate-500 font-medium">Pending Review ({{ $pendingJournalsCount ?? 0 }})</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart 2: Jam Masuk Lab Hari Kerja -->
-        <div class="mas-card p-5">
-            <h3 class="text-xs font-black text-slate-600 uppercase tracking-wider mb-4">
-                JAM MASUK LAB HARI KERJA (SENIN - JUMAT)
-            </h3>
-            <div class="relative h-56 flex items-center justify-center">
-                <canvas id="kehadiranLineChart"></canvas>
-            </div>
-            <div class="text-center text-[11px] text-slate-500 mt-3">
-                Rata-rata jam masuk lab: <b class="text-slate-900">07.54 WIB</b> (Tepat Waktu • Libur Tidak Dihitung)
-            </div>
-        </div>
-
-    </div>
-
 </div>
-
-<!-- Chart.js Scripts (Hitam - Merah Palette) -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Donut Chart
-        const ctxDonut = document.getElementById('jurnalDonutChart').getContext('2d');
-        new Chart(ctxDonut, {
-            type: 'doughnut',
-            data: {
-                labels: ['Valid', 'Pending'],
-                datasets: [{
-                    data: [1, 0],
-                    backgroundColor: ['#ef4444', '#0f172a'],
-                    borderWidth: 0,
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                cutout: '72%'
-            }
-        });
-
-        // Line Chart
-        const ctxLine = document.getElementById('kehadiranLineChart').getContext('2d');
-        new Chart(ctxLine, {
-            type: 'line',
-            data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                datasets: [{
-                    label: 'Jam Check-In',
-                    data: [7.54, null, null, null, null, null],
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                    tension: 0.3,
-                    fill: true,
-                    pointBackgroundColor: '#dc2626',
-                    pointRadius: 6,
-                    pointHoverRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        min: 7.0,
-                        max: 9.0,
-                        ticks: {
-                            callback: function(val) {
-                                return '0' + val.toFixed(2).replace('.', ':');
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-    });
-</script>
 @endsection

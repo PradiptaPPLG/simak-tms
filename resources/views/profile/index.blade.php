@@ -69,10 +69,19 @@
 
                 <!-- Fast Edit Trigger Button -->
                 <div class="mt-4">
-                    <button onclick="document.getElementById('edit-profile-section').scrollIntoView({behavior: 'smooth'})" 
-                            class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2">
+                    <button type="button" onclick="openAndScrollToEditProfile()" 
+                            class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
                         <i data-lucide="edit-3" class="w-3.5 h-3.5 text-red-400"></i>
                         <span>Edit Profil & Media Sosial</span>
+                    </button>
+                </div>
+
+                <!-- Fast Share Profile Trigger Button -->
+                <div class="mt-2.5">
+                    <button type="button" onclick="openProfileShareModal()" 
+                            class="w-full py-2.5 px-4 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                        <i data-lucide="share-2" class="w-3.5 h-3.5 text-red-600"></i>
+                        <span>Bagikan Profil Publik & QR Code</span>
                     </button>
                 </div>
 
@@ -441,20 +450,28 @@
             </div>
 
             <!-- 3. FORM EDIT PROFIL & MEDIA SOSIAL (Bisa Ditambah & Diubah Langsung) -->
-            <div id="edit-profile-section" class="mas-card p-6 sm:p-8 space-y-5">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <i data-lucide="settings" class="w-5 h-5 text-red-600"></i>
-                            <span>Pengaturan Profil Developer & Media Sosial</span>
+            <div id="edit-profile-section" class="mas-card p-5 sm:p-7 space-y-5 transition-all">
+                <div id="edit-profile-header" class="flex items-center justify-between gap-3 border-b border-slate-100 pb-4 transition-all">
+                    <div class="min-w-0">
+                        <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="settings" class="w-4 h-4"></i>
+                            </div>
+                            <span class="truncate">Pengaturan Profil & Media Sosial</span>
                         </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">
+                        <p id="edit-profile-sub" class="text-xs text-slate-500 mt-1">
                             Perbarui informasi biodata, tautan media sosial, serta foto avatar profil Anda di sini.
                         </p>
                     </div>
+
+                    <!-- Tombol Panah Abu-Abu Kecil (Kanan Atas Sesuai Permintaan) -->
+                    <button type="button" onclick="toggleProfileSection('edit-profile')" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all cursor-pointer shrink-0" title="Sembunyikan Pengaturan">
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
                 </div>
 
-                <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
+                <div id="edit-profile-body">
+                    <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
                     @csrf
 
                     <!-- Row 1: Username & Foto Avatar URL -->
@@ -565,10 +582,85 @@
                     </div>
 
                 </form>
+                </div>
             </div>
-
+        </div>
 
     </div>
 
+    <!-- ============================================================== -->
+    <!-- ZONA KELUAR AKUN / LOGOUT (Paling Bawah Halaman Profil)         -->
+    <!-- ============================================================== -->
+    <div class="mas-card p-5 sm:p-6 border-l-4 border-l-red-600 bg-red-50/20 flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
+        <div class="text-center sm:text-left">
+            <div class="flex items-center justify-center sm:justify-start gap-2">
+                <div class="w-7 h-7 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </div>
+                <h4 class="text-sm font-black text-slate-900 tracking-tight">Keluar dari Sesi Akun</h4>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Selesaikan sesi aktif Anda di perangkat ini untuk menjaga kerahasiaan data SIMAK-TMS.</p>
+        </div>
+        <form action="{{ route('logout') }}" method="POST" class="w-full sm:w-auto shrink-0">
+            @csrf
+            <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white text-xs font-bold transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span>Keluar dari Akun</span>
+            </button>
+        </form>
+    </div>
+
 </div>
+
+<script>
+    function toggleProfileSection(name) {
+        const body = document.getElementById(name + '-body');
+        const sub = document.getElementById(name + '-sub');
+        const header = document.getElementById(name + '-header');
+        if (!body) return;
+
+        const isHidden = body.classList.contains('hidden');
+        const btns = document.querySelectorAll(`button[onclick*="'${name}'"]`);
+
+        if (isHidden) {
+            // Expand
+            body.classList.remove('hidden');
+            if (sub) sub.classList.remove('hidden');
+            if (header) {
+                header.classList.add('border-b', 'pb-4');
+                header.classList.remove('pb-0');
+            }
+            btns.forEach(b => {
+                b.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4"></i>';
+                b.setAttribute('title', 'Sembunyikan Pengaturan');
+            });
+        } else {
+            // Collapse (Sembunyi menjadi 1 bar dengan arrow up)
+            body.classList.add('hidden');
+            if (sub) sub.classList.add('hidden');
+            if (header) {
+                header.classList.remove('border-b', 'pb-4');
+                header.classList.add('pb-0');
+            }
+            btns.forEach(b => {
+                b.innerHTML = '<i data-lucide="chevron-up" class="w-4 h-4"></i>';
+                b.setAttribute('title', 'Tampilkan Pengaturan');
+            });
+        }
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    function openAndScrollToEditProfile() {
+        const body = document.getElementById('edit-profile-body');
+        if (body && body.classList.contains('hidden')) {
+            toggleProfileSection('edit-profile');
+        }
+        const section = document.getElementById('edit-profile-section');
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
 @endsection

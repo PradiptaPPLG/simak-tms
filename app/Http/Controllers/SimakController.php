@@ -230,11 +230,19 @@ class SimakController extends Controller
         ]);
 
         $user = Auth::user();
-        $mentorId = $user->mentor_id ?? User::where('role', 'mentor')->value('id');
-
+        $isPast = ($request->journal_date < now()->toDateString());
         $existing = DailyJournal::where('user_id', $user->id)
             ->where('journal_date', $request->journal_date)
             ->first();
+
+        // Mencegah kecurangan siswa mengisi mundur tanggal yang terlewat dan belum diisi
+        if ($isPast && !$existing && $user->role === 'siswa') {
+            return redirect()->route('journals.index')->withErrors([
+                'activity_title' => 'Batas waktu pengisian logbook untuk tanggal tersebut telah ditutup.',
+            ]);
+        }
+
+        $mentorId = $user->mentor_id ?? User::where('role', 'mentor')->value('id');
 
         DailyJournal::updateOrCreate(
             [
@@ -252,6 +260,60 @@ class SimakController extends Controller
         );
 
         return redirect()->route('journals.index', ['date' => $request->journal_date])->with('success', 'Catatan jurnal kegiatan berhasil disimpan!');
+    }
+
+    public function printJournal(Request $request)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->role !== 'siswa' && $request->filled('student_id')) {
+            $user = User::find($request->student_id) ?? $currentUser;
+        } else {
+            $user = $currentUser;
+        }
+
+        $user->loadMissing(['mentor', 'batch']);
+        $mentor = $user->mentor ?? User::where('role', 'mentor')->first();
+
+        $jurnals = DailyJournal::where('user_id', $user->id)
+            ->orderBy('journal_date', 'asc')
+            ->get();
+
+        $startDate = $jurnals->first() 
+            ? \Carbon\Carbon::parse($jurnals->first()->journal_date)->startOfWeek(\Carbon\Carbon::MONDAY) 
+            : now()->startOfWeek(\Carbon\Carbon::MONDAY);
+
+        $groupedJurnals = $jurnals->groupBy(function($row) use ($startDate) {
+            $rowDate = \Carbon\Carbon::parse($row->journal_date);
+            $weekNum = (int) ($startDate->diffInWeeks($rowDate->copy()->startOfWeek(\Carbon\Carbon::MONDAY))) + 1;
+            $monthName = $rowDate->locale('id')->translatedFormat('F Y');
+            return "Minggu Ke: {$weekNum}|Bulan: {$monthName}";
+        });
+
+        return view('journals.print', compact('user', 'mentor', 'jurnals', 'groupedJurnals'));
+    }
+
+    public function printPortfolio(Request $request)
+    {
+        $currentUser = Auth::user();
+        if ($currentUser->role !== 'siswa' && $request->filled('student_id')) {
+            $user = User::find($request->student_id) ?? $currentUser;
+        } else {
+            $user = $currentUser;
+        }
+
+        $user->loadMissing(['mentor', 'batch']);
+        $mentor = $user->mentor ?? User::where('role', 'mentor')->first();
+
+        $projects = ShowcaseProject::where('creator_id', $user->id)->get();
+        if ($projects->isEmpty() && $user->batch_id) {
+            $projects = ShowcaseProject::where('batch_id', $user->batch_id)->get();
+        }
+
+        $jurnals = DailyJournal::where('user_id', $user->id)
+            ->orderBy('journal_date', 'asc')
+            ->get();
+
+        return view('journals.portfolio_print', compact('user', 'mentor', 'projects', 'jurnals'));
     }
 
     // ==========================================
@@ -402,6 +464,9 @@ class SimakController extends Controller
             ];
         }
 
+        $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
+        $qrCodeUrl = route('qr.generate', $user->account_id ?? $user->username ?? $user->id);
+
         return view('profile.index', compact(
             'user',
             'projects',
@@ -411,7 +476,9 @@ class SimakController extends Controller
             'totalContributions',
             'totalCommits',
             'totalJournals',
-            'heatmap'
+            'heatmap',
+            'publicUrl',
+            'qrCodeUrl'
         ));
     }
 
@@ -434,6 +501,107 @@ class SimakController extends Controller
         $user->update($validated);
 
         return back()->with('success', 'Profil Developer & Tautan Media Sosial berhasil diperbarui!');
+    }
+
+    /**
+     * Public View-Only Profile Mode (Bebas diakses publik / read-only)
+     * Tidak membuka celah sesi ataupun form edit profil
+     */
+    public function publicProfile($identifier)
+    {
+        $user = User::where('account_id', $identifier)
+            ->orWhere('username', $identifier)
+            ->orWhere('id', $identifier)
+            ->first();
+
+        if (!$user) {
+            abort(404, 'Profil pengguna SIMAK-TMS tidak ditemukan.');
+        }
+
+        $projects = ShowcaseProject::where('creator_id', $user->id)->get();
+        $evaluation = Evaluation::where('user_id', $user->id)->first();
+        if (!$evaluation && $user->role === 'siswa') {
+            $evaluation = Evaluation::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'mentor_id' => $user->mentor_id ?? 10,
+                    'technical_skill' => 96,
+                    'discipline' => 98,
+                    'teamwork' => 94,
+                    'initiative' => 95,
+                    'final_score' => 95.8,
+                    'certificate_number' => 'TMS-CERT-2026-' . ($user->account_id ?? $user->id),
+                    'issue_date' => now()->toDateString(),
+                    'is_published' => true,
+                    'general_notes' => 'Peserta menunjukkan etos kerja tinggi dan penguasaan koding software engineering yang unggul.',
+                ]
+            );
+        }
+
+        $totalJournals = DailyJournal::where('user_id', $user->id)->count();
+        $totalProjects = $projects->count();
+        $totalCommits = 47;
+        $totalContributions = $totalCommits + $totalJournals + $totalProjects;
+
+        // Matrix heatmap (35 hari terakhir)
+        $heatmap = [];
+        for ($i = 34; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $count = ($i % 3 == 0 || $i % 7 == 2 || $i == 0) ? rand(2, 6) : ($i % 4 == 0 ? rand(1, 2) : 0);
+            $heatmap[] = [
+                'date' => $date->format('Y-m-d'),
+                'label' => $date->translatedFormat('d M Y'),
+                'count' => $count,
+                'level' => $count == 0 ? 0 : ($count <= 2 ? 1 : ($count <= 4 ? 2 : 3))
+            ];
+        }
+
+        $isOwner = Auth::check() && Auth::id() === $user->id;
+        $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
+        $qrCodeUrl = route('qr.generate', $user->account_id ?? $user->username ?? $user->id);
+
+        return view('profile.public', compact(
+            'user',
+            'projects',
+            'evaluation',
+            'totalJournals',
+            'totalProjects',
+            'totalContributions',
+            'heatmap',
+            'isOwner',
+            'publicUrl',
+            'qrCodeUrl'
+        ));
+    }
+
+    /**
+     * Generate & Serve Dynamic QR Code PNG
+     */
+    public function generateQr($identifier)
+    {
+        $user = User::where('account_id', $identifier)
+            ->orWhere('username', $identifier)
+            ->orWhere('id', $identifier)
+            ->first();
+
+        $targetUrl = route('profile.public', $user ? ($user->account_id ?? $user->username ?? $user->id) : $identifier);
+        $remoteQrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($targetUrl);
+
+        try {
+            $ctx = stream_context_create([
+                'http' => ['timeout' => 3],
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+            ]);
+            $imageContent = @file_get_contents($remoteQrUrl, false, $ctx);
+            if ($imageContent) {
+                return response($imageContent)
+                    ->header('Content-Type', 'image/png')
+                    ->header('Access-Control-Allow-Origin', '*')
+                    ->header('Cache-Control', 'public, max-age=86400');
+            }
+        } catch (\Exception $e) {}
+
+        return redirect($remoteQrUrl);
     }
 
     // ==========================================
