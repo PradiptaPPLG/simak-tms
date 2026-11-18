@@ -417,10 +417,10 @@
     <!-- ============================================================== -->
     <!-- 3. MAIN CONTENT AREA (Offset by fixed sidebar on desktop)      -->
     <!-- ============================================================== -->
-    <div class="flex-1 flex flex-col min-w-0 md:pl-64 min-h-screen">
+    <div class="flex-1 flex flex-col min-w-0 md:pl-64 min-h-screen pt-16">
 
-        <!-- Top Header (Hitam - Putih - Merah) -->
-        <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
+        <!-- Top Header (Hitam - Putih - Merah TMS Style - FIXED) -->
+        <header class="h-16 bg-white border-b border-slate-200 px-4 sm:px-8 flex items-center justify-between fixed top-0 left-0 right-0 md:left-64 z-20">
             
             <!-- Mobile Brand & Hamburger Toggle (Kiri Atas Sesuai Standar Aplikasi) -->
             <div class="flex items-center gap-2.5 md:hidden">
@@ -582,7 +582,7 @@
                 </div>
                 <span class="text-[10px] font-bold">Review</span>
             </a>
-            <a href="{{ route('evaluation.index') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('evaluation.*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            <a href="{{ route('mentor.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('mentor.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="award" class="w-5 h-5"></i>
                 <span class="text-[10px]">Rapor</span>
             </a>
