@@ -1188,7 +1188,7 @@
             if (isCurrentlyHidden) {
                 // Calculate button bounding rect in viewport
                 const rect = btn.getBoundingClientRect();
-                const dropdownWidth = 176;
+                const dropdownWidth = dropdown.offsetWidth || 192;
 
                 dropdown.style.position = 'fixed';
                 dropdown.style.zIndex = '99999';

@@ -234,57 +234,59 @@
                             </td>
 
                             <td class="py-3.5 px-4 text-right">
-                                <div class="inline-flex items-center justify-end gap-1.5">
-                                    <!-- Detail Modal Trigger -->
-                                    <button type="button" 
-                                            onclick="openDetailModal({{ json_encode($reg) }})" 
-                                            title="Lihat Biodata Lengkap"
-                                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors">
-                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                <!-- Menu Aksi Titik 3 (More Action Dropdown) -->
+                                <div class="relative inline-block text-left dropdown-container">
+                                    <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-2xs flex items-center justify-center cursor-pointer ml-auto" title="Opsi Aksi Pendaftaran">
+                                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
                                     </button>
-
-                                    @if($reg->status === 'pending')
-                                        <!-- Approve Button Form -->
-                                        <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" class="inline" onsubmit="return confirm('Setujui pendaftaran PKL atas nama {{ addslashes($reg->full_name) }}?\n\nSiswa akan otomatis masuk ke menu Data Siswa dengan label (belum terdaftar) sampai Anda menetapkan mentor pembimbing.')">
-                                            @csrf
-                                            <button type="submit" 
-                                                    title="Setujui & Buat Akun Siswa"
-                                                    class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-colors">
-                                                <i data-lucide="check" class="w-3 h-3"></i>
-                                                <span>Setujui</span>
+                                    <div class="action-dropdown hidden absolute right-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
+                                        <div class="py-1">
+                                            <button type="button" 
+                                                    onclick="openDetailModal({{ json_encode($reg) }})" 
+                                                    class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
+                                                <i data-lucide="eye" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                <span>Lihat Biodata</span>
                                             </button>
-                                        </form>
+                                        </div>
 
-                                        <!-- Reject Button Form Trigger -->
-                                        <button type="button" 
-                                                onclick="openRejectModal({{ $reg->id }}, '{{ addslashes($reg->full_name) }}')"
-                                                title="Tolak Pendaftaran"
-                                                class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold flex items-center gap-1 transition-colors">
-                                            <i data-lucide="x" class="w-3 h-3"></i>
-                                            <span>Tolak</span>
-                                        </button>
-                                    @elseif($reg->status === 'approved')
-                                        <!-- Go to Student List -->
-                                        <a href="{{ route('admin.students') }}" 
-                                           title="Buka Data Siswa untuk Mengatur Mentor"
-                                           class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold flex items-center gap-1 border border-slate-200 transition-colors">
-                                            <i data-lucide="user-check" class="w-3 h-3 text-red-600"></i>
-                                            <span>Data Siswa</span>
-                                        </a>
-                                    @endif
+                                        @if($reg->status === 'pending')
+                                            <div class="py-1">
+                                                <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" onsubmit="return confirm('Setujui pendaftaran PKL atas nama {{ addslashes($reg->full_name) }}?\n\nSiswa akan otomatis masuk ke menu Data Siswa.');">
+                                                    @csrf
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer">
+                                                        <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                                        <span>Setujui Pendaftaran</span>
+                                                    </button>
+                                                </form>
+                                                <button type="button" 
+                                                        onclick="openRejectModal({{ $reg->id }}, '{{ addslashes($reg->full_name) }}')"
+                                                        class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 transition-colors text-left cursor-pointer">
+                                                    <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500"></i>
+                                                    <span>Tolak Pendaftaran</span>
+                                                </button>
+                                            </div>
+                                        @elseif($reg->status === 'approved')
+                                            <div class="py-1">
+                                                <a href="{{ route('admin.students') }}" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors">
+                                                    <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                                    <span>Buka di Data Siswa</span>
+                                                </a>
+                                            </div>
+                                        @endif
 
-                                    <!-- Delete Button -->
-                                    <form method="POST" action="{{ route('admin.registrations.destroy', $reg->id) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus antrian pendaftaran ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                title="Hapus Antrian"
-                                                class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-600 text-slate-400 flex items-center justify-center transition-colors">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                        </button>
-                                    </form>
+                                        <div class="py-1">
+                                            <form method="POST" action="{{ route('admin.registrations.destroy', $reg->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus antrian formulir pendaftaran {{ addslashes($reg->full_name) }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+                                                    <span>Hapus Formulir</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
-                            </td>
+                            </td></td>
                         </tr>
                     @empty
                         <tr>
