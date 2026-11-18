@@ -30,8 +30,8 @@
         </div>
     </div>
 
-    <!-- 1. Quick Stats Cards (Compact 3-Cols on Mobile) -->
-    <div class="grid grid-cols-3 gap-2 sm:gap-4">
+    <!-- 1. Quick Stats Cards (Compact 4-Cols) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
         <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-red-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
                 <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Total Siswa</p>
@@ -42,22 +42,32 @@
             </div>
         </div>
 
-        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
-                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Ada Pembimbing</p>
-                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $assignedInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Siswa</span></h3>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Siswa Aktif</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ max(0, $totalInterns - $totalAlumni) }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Magang</span></h3>
             </div>
-            <div class="hidden sm:flex w-11 h-11 bg-slate-100 text-slate-900 rounded-xl items-center justify-center shrink-0">
+            <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="user-check" class="w-5 h-5"></i>
             </div>
         </div>
 
-        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-indigo-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <div>
+                <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Alumni Magang</p>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $totalAlumni }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Lulus</span></h3>
+            </div>
+            <div class="hidden sm:flex w-11 h-11 bg-indigo-50 text-indigo-600 rounded-xl items-center justify-center shrink-0">
+                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+        </div>
+
+        <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-amber-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
                 <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Nilai Rapor</p>
                 <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $evaluatedInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Ternilai</span></h3>
             </div>
-            <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
+            <div class="hidden sm:flex w-11 h-11 bg-amber-50 text-amber-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="award" class="w-5 h-5"></i>
             </div>
         </div>
@@ -71,7 +81,13 @@
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa, email, sekolah (contoh: SMKN 1 Ciamis), atau jurusan..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
             </div>
 
-            <div class="flex items-center gap-2.5 w-full md:w-auto">
+            <div class="flex items-center gap-2.5 w-full md:w-auto flex-wrap">
+                <select name="status" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-red-500">
+                    <option value="">-- Semua Status --</option>
+                    <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>✓ Siswa Aktif Magang</option>
+                    <option value="alumni" {{ request('status') == 'alumni' ? 'selected' : '' }}>🎓 Alumni Magang (Lulus)</option>
+                </select>
+
                 <select name="mentor_id" onchange="this.form.submit()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium focus:outline-none focus:border-red-500">
                     <option value="">-- Semua Pembimbing TMS --</option>
                     @foreach($mentors as $m)
@@ -84,7 +100,7 @@
                     <span>Terapkan</span>
                 </button>
 
-                @if(request('search') || request('mentor_id'))
+                @if(request('search') || request('mentor_id') || request('status'))
                     <a href="{{ route('admin.students') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition-colors flex-shrink-0">
                         Reset
                     </a>
@@ -173,7 +189,19 @@
                                 <div class="text-[10px] text-slate-400">Portofolio Digital</div>
                             </td>
                             <td class="py-3.5 px-4 whitespace-nowrap">
-                                @if($intern->evaluation)
+                                @if($intern->status === 'alumni')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
+                                        <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                        Alumni Magang
+                                    </span>
+                                    @if($intern->evaluation)
+                                        <div class="mt-1">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-[9px] font-bold">
+                                                Nilai: {{ $intern->evaluation->final_score }} [A]
+                                            </span>
+                                        </div>
+                                    @endif
+                                @elseif($intern->evaluation)
                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
                                         Nilai: {{ $intern->evaluation->final_score }} [A]
                                     </span>
@@ -189,7 +217,7 @@
                                     <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-2xs flex items-center justify-center cursor-pointer ml-auto" title="Opsi Aksi Siswa">
                                         <i data-lucide="more-vertical" class="w-4 h-4"></i>
                                     </button>
-                                    <div class="action-dropdown hidden absolute right-0 mt-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
+                                    <div class="action-dropdown hidden absolute right-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
                                         <div class="py-1">
                                             @php
                                                 $hasCert = !empty($intern->account_id) && !empty($intern->mentor_id) && !empty($intern->evaluation) && $intern->evaluation->is_published;
@@ -227,11 +255,11 @@
                                                         <span>Verifikasi QR</span>
                                                     </button>
                                                 @else
-                                                    <button type="button" onclick="alert('Sertifikat kelulusan belum dapat dicetak karena siswa {{ addslashes($intern->name) }} masih aktif magang dan nilai akhir belum diterbitkan oleh mentor di menu Rapor & Nilai.')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 transition-colors text-left cursor-not-allowed opacity-60" title="Evaluasi belum diterbitkan">
+                                                    <button type="button" onclick="alert('Sertifikat kelulusan belum dapat dicetak karena nilai akhir belum diterbitkan oleh mentor di menu Rapor & Nilai.')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 transition-colors text-left cursor-not-allowed opacity-60" title="Evaluasi belum diterbitkan">
                                                         <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-400"></i>
                                                         <span>Cetak Sertifikat</span>
                                                     </button>
-                                                    <button type="button" onclick="alert('Verifikasi QR sertifikat belum tersedia karena siswa {{ addslashes($intern->name) }} masih aktif magang dan nilai kelulusan belum disahkan oleh mentor.')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 transition-colors text-left cursor-not-allowed opacity-60" title="Evaluasi belum diterbitkan">
+                                                    <button type="button" onclick="alert('Verifikasi QR sertifikat belum tersedia karena nilai kelulusan belum disahkan oleh mentor.')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 transition-colors text-left cursor-not-allowed opacity-60" title="Evaluasi belum diterbitkan">
                                                         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-slate-400"></i>
                                                         <span>Verifikasi QR</span>
                                                     </button>
@@ -250,7 +278,26 @@
                                             @endif
                                         </div>
                                         <div class="py-1">
-                                            <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
+                                            @if($intern->status === 'alumni')
+                                                <form action="{{ route('admin.students.alumni', $intern->id) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="aktif">
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer">
+                                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                                        <span>Kembalikan ke Aktif</span>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('admin.students.alumni', $intern->id) }}" method="POST" onsubmit="return confirm('Luluskan siswa {{ addslashes($intern->name) }} dan pindahkan ke Alumni Magang? Data portofolio dan sertifikat akan tetap tersimpan aman.');">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="alumni">
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left cursor-pointer">
+                                                        <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                                        <span>Luluskan / Jadi Alumni</span>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}', '{{ $intern->status ?? 'aktif' }}', '{{ $intern->alumni_status ?? 'bekerja' }}', '{{ addslashes($intern->alumni_current_at ?? '') }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
                                                 <i data-lucide="edit-2" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Edit Data</span>
                                             </button>
@@ -260,14 +307,10 @@
                                             </button>
                                         </div>
                                         <div class="py-1">
-                                            <form action="{{ route('admin.students.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa {{ $intern->name }}? Tindakan ini permanen jika siswa dipulangkan atau pindah.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer">
-                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
-                                                    <span>Hapus Siswa</span>
-                                                </button>
-                                            </form>
+                                            <button type="button" onclick="openStudentDeletionModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->status ?? 'aktif' }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+                                                <span>Hapus Siswa</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -411,6 +454,37 @@
                         <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
                         <span>Jika siswa berstatus <b>(belum terdaftar)</b>, memilih mentor dan menekan Simpan akan otomatis menerbitkan ID resmi 5-digit siswa.</span>
                     </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Status Keikutsertaan Magang</label>
+                    <select id="edit-status" name="status" onchange="toggleAlumniFields(this.value)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                        <option value="aktif">✓ Siswa Aktif Magang (Sedang Berjalan)</option>
+                        <option value="alumni">🎓 Alumni Magang (Telah Lulus PKL)</option>
+                    </select>
+                </div>
+
+                <div id="edit-alumni-section" class="hidden p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-3">
+                    <div class="flex items-center gap-1.5 text-indigo-950 font-bold text-xs">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-600"></i>
+                        <span>Pelacakan Karir Pasca-PKL (Alumni Tracer)</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Status Karir</label>
+                            <select id="edit-alumni-status" name="alumni_status" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                                <option value="direkrut_tms">Direkrut PT. TMS</option>
+                                <option value="bekerja">Bekerja di Perusahaan Lain</option>
+                                <option value="kuliah">Kuliah / Studi Lanjut</option>
+                                <option value="mencari_kerja">Mencari Kerja / Freelance</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Instansi / Kampus / Kantor</label>
+                            <input type="text" id="edit-alumni-current-at" name="alumni_current_at" placeholder="Contoh: PT. TMS / Politeknik" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">

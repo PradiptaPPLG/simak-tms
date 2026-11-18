@@ -920,10 +920,15 @@ class SimakController extends Controller
             $query->where('mentor_id', $request->mentor_id);
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         $interns = $query->latest()->get();
         $mentors = User::where('role', 'mentor')->get();
         $batches = Batch::all();
         $totalInterns = User::where('role', 'siswa')->count();
+        $totalAlumni = User::where('role', 'siswa')->where('status', 'alumni')->count();
         $assignedInterns = User::where('role', 'siswa')->whereNotNull('mentor_id')->count();
         $evaluatedInterns = Evaluation::count();
 
@@ -932,6 +937,7 @@ class SimakController extends Controller
             'mentors',
             'batches',
             'totalInterns',
+            'totalAlumni',
             'assignedInterns',
             'evaluatedInterns'
         ));
@@ -1041,6 +1047,9 @@ class SimakController extends Controller
             'school_origin' => 'nullable|string|max:150',
             'major' => 'nullable|string|max:100',
             'mentor_id' => 'nullable|exists:users,id',
+            'status' => 'nullable|in:aktif,selesai,alumni',
+            'alumni_status' => 'nullable|string|max:50',
+            'alumni_current_at' => 'nullable|string|max:150',
         ]);
 
         $generatedMsg = '';
@@ -1055,6 +1064,28 @@ class SimakController extends Controller
         $student->update($validated);
 
         return back()->with('success', "Data siswa {$student->name} berhasil diperbarui oleh Admin!{$generatedMsg}");
+    }
+
+    public function adminGraduateStudent(Request $request, $id)
+    {
+        $this->authorizeAdmin();
+
+        $student = User::where('role', 'siswa')->findOrFail($id);
+        $newStatus = $request->input('status', 'alumni');
+
+        if ($newStatus === 'alumni') {
+            $student->update([
+                'status' => 'alumni',
+                'alumni_status' => $request->input('alumni_status', $student->alumni_status ?? 'bekerja'),
+                'alumni_current_at' => $request->input('alumni_current_at', $student->alumni_current_at)
+            ]);
+            return back()->with('success', "Siswa {$student->name} berhasil dialihkan menjadi Alumni Magang (Lulus PKL). Semua data portofolio, sertifikat, dan logbook tetap tersimpan aman!");
+        } else {
+            $student->update([
+                'status' => 'aktif'
+            ]);
+            return back()->with('success', "Status siswa {$student->name} berhasil dikembalikan menjadi Siswa Aktif Magang.");
+        }
     }
 
     public function adminDeleteStudent($id)

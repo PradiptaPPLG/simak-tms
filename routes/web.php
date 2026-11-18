@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
         Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
         Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
+        Route::post('/admin/siswa/{id}/alumni', [SimakController::class, 'adminGraduateStudent'])->name('admin.students.alumni');
         Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
         Route::get('/admin/mentor', [SimakController::class, 'adminMentors'])->name('admin.mentors');
         Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
