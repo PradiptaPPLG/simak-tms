@@ -158,7 +158,7 @@
                                             @foreach($mentor->students as $student)
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-700 shadow-2xs">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                    {{ $student->name }} ({{ $student->account_id ?? $student->username ?? $student->id }})
+                                                    {{ $student->name }} ({{ $student->account_id ?? 'belum terdaftar' }})
                                                 </span>
                                             @endforeach
                                         </div>

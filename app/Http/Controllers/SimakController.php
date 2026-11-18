@@ -929,7 +929,7 @@ class SimakController extends Controller
         $batches = Batch::all();
         $totalInterns = User::where('role', 'siswa')->count();
         $totalAlumni = User::where('role', 'siswa')->where('status', 'alumni')->count();
-        $assignedInterns = User::where('role', 'siswa')->whereNotNull('mentor_id')->count();
+        $assignedInterns = User::where('role', 'siswa')->whereNotNull('mentor_id')->where('status', '!=', 'alumni')->count();
         $evaluatedInterns = Evaluation::count();
 
         return view('admin.students', compact(
@@ -1058,7 +1058,8 @@ class SimakController extends Controller
             $newAccountId = $this->generateUniqueAccountId();
             $validated['account_id'] = $newAccountId;
             $validated['username'] = $newAccountId;
-            $generatedMsg = " ID Akun resmi ({$newAccountId}) telah berhasil diterbitkan dan aktif!";
+            $validated['status'] = 'aktif';
+            $generatedMsg = " ID Akun resmi ({$newAccountId}) telah berhasil diterbitkan dan siswa resmi aktif!";
         }
 
         $student->update($validated);
@@ -1820,7 +1821,7 @@ class SimakController extends Controller
             'username' => null,
             'password' => Hash::make('tmshebatsukses'),
             'must_change_password' => 1,
-            'status' => 'aktif',
+            'status' => 'pending',
             'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($reg->full_name) . '&background=ef4444&color=ffffff&bold=true&size=256',
         ]);
 

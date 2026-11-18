@@ -136,7 +136,7 @@
                         </div>
 
                         <div class="text-xs font-mono font-semibold text-slate-500 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                            <span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? $user->username ?? $user->id }}</span>
+                            <span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? '-' }}</span>
                             <span>•</span>
                             <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
                             <span>•</span>

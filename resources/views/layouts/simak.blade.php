@@ -396,9 +396,9 @@
                                 @if(auth()->user()->role === 'admin_tms')
                                     ADMIN <span class="text-slate-400 font-mono font-bold">(admin)</span>
                                 @elseif(auth()->user()->role === 'mentor')
-                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? 'mentor' }})</span>
                                 @else
-                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? 'siswa' }})</span>
                                 @endif
                             </div>
                         </div>
@@ -459,9 +459,9 @@
                                 @if(auth()->user()->role === 'admin_tms')
                                     ADMIN <span class="text-slate-400 font-mono font-bold">(admin)</span>
                                 @elseif(auth()->user()->role === 'mentor')
-                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? 'mentor' }})</span>
                                 @else
-                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? 'siswa' }})</span>
                                 @endif
                             </div>
                         </div>

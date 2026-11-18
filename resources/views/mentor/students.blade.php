@@ -112,14 +112,14 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-black text-slate-900">{{ $student->name }} <span class="font-mono text-red-600 font-bold text-xs">({{ $student->account_id ?? $student->username ?? $student->id }})</span></h3>
+                                <h3 class="text-sm font-black text-slate-900">{{ $student->name }} <span class="font-mono text-red-600 font-bold text-xs">({{ $student->account_id ?? 'belum terdaftar' }})</span></h3>
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
                                     Check-in 07:54 WIB
                                 </span>
                             </div>
                             <div class="text-[11px] text-slate-400 font-mono mt-0.5">
-                                <span>ID: {{ $student->account_id ?? $student->username ?? $student->id }}</span>
+                                <span>ID: {{ $student->account_id ?? 'Menunggu Mentor' }}</span>
                                 <span class="mx-1">•</span>
                                 <span>{{ $student->school_origin ?? 'SMKN 1 Ciamis' }} ({{ $student->major ?? 'PPLG' }})</span>
                             </div>

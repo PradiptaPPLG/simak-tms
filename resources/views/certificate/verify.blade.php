@@ -74,7 +74,7 @@
                             </div>
                             <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{{ $student->name }}</h2>
                             <div class="text-xs text-slate-500 font-mono mt-0.5">
-                                NIS/NIM: <b class="text-slate-800">{{ $student->nis_nim ?: ($student->account_id ?? '-') }}</b> • ID Akun: <b class="text-slate-800">{{ $student->account_id ?? $student->id }}</b>
+                                NIS/NIM: <b class="text-slate-800">{{ $student->nis_nim ?: ($student->account_id ?? '-') }}</b> • ID Akun: <b class="text-slate-800">{{ $student->account_id ?? '-' }}</b>
                             </div>
                         </div>
                     </div>

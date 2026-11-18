@@ -57,7 +57,7 @@
                         {{ $user->name }}
                     </h1>
                     <div class="text-xs font-mono font-semibold text-slate-500 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? $user->username ?? $user->id }}</span>
+                        <span class="text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? '-' }}</span>
                         <span>•</span>
                         <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
                         @if($user->status === 'alumni')

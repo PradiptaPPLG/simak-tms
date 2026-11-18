@@ -45,7 +45,7 @@
         <div class="mas-card p-3 sm:p-5 border-l-2 sm:border-l-4 border-l-emerald-600 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div>
                 <p class="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate">Siswa Aktif</p>
-                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ max(0, $totalInterns - $totalAlumni) }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Magang</span></h3>
+                <h3 class="text-lg sm:text-2xl font-black text-slate-900 font-mono">{{ $assignedInterns }} <span class="text-[10px] sm:text-xs font-normal text-slate-500">Magang</span></h3>
             </div>
             <div class="hidden sm:flex w-11 h-11 bg-emerald-50 text-emerald-600 rounded-xl items-center justify-center shrink-0">
                 <i data-lucide="user-check" class="w-5 h-5"></i>
@@ -201,6 +201,11 @@
                                             </span>
                                         </div>
                                     @endif
+                                @elseif(empty($intern->account_id) || empty($intern->mentor_id))
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
+                                        <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i>
+                                        Belum Di-assign
+                                    </span>
                                 @elseif($intern->evaluation)
                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
                                         Nilai: {{ $intern->evaluation->final_score }} [A]
@@ -301,7 +306,7 @@
                                                 <i data-lucide="edit-2" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Edit Data</span>
                                             </button>
-                                            <button type="button" onclick="openResetPasswordModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id ?? $intern->username ?? $intern->id }}', 'siswa')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors text-left cursor-pointer">
+                                            <button type="button" onclick="openResetPasswordModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id ?? $intern->email }}', 'siswa')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors text-left cursor-pointer">
                                                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-500"></i>
                                                 <span>Reset Sandi</span>
                                             </button>

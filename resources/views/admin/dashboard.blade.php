@@ -218,7 +218,7 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
                             <span class="text-slate-700 font-medium">Siswa Aktif Magang</span>
                         </div>
-                        <span class="font-mono font-bold text-slate-900">{{ $totalInterns }} Siswa</span>
+                        <span class="font-mono font-bold text-slate-900">{{ $interns->whereNotNull('mentor_id')->where('status', '!=', 'alumni')->count() }} Siswa</span>
                     </div>
 
                     <div class="flex items-center justify-between text-xs">
@@ -295,8 +295,21 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-900 text-xs">{{ $intern->name }} <span class="font-mono text-red-600 font-bold text-[11px]">({{ $intern->account_id ?? $intern->username ?? $intern->id }})</span></div>
-                                        <div class="text-[10px] text-slate-400 font-mono">ID: {{ $intern->account_id ?? $intern->username ?? $intern->id }} • {{ $intern->email }}</div>
+                                        <div class="font-bold text-slate-900 text-xs">
+                                            {{ $intern->name }} 
+                                            @if(!empty($intern->account_id))
+                                                <span class="font-mono text-red-600 font-bold text-[11px]">({{ $intern->account_id }})</span>
+                                            @else
+                                                <span class="font-mono text-amber-700 bg-amber-100/90 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-300">(belum terdaftar)</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-mono">
+                                            @if(!empty($intern->account_id))
+                                                ID: {{ $intern->account_id }} • {{ $intern->email }}
+                                            @else
+                                                <span class="text-amber-600 font-semibold font-sans">Menunggu Penetapan Mentor</span> • {{ $intern->email }}
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -333,6 +346,11 @@
                                             </span>
                                         </div>
                                     @endif
+                                @elseif(empty($intern->account_id) || empty($intern->mentor_id))
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
+                                        <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i>
+                                        Belum Di-assign
+                                    </span>
                                 @elseif($intern->evaluation)
                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
                                         Nilai: {{ $intern->evaluation->final_score }} [A]
@@ -391,7 +409,7 @@
                                                 <i data-lucide="edit-2" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Edit Data</span>
                                             </button>
-                                            <button type="button" onclick="openResetPasswordModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id ?? $intern->username ?? $intern->id }}', 'siswa')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors text-left cursor-pointer">
+                                            <button type="button" onclick="openResetPasswordModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id ?? $intern->email }}', 'siswa')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 transition-colors text-left cursor-pointer">
                                                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-500"></i>
                                                 <span>Reset Sandi</span>
                                             </button>
@@ -983,7 +1001,7 @@
                     labels: ['Siswa Aktif Magang', 'Terhubung Mentor', 'Evaluasi Selesai'],
                     datasets: [{
                         data: [
-                            {{ max($totalInterns, 1) }},
+                            {{ max($interns->whereNotNull('mentor_id')->where('status', '!=', 'alumni')->count(), 1) }},
                             {{ max($interns->whereNotNull('mentor_id')->count(), 1) }},
                             {{ max($interns->filter(fn($i) => $i->evaluation)->count(), 1) }}
                         ],
