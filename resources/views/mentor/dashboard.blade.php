@@ -8,13 +8,8 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span class="hidden sm:inline">Monitoring Khusus Batch Berjalan (Yang Sekarang)</span>
-                <span class="sm:hidden">Monitoring Batch Berjalan</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Dashboard Monitoring Pembimbing</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Monitoring aktivitas koding siswa magang aktif, validasi cepat jurnal harian, dan review Pull Request di PT. TMS.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Monitoring aktivitas koding siswa magang aktif, validasi cepat jurnal harian, dan review bimbingan.</p>
         </div>
 
         <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">

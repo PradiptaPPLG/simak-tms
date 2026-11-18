@@ -8,11 +8,8 @@
     <!-- Page Heading -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                Area Staff Mentor
-            </div>
             <h1 class="text-2xl font-black tracking-tight text-slate-900">Siswa Bimbingan & Monitoring Performa</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Inspect performa koding, rekapitulasi logbook jurnal harian, dan karya portofolio siswa bimbingan Anda.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pantau performa koding, rekapitulasi logbook jurnal harian, dan karya portofolio siswa bimbingan Anda.</p>
         </div>
 
         <div class="flex items-center gap-2.5">

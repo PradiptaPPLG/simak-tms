@@ -74,11 +74,7 @@
     <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full space-y-8">
         
         <!-- Hero Title Section -->
-        <div class="text-center space-y-3">
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-wider">
-                <i data-lucide="shield-check" class="w-4 h-4 text-red-600"></i>
-                <span>Panduan Akses & Keamanan Sistem</span>
-            </div>
+        <div class="text-center space-y-2">
             <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Pusat Bantuan & FAQ SIMAK-TMS</h1>
             <p class="text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed">
                 Informasi resmi mengenai aturan login menggunakan ID 5-digit, kata sandi universal default, penanganan kendala akses, dan dukungan teknis PT. Teknologi Multi Sistem.

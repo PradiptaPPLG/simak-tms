@@ -8,13 +8,8 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span class="hidden sm:inline">Monitoring Global Seluruh Angkatan & Master Arsip Perusahaan</span>
-                <span class="sm:hidden">Monitoring Global & Master Arsip</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Pusat Monitoring Global & Arsip Master</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Memonitoring komprehensif seluruh siswa lintas angkatan, repositori master karya proyek digital, dan rekapitulasi nilai DUDI.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Monitoring komprehensif seluruh siswa lintas angkatan, repositori proyek digital, dan rekapitulasi nilai DUDI.</p>
         </div>
 
         <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
@@ -494,9 +489,6 @@
     <!-- 4. Section: Pendaftaran Akun Baru oleh Admin (Mentor & Siswa) -->
     <div id="form-register-user" class="mas-card p-4 sm:p-8 space-y-4 sm:space-y-5 overflow-hidden">
         <div class="border-b border-slate-100 pb-4">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                Hak Akses Admin
-            </div>
             <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
                 <i data-lucide="user-plus" class="w-5 h-5 text-red-600"></i>
                 <span>Pendaftaran Akun Baru (Mentor & Siswa)</span>

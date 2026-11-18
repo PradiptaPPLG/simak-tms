@@ -8,16 +8,12 @@
     <!-- 1. Header Banner -->
     <div class="mas-card p-6 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-red-50/20 border-slate-200">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-2">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-700 font-bold text-xs">
-                    <i data-lucide="book-open-check" class="w-3.5 h-3.5 text-red-600"></i>
-                    <span>PANDUAN RESMI & STANDAR OPERASIONAL PROSEDUR (SOP)</span>
-                </div>
+            <div class="space-y-1">
                 <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
                     Panduan Penggunaan & Tutorial Alur Kerja
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-                    Panduan komprehensif mengenai tugas & tanggung jawab per role (Siswa, Mentor, Admin TMS), fungsi lengkap seluruh menu sidebar, serta alur kerja industri di lingkungan PT. Teknologi Multi Sistem.
+                    Panduan komprehensif mengenai tugas & tanggung jawab per role (Siswa, Mentor, Admin TMS), fungsi seluruh menu sidebar, dan SOP lab industri PT. TMS.
                 </p>
             </div>
 

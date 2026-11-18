@@ -8,11 +8,6 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span class="hidden sm:inline">Manajemen Angkatan & Portofolio Karya Industri PT. TMS</span>
-                <span class="sm:hidden">Manajemen Angkatan & Project DUDI</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Data Angkatan & Project per Angkatan</h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola angkatan magang (cohort/batch) serta produk software yang dibangun siswa PKL (1 angkatan dapat mengerjakan &gt;1 project).</p>
         </div>

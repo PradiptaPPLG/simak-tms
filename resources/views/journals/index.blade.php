@@ -149,9 +149,6 @@
         <!-- Form Header -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-wider mb-1">
-                    Logbook Harian Industri
-                </div>
                 <h2 class="text-xl font-black text-slate-900 tracking-tight">
                     {{ $selectedJournal ? 'Edit Jurnal Kegiatan' : 'Tulis Jurnal Kegiatan' }}
                 </h2>

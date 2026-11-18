@@ -8,12 +8,8 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span>Portal Seleksi & Antrian Calon Peserta Magang</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Manajemen Pendaftaran PKL Online</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Tinjau biodata pendaftar, seleksi administrasi, verifikasi kuota, dan otomatisasi pembuatan data siswa magang.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Tinjau biodata pendaftar, seleksi administrasi, verifikasi kuota, dan pembuatan data siswa magang.</p>
         </div>
 
         <div class="flex items-center gap-2">

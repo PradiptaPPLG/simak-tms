@@ -8,13 +8,8 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span class="hidden sm:inline">Repositori Produk Nyata & Portofolio Angkatan PKL</span>
-                <span class="sm:hidden">Portofolio Project Angkatan</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Showcase & Project per Angkatan</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Repositori produk digital, aplikasi web, dan sistem internal yang dibangun siswa PKL di bawah standar industri PT. TMS (1 angkatan &gt; 1 project).</p>
+            <p class="text-xs text-slate-500 mt-0.5">Repositori produk digital, aplikasi web, dan portofolio yang dibangun siswa PKL PT. TMS.</p>
         </div>
     </div>
 

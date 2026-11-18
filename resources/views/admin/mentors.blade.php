@@ -8,11 +8,6 @@
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
-                <span class="hidden sm:inline">Manajemen Staff & Pembimbing Industri PT. TMS</span>
-                <span class="sm:hidden">Staff Mentor & Pembimbing</span>
-            </div>
             <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Master Data Staff Mentor & Pembimbing</h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola data seluruh staff mentor teknis lab software, pembagian siswa bimbingan, kontak koordinasi, dan pendaftaran mentor baru.</p>
         </div>
@@ -246,9 +241,6 @@
     <!-- 4. Form Pendaftaran Akun Staff Mentor Baru -->
     <div id="form-register-mentor" class="mas-card p-6 sm:p-8 space-y-5">
         <div class="border-b border-slate-100 pb-4">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
-                Hak Akses Khusus Admin TMS
-            </div>
             <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
                 <i data-lucide="user-plus" class="w-5 h-5 text-red-600"></i>
                 <span>Form Pendaftaran Akun Staff Mentor Baru</span>
