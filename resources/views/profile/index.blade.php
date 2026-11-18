@@ -60,9 +60,15 @@
                         <span class="text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? $user->username ?? $user->id }}</span>
                         <span>•</span>
                         <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
-                        <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
-                            {{ $user->role === 'siswa' ? 'Siswa PKL' : strtoupper($user->role) }}
-                        </span>
+                        @if($user->status === 'alumni')
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 inline-flex items-center gap-1">
+                                <i data-lucide="graduation-cap" class="w-3 h-3 text-indigo-600"></i> Alumni PKL
+                            </span>
+                        @else
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                                {{ $user->role === 'siswa' ? 'Siswa PKL' : strtoupper($user->role) }}
+                            </span>
+                        @endif
                     </div>
                     <p class="text-xs text-slate-700 font-medium pt-1 leading-relaxed">
                         {{ $user->headline ?? 'Junior Full-Stack Web Developer & Intern @ PT. Teknologi Multi Sistem' }}

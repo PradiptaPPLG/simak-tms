@@ -140,9 +140,15 @@
                             <span>•</span>
                             <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
                             <span>•</span>
-                            <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-bold border border-red-200 uppercase text-[10px]">
-                                {{ $user->role === 'siswa' ? 'Siswa PKL' : strtoupper($user->role) }}
-                            </span>
+                            @if($user->status === 'alumni')
+                                <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 uppercase text-[10px] inline-flex items-center gap-1">
+                                    <i data-lucide="graduation-cap" class="w-3 h-3 text-indigo-600"></i> Alumni Magang
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-bold border border-red-200 uppercase text-[10px]">
+                                    {{ $user->role === 'siswa' ? 'Siswa PKL' : strtoupper($user->role) }}
+                                </span>
+                            @endif
                         </div>
 
                         <p class="text-xs sm:text-sm text-slate-700 font-medium max-w-xl">
@@ -252,7 +258,13 @@
                 </div>
                 <div class="mas-card p-4 text-center">
                     <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status DUDI</div>
-                    <div class="text-lg font-black text-slate-900 mt-2"><span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Aktif Magang</span></div>
+                    @if($user->status === 'alumni')
+                        <div class="text-sm font-black text-indigo-700 mt-2 font-mono">
+                            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">Alumni (Lulus PKL)</span>
+                        </div>
+                    @else
+                        <div class="text-lg font-black text-slate-900 mt-2"><span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Aktif Magang</span></div>
+                    @endif
                 </div>
             @endif
         </div>
