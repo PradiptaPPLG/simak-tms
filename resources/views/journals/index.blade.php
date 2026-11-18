@@ -80,14 +80,14 @@
                     </a>
 
                 @elseif($isToday)
-                    {{-- 2. HARI INI (AKTIF UNTUK DIISI) --}}
+                    {{-- 2. HARI INI (AKTIF UNTUK DIISI - ORANYE) --}}
                     <a href="{{ route('journals.index', ['date' => $dayStr]) }}#form-jurnal"
-                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-white border-2 border-slate-800 text-slate-900 shadow-xs ring-2 ring-slate-900/10 hover:border-slate-950
-                              {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
-                       title="Hari Ini - Klik untuk mengisi jurnal kegiatan">
-                        <span class="text-xs sm:text-sm font-black text-slate-900 leading-none">{{ $d }}</span>
+                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-amber-50 border-2 border-amber-500 text-amber-900 shadow-xs ring-2 ring-amber-500/20 hover:bg-amber-100/80
+                              {{ $isSelected ? 'ring-2 ring-amber-600 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
+                       title="Hari Ini ({{ $dayStr }}) - Klik untuk mengisi jurnal kegiatan aktif">
+                        <span class="text-xs sm:text-sm font-black text-amber-900 leading-none">{{ $d }}</span>
                         <div class="mt-1 flex items-center justify-center">
-                            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-800"></i>
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
                         </div>
                     </a>
 
@@ -123,10 +123,10 @@
                 <span class="text-slate-700"><b class="text-emerald-700">Hijau:</b> Jurnal Diisi</span>
             </div>
             <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-white border-2 border-slate-700 flex items-center justify-center text-slate-800 shadow-2xs">
-                    <i data-lucide="edit-3" class="w-3 h-3 text-slate-700"></i>
+                <span class="w-6 h-6 rounded-lg bg-amber-50 border border-amber-400 flex items-center justify-center text-amber-700 shadow-2xs">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
                 </span>
-                <span class="text-slate-700"><b class="text-slate-800">Tegas:</b> Hari Ini</span>
+                <span class="text-slate-700"><b class="text-amber-700">Oranye:</b> Hari Ini</span>
             </div>
             <div class="flex items-center gap-2">
                 <span class="w-6 h-6 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
