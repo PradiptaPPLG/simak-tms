@@ -123,15 +123,16 @@ class DatabaseSeeder extends Seeder
 
         $adminId = DB::table('users')->insertGetId([
             'batch_id' => null,
-            'account_id' => '99999',
+            'account_id' => 'admin',
             'username' => 'admin',
             'name' => 'Admin TMS',
             'email' => 'admin@tms.co.id',
-            'password' => Hash::make('tmshebatsukses'),
+            'password' => Hash::make('tmsadmin123'),
             'role' => 'admin_tms',
             'school_origin' => 'PT. Teknologi Multi Sistem',
             'major' => 'Human Resources & Internship Coordinator',
             'phone_number' => '081234595426',
+            'must_change_password' => 0,
             'avatar' => null,
             'created_at' => now(),
             'updated_at' => now(),

@@ -40,6 +40,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Cropper.js for 1:1 Avatar Cropping & Camera -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
     <style>
         html, body {
@@ -437,9 +440,9 @@
                     <a href="{{ route('profile') }}" class="hidden sm:flex items-center gap-2 group hover:opacity-85 transition-opacity" title="Buka Profil Developer">
                         <div class="w-9 h-9 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold text-xs flex items-center justify-center border-2 border-red-500 shadow-xs flex-shrink-0">
                             @if(auth()->user()->avatar)
-                                <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                                <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover user-avatar-preview">
                             @else
-                                {{ substr(auth()->user()->name, 0, 2) }}
+                                <span class="user-avatar-initials">{{ substr(auth()->user()->name, 0, 2) }}</span>
                             @endif
                         </div>
                         <div class="text-left">
@@ -726,8 +729,8 @@
                             <span id="dot-len" class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">○</span>
                             <span>Minimal <b>6 karakter</b></span>
                         </div>
-                        <div id="rule-combo" class="flex items-center gap-2 text-emerald-600 font-medium transition-colors">
-                            <span id="dot-combo" class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                        <div id="rule-combo" class="flex items-center gap-2 text-slate-400 font-medium transition-colors">
+                            <span id="dot-combo" class="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px]">○</span>
                             <span>Format bebas (huruf, angka, atau simbol)</span>
                         </div>
                         <div id="rule-match" class="flex items-center gap-2 text-slate-400 font-medium transition-colors">
@@ -990,6 +993,9 @@
                 modal.style.display = 'flex';
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                if (window.validatePasswordCriteria) {
+                    window.validatePasswordCriteria();
+                }
                 setTimeout(() => lucide.createIcons(), 50);
             }
         }
@@ -1082,23 +1088,27 @@
                 const isLen = val.length >= 6;
                 updateRuleState('rule-len', 'dot-len', isLen);
 
-                // 2. Format Bebas (huruf, angka, atau simbol)
-                updateRuleState('rule-combo', 'dot-combo', true);
+                // 2. Format Bebas (huruf, angka, atau simbol) - aktif jika sudah mulai mengetik karakter apapun
+                const hasCharacters = val.length > 0;
+                updateRuleState('rule-combo', 'dot-combo', hasCharacters);
 
-                // 3. Match
-                const isMatch = val.length >= 6 && val === conf;
+                // 3. Match - aktif jika minimal 6 karakter, konfirmasi terisi dan cocok
+                const isMatch = val.length >= 6 && conf.length > 0 && val === conf;
                 updateRuleState('rule-match', 'dot-match', isMatch);
 
                 // Badge All Valid
                 const badgeAll = document.getElementById('badge-all-valid');
                 if (badgeAll) {
-                    if (isLen && isMatch) {
+                    if (isLen && hasCharacters && isMatch) {
                         badgeAll.classList.remove('hidden');
                     } else {
                         badgeAll.classList.add('hidden');
                     }
                 }
             }
+
+            window.validatePasswordCriteria = validatePasswordCriteria;
+            validatePasswordCriteria();
 
             function updateRuleState(ruleId, dotId, isValid) {
                 const ruleEl = document.getElementById(ruleId);
@@ -1416,6 +1426,440 @@
             };
             img.src = qrUrl;
         }
+
+        // ==============================================================
+        // AVATAR UPLOAD, CAMERA & AUTO 1:1 CROPPER LOGIC (MAX 2MB)
+        // ==============================================================
+        let avatarCropper = null;
+        let avatarCameraStream = null;
+        let avatarFacingMode = 'user';
+
+        function openAvatarModal() {
+            const modal = document.getElementById('modal-avatar-crop');
+            if (!modal) return;
+            
+            // Reset to Step 1
+            cancelAvatarStep(false);
+            hideAvatarError();
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+        }
+
+        function closeAvatarModal() {
+            stopCamera();
+            if (avatarCropper) {
+                avatarCropper.destroy();
+                avatarCropper = null;
+            }
+            const modal = document.getElementById('modal-avatar-crop');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function cancelAvatarStep(shouldCloseModal = true) {
+            const isCropView = !document.getElementById('avatar-step-crop').classList.contains('hidden');
+            const isCamView = !document.getElementById('avatar-camera-box').classList.contains('hidden');
+
+            if (avatarCropper) {
+                avatarCropper.destroy();
+                avatarCropper = null;
+            }
+
+            stopCamera();
+
+            document.getElementById('avatar-step-crop').classList.add('hidden');
+            document.getElementById('avatar-step-source').classList.remove('hidden');
+            document.getElementById('avatar-upload-box').classList.remove('hidden');
+            document.getElementById('avatar-camera-btn-box').classList.remove('hidden');
+            document.getElementById('avatar-camera-box').classList.add('hidden');
+            document.getElementById('btn-save-avatar').classList.add('hidden');
+            document.getElementById('avatar-file-input').value = '';
+            hideAvatarError();
+
+            if (shouldCloseModal && !isCropView && !isCamView) {
+                closeAvatarModal();
+            }
+        }
+
+        function showAvatarError(msg) {
+            const banner = document.getElementById('avatar-error-banner');
+            const text = document.getElementById('avatar-error-text');
+            if (banner && text) {
+                text.textContent = msg;
+                banner.classList.remove('hidden');
+            }
+        }
+
+        function hideAvatarError() {
+            const banner = document.getElementById('avatar-error-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function handleAvatarFileSelect(e) {
+            const file = e.target.files ? e.target.files[0] : null;
+            if (!file) return;
+
+            // Validasi Maksimal 2MB (2 * 1024 * 1024 bytes)
+            const maxBytes = 2 * 1024 * 1024;
+            if (file.size > maxBytes) {
+                const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                showAvatarError(`Ukuran file terlalu besar (${sizeMb} MB)! Maksimal ukuran foto adalah 2.00 MB.`);
+                e.target.value = '';
+                return;
+            }
+
+            hideAvatarError();
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                initAvatarCropper(evt.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function startCamera() {
+            hideAvatarError();
+            stopCamera();
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: avatarFacingMode,
+                        width: { ideal: 720 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                avatarCameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('avatar-video');
+                video.srcObject = avatarCameraStream;
+                await video.play();
+
+                document.getElementById('avatar-upload-box').classList.add('hidden');
+                document.getElementById('avatar-camera-btn-box').classList.add('hidden');
+                document.getElementById('avatar-camera-box').classList.remove('hidden');
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                console.error(err);
+                showAvatarError('Tidak dapat membuka kamera. Pastikan Anda telah memberikan izin akses kamera di peramban.');
+            }
+        }
+
+        function stopCamera() {
+            if (avatarCameraStream) {
+                avatarCameraStream.getTracks().forEach(track => track.stop());
+                avatarCameraStream = null;
+            }
+            const video = document.getElementById('avatar-video');
+            if (video) video.srcObject = null;
+        }
+
+        function switchCameraFacing() {
+            avatarFacingMode = (avatarFacingMode === 'user') ? 'environment' : 'user';
+            startCamera();
+        }
+
+        function captureCamera() {
+            const video = document.getElementById('avatar-video');
+            if (!video || !avatarCameraStream) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 640;
+            const ctx = canvas.getContext('2d');
+
+            // Cermin jika kamera depan
+            if (avatarFacingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+
+            stopCamera();
+            initAvatarCropper(dataUrl);
+        }
+
+        function initAvatarCropper(imgSrc) {
+            const cropImg = document.getElementById('avatar-crop-image');
+            cropImg.src = imgSrc;
+
+            document.getElementById('avatar-step-source').classList.add('hidden');
+            document.getElementById('avatar-step-crop').classList.remove('hidden');
+            document.getElementById('btn-save-avatar').classList.remove('hidden');
+
+            if (avatarCropper) {
+                avatarCropper.destroy();
+                avatarCropper = null;
+            }
+
+            setTimeout(() => {
+                avatarCropper = new Cropper(cropImg, {
+                    aspectRatio: 1, // LOCKED 1:1 RATIO
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.9,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    preview: '#avatar-preview-circle, #avatar-preview-square',
+                });
+                if (window.lucide) lucide.createIcons();
+            }, 100);
+        }
+
+        function cropperRotate(deg) {
+            if (avatarCropper) avatarCropper.rotate(deg);
+        }
+
+        function cropperZoom(ratio) {
+            if (avatarCropper) avatarCropper.zoom(ratio);
+        }
+
+        function cropperReset() {
+            if (avatarCropper) avatarCropper.reset();
+        }
+
+        async function saveCroppedAvatar() {
+            if (!avatarCropper) return;
+            const btn = document.getElementById('btn-save-avatar');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="inline-block animate-spin mr-1.5"><i data-lucide="loader-2" class="w-4 h-4"></i></span><span>Menyimpan...</span>`;
+            if (window.lucide) lucide.createIcons();
+
+            // Potong menjadi kanvas persegi 1:1 resolusi 512x512
+            const canvas = avatarCropper.getCroppedCanvas({
+                width: 512,
+                height: 512,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+
+            const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+
+            try {
+                const res = await fetch('{{ route("profile.avatar.update") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ avatar_base64: base64Data })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    // Update semua avatar di navbar dan profil secara real-time
+                    document.querySelectorAll('.user-avatar-preview').forEach(el => {
+                        if (el.tagName.toLowerCase() === 'img') {
+                            el.src = data.avatar_url;
+                        } else {
+                            el.outerHTML = `<img src="${data.avatar_url}" alt="Avatar" class="w-full h-full object-cover user-avatar-preview">`;
+                        }
+                    });
+
+                    const profileDisplay = document.getElementById('profile-avatar-display');
+                    if (profileDisplay) {
+                        profileDisplay.src = data.avatar_url;
+                    }
+                    const profilePlaceholder = document.getElementById('profile-avatar-placeholder');
+                    if (profilePlaceholder) {
+                        profilePlaceholder.outerHTML = `<img id="profile-avatar-display" src="${data.avatar_url}" alt="Avatar" class="w-full h-full object-cover">`;
+                    }
+                    const formInput = document.getElementById('form-avatar-url-input');
+                    if (formInput) {
+                        formInput.value = data.avatar_url;
+                    }
+
+                    closeAvatarModal();
+                    
+                    // Notifikasi Sukses
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-2.5 animate-in slide-in-from-bottom duration-300 text-xs font-bold';
+                    toast.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span><span>✓ Foto profil baru berhasil disimpan & diperbarui!</span>`;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 4000);
+                } else {
+                    showAvatarError(data.message || 'Gagal menyimpan foto profil.');
+                }
+            } catch (err) {
+                console.error(err);
+                showAvatarError('Terjadi kesalahan saat mengunggah foto: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+    </script>
+
+    <!-- ============================================================== -->
+    <!-- MODAL EDIT AVATAR: UPLOAD & KAMERA DENGAN CROPPER 1:1          -->
+    <!-- ============================================================== -->
+    <div id="modal-avatar-crop" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 transition-all duration-300">
+        <div class="bg-white rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+            
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="camera" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black tracking-tight text-slate-900">Ubah Foto Profil</h3>
+                        <p class="text-[11px] text-slate-500">Unggah berkas atau gunakan kamera &bull; Rasio otomatis 1:1 (Maks. 2MB)</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAvatarModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer" title="Tutup">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="avatar-error-banner" class="hidden px-4 py-2.5 bg-rose-50 border-b border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 shrink-0">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0"></i>
+                <span id="avatar-error-text">Terjadi kesalahan pada gambar.</span>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
+                
+                <!-- STEP 1: SOURCE SELECTION (Upload vs Camera) -->
+                <div id="avatar-step-source" class="space-y-4">
+                    
+                    <!-- Mode Upload File -->
+                    <div id="avatar-upload-box" class="border-2 border-dashed border-slate-200 hover:border-red-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-red-50/20 group" onclick="document.getElementById('avatar-file-input').click()">
+                        <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" onchange="handleAvatarFileSelect(event)">
+                        
+                        <div class="w-14 h-14 rounded-2xl bg-white shadow-xs border border-slate-200 text-slate-400 group-hover:text-red-600 group-hover:scale-105 transition-all flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+                        </div>
+                        <div class="text-xs font-bold text-slate-800 group-hover:text-red-600 transition-colors">
+                            Klik atau Seret Foto ke Sini
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">
+                            Mendukung JPG, PNG, WEBP (Batas maksimal <b>2MB</b>)
+                        </p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Atau Ambil Langsung</span>
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                    </div>
+
+                    <!-- Button Activate Camera -->
+                    <div id="avatar-camera-btn-box">
+                        <button type="button" onclick="startCamera()" class="w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                            <i data-lucide="video" class="w-4 h-4 text-red-500"></i>
+                            <span>Gunakan Kamera (Webcam / HP)</span>
+                        </button>
+                    </div>
+
+                    <!-- Camera Viewfinder Box (Hidden initially) -->
+                    <div id="avatar-camera-box" class="hidden space-y-3">
+                        <div class="relative w-full aspect-square max-h-72 rounded-2xl overflow-hidden bg-black mx-auto shadow-inner border-2 border-slate-800 flex items-center justify-center">
+                            <video id="avatar-video" autoplay playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+                            
+                            <!-- 1:1 Viewfinder Guide Overlay -->
+                            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-dashed border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Camera Controls -->
+                        <div class="flex items-center justify-center gap-2 pt-1">
+                            <button type="button" onclick="switchCameraFacing()" id="btn-switch-camera" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer" title="Putar Kamera">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline">Putar Kamera</span>
+                            </button>
+                            <button type="button" onclick="captureCamera()" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md shadow-red-600/30 transition-all flex items-center gap-2 cursor-pointer">
+                                <i data-lucide="camera" class="w-4 h-4"></i>
+                                <span>Ambil Foto</span>
+                            </button>
+                            <button type="button" onclick="stopCamera()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold rounded-xl transition-all cursor-pointer">
+                                Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: CROP & PREVIEW AUTO 1:1 -->
+                <div id="avatar-step-crop" class="hidden space-y-4">
+                    
+                    <!-- Cropper Canvas Container -->
+                    <div class="bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center min-h-[260px] max-h-[320px]">
+                        <img id="avatar-crop-image" src="" alt="Crop Source" class="max-w-full block">
+                    </div>
+
+                    <!-- Cropper Control Tools -->
+                    <div class="flex items-center justify-between gap-1 p-2 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="cropperRotate(-90)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer" title="Putar Kiri 90°">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button type="button" onclick="cropperRotate(90)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer" title="Putar Kanan 90°">
+                                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button type="button" onclick="cropperZoom(0.1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer" title="Perbesar">
+                                <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button type="button" onclick="cropperZoom(-0.1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center cursor-pointer" title="Perkecil">
+                                <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button type="button" onclick="cropperReset()" class="px-2.5 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-semibold text-[11px] flex items-center gap-1 cursor-pointer" title="Reset">
+                                <i data-lucide="undo" class="w-3 h-3"></i>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400 font-bold px-2">Rasio 1:1</span>
+                    </div>
+
+                    <!-- Live Previews (Circle & Rounded Square) -->
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pratinjau Hasil (Auto 1:1)</span>
+                            <span class="text-xs text-slate-600 font-medium">Tampilan di Dasbor & Profil</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <!-- Circular Preview (Navbar) -->
+                            <div class="text-center">
+                                <div id="avatar-preview-circle" class="w-12 h-12 rounded-full overflow-hidden border-2 border-red-500 shadow-sm mx-auto bg-slate-200"></div>
+                                <span class="text-[9px] text-slate-400 mt-0.5 block font-medium">Lingkaran</span>
+                            </div>
+                            <!-- Rounded Square Preview (Profile Card) -->
+                            <div class="text-center">
+                                <div id="avatar-preview-square" class="w-12 h-12 rounded-xl overflow-hidden border-2 border-slate-900 shadow-sm mx-auto bg-slate-200"></div>
+                                <span class="text-[9px] text-slate-400 mt-0.5 block font-medium">Kotak Profil</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer (Actions) -->
+            <div class="p-4 sm:p-5 border-t border-slate-100 bg-white flex items-center justify-between gap-2 shrink-0">
+                <button type="button" onclick="cancelAvatarStep()" id="btn-avatar-back" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btn-save-avatar" onclick="saveCroppedAvatar()" class="hidden px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center gap-1.5 cursor-pointer">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Simpan Foto (Done)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     </script>
     @endauth
 </body>

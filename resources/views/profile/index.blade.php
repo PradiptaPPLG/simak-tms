@@ -5,17 +5,6 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Flash Message Notification -->
-    @if(session('success'))
-        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2">
-                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900">&times;</button>
-        </div>
-    @endif
-
     <!-- Profile Grid Layout (Ala GitHub Two-Column) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
@@ -29,18 +18,38 @@
                 <!-- Top Accent Line -->
                 <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-slate-900 via-red-600 to-red-500"></div>
 
-                <!-- Avatar with Badge -->
-                <div class="relative w-36 h-36 mx-auto sm:mx-0 mb-4 group">
-                    <div class="w-36 h-36 rounded-2xl overflow-hidden bg-slate-900 border-4 border-white shadow-lg shadow-slate-900/10 flex items-center justify-center">
+                <!-- Avatar with Badge & Edit Trigger (Kamera / Upload 1:1) -->
+                <div class="relative w-36 h-36 mx-auto sm:mx-0 mb-3 group">
+                    <div onclick="openAvatarModal()" class="w-36 h-36 rounded-2xl overflow-hidden bg-slate-900 border-4 border-white shadow-lg shadow-slate-900/10 flex items-center justify-center relative cursor-pointer group" title="Klik untuk Ubah Foto Profil">
                         @if($user->avatar)
-                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                            <img id="profile-avatar-display" src="{{ $user->avatar }}" alt="{{ $user->name }}" class="w-full h-full object-cover user-avatar-preview transition-transform duration-300 group-hover:scale-105">
                         @else
-                            <span class="text-3xl font-black text-white">{{ substr($user->name, 0, 2) }}</span>
+                            <div id="profile-avatar-placeholder" class="w-full h-full flex items-center justify-center bg-red-600 text-white font-black text-3xl font-mono">
+                                {{ substr($user->name, 0, 2) }}
+                            </div>
                         @endif
+
+                        <!-- Hover Overlay with Camera Icon -->
+                        <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-1 backdrop-blur-2xs">
+                            <i data-lucide="camera" class="w-6 h-6 text-red-400"></i>
+                            <span class="text-[10px] font-bold">Ubah Foto Profil</span>
+                        </div>
                     </div>
+
+                    <!-- Circular Camera Button on Corner -->
+                    <button type="button" onclick="openAvatarModal()" class="absolute -bottom-1.5 -right-1.5 w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg border-2 border-white transition-all transform hover:scale-110 cursor-pointer z-10" title="Ubah Foto Profil (Kamera / Upload 1:1)">
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                    </button>
+
                     <!-- Online Status Badge -->
-                    <div class="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" title="Aktif di Lab TMS"></div>
+                    <div class="absolute top-2 right-2 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow-sm z-10" title="Aktif di Lab TMS"></div>
                 </div>
+
+                <!-- Secondary Quick Button under avatar -->
+                <button type="button" onclick="openAvatarModal()" class="w-full sm:w-36 mb-4 px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-700 text-[11px] font-bold border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i data-lucide="image-plus" class="w-3.5 h-3.5 text-red-500"></i>
+                    <span>Edit Foto Profil (1:1)</span>
+                </button>
 
                 <!-- Names & Headlines -->
                 <div class="space-y-1">
@@ -237,135 +246,85 @@
         </div>
 
         <!-- ============================================================== -->
-        <!-- RIGHT COLUMN: GITHUB CONTRIBUTION HEATMAP, PINNED REPOS, EDIT  -->
+        <!-- RIGHT COLUMN: E-SERTIFIKAT, PINNED REPOS, & PENGATURAN PROFIL  -->
         <!-- ============================================================== -->
         <div class="lg:col-span-8 space-y-6">
 
-            <!-- 1. GITHUB CONTRIBUTION ACTIVITY HEATMAP (Fitur Khas GitHub) -->
-            <div class="mas-card p-6 space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="activity" class="w-4 h-4 text-red-600"></i>
-                            <h2 class="text-sm font-black text-slate-900 uppercase tracking-wider">
-                                Grafik Kontribusi & Aktivitas Koding (November 2026)
-                            </h2>
-                        </div>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Visualisasi harian kompilasi commit Git, pengisian jurnal logbook, dan submission sprint LMS.
-                        </p>
-                    </div>
-                    <div class="text-left sm:text-right">
-                        <div class="text-base font-black text-slate-900 font-mono">{{ $totalContributions }} Kontribusi</div>
-                        <div class="text-[10px] text-red-600 font-bold uppercase">35 Hari Terakhir</div>
-                    </div>
-                </div>
-
-                <!-- GitHub-Style Contribution Heatmap Matrix -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-x-auto">
-                    <div class="min-w-[500px]">
-                        <!-- Heatmap Grid -->
-                        <div class="grid grid-flow-col grid-rows-7 gap-1.5 auto-cols-max">
-                            @foreach($heatmap as $day)
-                                @php
-                                    $bgClass = 'bg-slate-200';
-                                    if ($day['level'] === 1) $bgClass = 'bg-red-200 border-red-300';
-                                    elseif ($day['level'] === 2) $bgClass = 'bg-red-500 border-red-600';
-                                    elseif ($day['level'] === 3) $bgClass = 'bg-slate-900 border-black';
-                                @endphp
-                                <div class="w-4 h-4 rounded-sm {{ $bgClass }} border border-transparent transition-transform hover:scale-125 cursor-pointer relative group"
-                                     title="{{ $day['label'] }}: {{ $day['count'] }} kontribusi aktivitas">
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <!-- Legend Scale -->
-                        <div class="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500">
-                            <span>Pelajari bagaimana kami mengalkulasi kontribusi repositori TMS</span>
-                            <div class="flex items-center gap-1.5">
-                                <span>Sedikit</span>
-                                <span class="w-3 h-3 rounded-xs bg-slate-200 inline-block"></span>
-                                <span class="w-3 h-3 rounded-xs bg-red-200 inline-block"></span>
-                                <span class="w-3 h-3 rounded-xs bg-red-500 inline-block"></span>
-                                <span class="w-3 h-3 rounded-xs bg-slate-900 inline-block"></span>
-                                <span>Banyak</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3 Quick Activity KPI Metrics -->
-                <div class="grid grid-cols-3 gap-3 pt-1">
-                    <div class="bg-white p-3 rounded-xl border border-slate-100 text-center">
-                        <div class="text-[10px] uppercase font-bold text-slate-400">Total Commit Git</div>
-                        <div class="text-xl font-black text-slate-900 font-mono">{{ $totalCommits }}</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-100 text-center">
-                        <div class="text-[10px] uppercase font-bold text-slate-400">Jurnal Terverifikasi</div>
-                        <div class="text-xl font-black text-red-600 font-mono">{{ $totalJournals }}</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-100 text-center">
-                        <div class="text-[10px] uppercase font-bold text-slate-400">{{ $user->role === 'siswa' ? 'Skor Evaluasi' : 'Role Akses' }}</div>
-                        <div class="text-xl font-black text-slate-900 font-mono">{{ $user->role === 'siswa' ? ($evaluation->final_score ?? 94) : strtoupper($user->role) }}</div>
-                    </div>
-                </div>
-            </div>
-
             @if($user->role === 'siswa')
-            @php
-                $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
-                $verifyUrl = route('verify.show', $certNumber);
-                $printUrl = route('certificate.print', $certNumber);
-            @endphp
-            <!-- ============================================================== -->
-            <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI (Fitur Unggulan Siswa)       -->
-            <!-- ============================================================== -->
-            <div class="mas-card p-6 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-2 border-red-500/30 shadow-xl">
-                <!-- Top Accent Line -->
-                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-500"></div>
+                @if($evaluation && $evaluation->is_published)
+                    @php
+                        $certNumber = $evaluation->certificate_number ?? ('TMS-CERT-2026-' . ($user->account_id ?? $user->id));
+                        $verifyUrl = route('verify.show', $certNumber);
+                        $printUrl = route('certificate.print', $certNumber);
+                    @endphp
+                    <!-- ============================================================== -->
+                    <!-- E-SERTIFIKAT & QR VERIFIKASI DUDI (Fitur Unggulan Siswa)       -->
+                    <!-- ============================================================== -->
+                    <div class="mas-card p-6 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-2 border-red-500/30 shadow-xl">
+                        <!-- Top Accent Line -->
+                        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-500"></div>
 
-                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <!-- Left: QR Code & Info -->
-                    <div class="flex items-center gap-4 shrink-0">
-                        <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white p-2 rounded-2xl shadow-lg border-2 border-amber-400/50 shrink-0">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" alt="QR Code Verifikasi" class="w-full h-full object-contain">
-                        </div>
-                        <div class="space-y-1">
-                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Dokumen Otentik Terverifikasi
+                        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                            <!-- Left: QR Code & Info -->
+                            <div class="flex items-center gap-4 shrink-0">
+                                <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white p-2 rounded-2xl shadow-lg border-2 border-amber-400/50 shrink-0">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ urlencode($verifyUrl) }}" alt="QR Code Verifikasi" class="w-full h-full object-contain">
+                                </div>
+                                <div class="space-y-1">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold uppercase">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Dokumen Otentik Terverifikasi
+                                    </div>
+                                    <h3 class="text-base font-black text-white">E-Sertifikat Kelulusan PKL PT. TMS</h3>
+                                    <div class="text-xs font-mono text-slate-300">
+                                        No. Sertifikat: <b class="text-amber-400 font-mono">{{ $certNumber }}</b>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 max-w-sm leading-snug">
+                                        Pindai QR ini langsung dengan kamera HP untuk memvalidasi keaslian di portal resmi.
+                                    </p>
+                                </div>
                             </div>
-                            <h3 class="text-base font-black text-white">E-Sertifikat Kelulusan PKL PT. TMS</h3>
-                            <div class="text-xs font-mono text-slate-300">
-                                No. Sertifikat: <b class="text-amber-400 font-mono">{{ $certNumber }}</b>
+
+                            <!-- Right: Skor & Tombol Aksi -->
+                            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-end">
+                                <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center shrink-0 w-full sm:w-auto">
+                                    <div class="text-[10px] uppercase font-bold text-slate-300">Skor Kelulusan</div>
+                                    <div class="text-2xl font-black text-amber-400 font-mono">{{ $evaluation->final_score }}</div>
+                                    <div class="text-[10px] text-emerald-400 font-bold">PREDIKAT {{ $evaluation->final_score >= 85 ? 'A' : ($evaluation->final_score >= 75 ? 'B' : 'C') }}</div>
+                                </div>
+
+                                <div class="flex flex-col gap-2 w-full sm:w-auto shrink-0">
+                                    <a href="{{ $printUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2">
+                                        <i data-lucide="printer" class="w-4 h-4"></i>
+                                        <span>Cetak E-Sertifikat (PDF)</span>
+                                    </a>
+                                    <a href="{{ $verifyUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-2">
+                                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                                        <span>Verifikasi Publik &rarr;</span>
+                                    </a>
+                                </div>
                             </div>
-                            <p class="text-[11px] text-slate-400 max-w-sm leading-snug">
-                                Orang tinggal scan QR ini langsung dengan kamera HP untuk memvalidasi keaslian di portal resmi.
-                            </p>
                         </div>
                     </div>
-
-                    <!-- Right: Skor & Tombol Aksi -->
-                    <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto justify-end">
-                        <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 text-center shrink-0 w-full sm:w-auto">
-                            <div class="text-[10px] uppercase font-bold text-slate-300">Skor Kelulusan</div>
-                            <div class="text-2xl font-black text-amber-400 font-mono">{{ $evaluation->final_score ?? '95.8' }}</div>
-                            <div class="text-[10px] text-emerald-400 font-bold">PREDIKAT A</div>
-                        </div>
-
-                        <div class="flex flex-col gap-2 w-full sm:w-auto shrink-0">
-                            <a href="{{ $printUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2">
-                                <i data-lucide="printer" class="w-4 h-4"></i>
-                                <span>Cetak E-Sertifikat (PDF)</span>
-                            </a>
-                            <a href="{{ $verifyUrl }}" target="_blank" class="py-2.5 px-4 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-2">
-                                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-                                <span>Verifikasi Publik &rarr;</span>
-                            </a>
+                @else
+                    <!-- Status Belum Lulus / Magang Berjalan -->
+                    <div class="mas-card p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-slate-700 shadow-md">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase mb-1">
+                                    Status: Praktik Kerja Lapangan Aktif
+                                </div>
+                                <h3 class="text-sm font-bold text-white">E-Sertifikat Kelulusan Belum Diterbitkan</h3>
+                                <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">
+                                    Sertifikat resmi dan kode verifikasi QR akan terbit otomatis setelah pembimbing mentor industri menyelesaikan evaluasi nilai 4 pilar di akhir periode PKL.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                @endif
             @endif
 
             <!-- 2. PINNED REPOSITORIES & PROJECTS (Proyek Unggulan Ala GitHub) -->
@@ -487,11 +446,17 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">URL Foto Profil / Avatar</label>
-                            <input type="text" name="avatar" value="{{ old('avatar', $user->avatar) }}" 
-                                   placeholder="https://.../avatar.jpg"
-                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                            <p class="text-[10px] text-slate-400 mt-1">Dapat menggunakan URL Gravatar, Unsplash, atau UI-Avatars.</p>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Foto Profil / Avatar</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="form-avatar-url-input" name="avatar" value="{{ old('avatar', $user->avatar) }}" 
+                                       placeholder="https://... atau klik tombol upload"
+                                       class="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                                <button type="button" onclick="openAvatarModal()" class="px-3.5 py-2.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer" title="Ambil Kamera / Upload & Crop 1:1">
+                                    <i data-lucide="camera" class="w-4 h-4 text-red-500"></i>
+                                    <span class="hidden sm:inline">Upload / Kamera</span>
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-slate-400 mt-1">Dapat menggunakan kamera langsung atau upload file (Maks. 2MB, Crop 1:1 auto).</p>
                         </div>
                     </div>
 

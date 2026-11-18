@@ -49,7 +49,7 @@
     <!-- Top Navigation Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <a href="{{ url('/') }}" class="flex items-center gap-2.5">
+            <a href="{{ route('registry.index') }}" class="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
                 <div class="w-9 h-9 rounded-xl bg-slate-950 flex items-center justify-center font-extrabold text-white text-xs border border-red-500 shadow-xs">
                     TMS
                 </div>
@@ -60,9 +60,16 @@
             </a>
             
             <div class="flex items-center gap-2">
-                <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all">
-                    Login SIMAK
-                </a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
+                        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-red-500"></i>
+                        <span>Ke Dasbor SIMAK</span>
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all">
+                        Login SIMAK
+                    </a>
+                @endauth
             </div>
         </div>
     </header>
@@ -132,14 +139,20 @@
             </div>
         @endif
 
+        @php
+            $isCheckTab = ($activeTab === 'check');
+        @endphp
+
         <!-- Selection Switcher / Tabs: 1. Formulir Pendaftaran | 2. Cek Status Pendaftaran -->
         <div class="flex items-center gap-2 p-1.5 bg-slate-200/80 rounded-2xl">
-            <button type="button" onclick="switchTab('register')" id="tab-btn-register" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs bg-white text-slate-900">
-                <i data-lucide="clipboard-edit" class="w-4 h-4 text-red-600"></i>
+            <button type="button" onclick="switchTab('register')" id="tab-btn-register" 
+                    class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ !$isCheckTab ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                <i data-lucide="clipboard-edit" id="tab-icon-register" class="w-4 h-4 {{ !$isCheckTab ? 'text-red-600' : 'text-slate-500' }}"></i>
                 <span>Formulir Pendaftaran PKL</span>
             </button>
-            <button type="button" onclick="switchTab('check')" id="tab-btn-check" class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900">
-                <i data-lucide="search" class="w-4 h-4 text-slate-500"></i>
+            <button type="button" onclick="switchTab('check')" id="tab-btn-check" 
+                    class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer {{ $isCheckTab ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
+                <i data-lucide="search" id="tab-icon-check" class="w-4 h-4 {{ $isCheckTab ? 'text-red-600' : 'text-slate-500' }}"></i>
                 <span>Cek Status Pendaftaran</span>
             </button>
         </div>
@@ -147,7 +160,7 @@
         <!-- ======================================================== -->
         <!-- TAB 1: FORMULIR PENDAFTARAN PKL                          -->
         <!-- ======================================================== -->
-        <div id="tab-content-register" class="form-card p-6 sm:p-8 space-y-6 {{ ($activeTab === 'check' && !session('registration_success')) ? 'hidden' : '' }}">
+        <div id="tab-content-register" class="form-card p-6 sm:p-8 space-y-6 {{ $isCheckTab ? 'hidden' : '' }}">
             <div class="border-b border-slate-100 pb-3">
                 <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Biodata Calon Siswa Magang</h2>
                 <p class="text-xs text-slate-500 mt-0.5">Lengkapi seluruh kolom identitas di bawah ini dengan data yang valid.</p>
@@ -283,7 +296,7 @@
         <!-- ======================================================== -->
         <!-- TAB 2: CEK STATUS PENDAFTARAN                            -->
         <!-- ======================================================== -->
-        <div id="tab-content-check" class="form-card p-6 sm:p-8 space-y-6 {{ ($activeTab === 'check' || session('registration_success')) ? '' : 'hidden' }}">
+        <div id="tab-content-check" class="form-card p-6 sm:p-8 space-y-6 {{ $isCheckTab ? '' : 'hidden' }}">
             <div class="border-b border-slate-100 pb-3">
                 <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Cek Status Antrian Pendaftaran</h2>
                 <p class="text-xs text-slate-500 mt-0.5">Masukkan kode registrasi yang didapatkan saat Anda menyelesaikan pendaftaran.</p>
@@ -462,21 +475,45 @@
             const checkContent = document.getElementById('tab-content-check');
             const regBtn = document.getElementById('tab-btn-register');
             const checkBtn = document.getElementById('tab-btn-check');
+            const regIcon = document.getElementById('tab-icon-register');
+            const checkIcon = document.getElementById('tab-icon-check');
 
             if (tab === 'register') {
-                regContent.classList.remove('hidden');
-                checkContent.classList.add('hidden');
-                regBtn.classList.add('bg-white', 'text-slate-900', 'shadow-xs');
-                regBtn.classList.remove('text-slate-600');
-                checkBtn.classList.remove('bg-white', 'text-slate-900', 'shadow-xs');
-                checkBtn.classList.add('text-slate-600');
+                if (regContent) regContent.classList.remove('hidden');
+                if (checkContent) checkContent.classList.add('hidden');
+                
+                if (regBtn) {
+                    regBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-white text-slate-900 shadow-xs';
+                }
+                if (checkBtn) {
+                    checkBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900';
+                }
+                if (regIcon) {
+                    regIcon.classList.remove('text-slate-500');
+                    regIcon.classList.add('text-red-600');
+                }
+                if (checkIcon) {
+                    checkIcon.classList.remove('text-red-600');
+                    checkIcon.classList.add('text-slate-500');
+                }
             } else {
-                checkContent.classList.remove('hidden');
-                regContent.classList.add('hidden');
-                checkBtn.classList.add('bg-white', 'text-slate-900', 'shadow-xs');
-                checkBtn.classList.remove('text-slate-600');
-                regBtn.classList.remove('bg-white', 'text-slate-900', 'shadow-xs');
-                regBtn.classList.add('text-slate-600');
+                if (checkContent) checkContent.classList.remove('hidden');
+                if (regContent) regContent.classList.add('hidden');
+                
+                if (checkBtn) {
+                    checkBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer bg-white text-slate-900 shadow-xs';
+                }
+                if (regBtn) {
+                    regBtn.className = 'flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer text-slate-600 hover:text-slate-900';
+                }
+                if (checkIcon) {
+                    checkIcon.classList.remove('text-slate-500');
+                    checkIcon.classList.add('text-red-600');
+                }
+                if (regIcon) {
+                    regIcon.classList.remove('text-red-600');
+                    regIcon.classList.add('text-slate-500');
+                }
             }
             if (window.lucide) lucide.createIcons();
         }

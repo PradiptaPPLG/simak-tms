@@ -174,20 +174,6 @@
                     <summary class="flex items-center justify-between font-bold text-sm text-slate-900">
                         <span class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xs">3</span>
-                            <span>Apa perbedaan pengisian jurnal di SIMAK-TMS dengan MAS-PKL?</span>
-                        </span>
-                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
-                    </summary>
-                    <div class="text-xs text-slate-600 leading-relaxed mt-3 pt-3 border-t border-slate-100 space-y-2">
-                        <p><b>SIMAK-TMS</b> difokuskan murni pada <b>dokumentasi aktivitas industri nyata & portofolio koding</b> (pekerjaan fitur, deskripsi harian, commit Git). Seluruh atribut kurikulum akademik sekolah seperti <i>Capaian Pembelajaran (CP)</i>, <i>Tujuan Pembelajaran (TP)</i>, dan <i>Elemen Kompetensi</i> sudah dikelola secara terpisah di aplikasi <b>MAS-PKL</b>.</p>
-                    </div>
-                </details>
-
-                <!-- FAQ 4 -->
-                <details class="bg-white rounded-2xl border border-slate-200 p-5 group cursor-pointer shadow-xs open:border-red-300 transition-colors">
-                    <summary class="flex items-center justify-between font-bold text-sm text-slate-900">
-                        <span class="flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-xs">4</span>
                             <span>Apa arti warna Merah dan Hijau pada kalender Jurnal PKL?</span>
                         </span>
                         <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
@@ -204,56 +190,6 @@
             </div>
         </div>
 
-        <!-- Contact Support Card PT. TMS -->
-        <div class="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-6 sm:p-8 text-white space-y-5 shadow-xl">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-                <div>
-                    <span class="text-red-500 font-bold text-xs uppercase tracking-wider">Layanan Bantuan Pengguna</span>
-                    <h3 class="text-xl font-black tracking-tight text-white mt-1">Butuh Bantuan Langsung dari Administrator?</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Hubungi tim administrator dan mentor industri PT. Teknologi Multi Sistem pada jam kerja.</p>
-                </div>
-                <a href="https://wa.me/6285219583336?text=Halo%20Admin%20TMS,%20saya%20memerlukan%20bantuan%20terkait%20akun%20SIMAK-TMS" target="_blank" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-all shadow-lg shadow-red-600/30 flex items-center gap-2 self-start sm:self-auto cursor-pointer">
-                    <i data-lucide="message-circle" class="w-4 h-4"></i>
-                    <span>Hubungi WhatsApp Admin</span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-300">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-red-400 shrink-0">
-                        <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Lokasi Lab</div>
-                        <div class="font-semibold text-white">Lab Software TMS</div>
-                        <div class="text-[11px] text-slate-400">PT. Teknologi Multi Sistem</div>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-red-400 shrink-0">
-                        <i data-lucide="clock" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Jam Kerja</div>
-                        <div class="font-semibold text-white">08:00 – 17:00 WIB</div>
-                        <div class="text-[11px] text-slate-400">Senin s/d Jumat</div>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-red-400 shrink-0">
-                        <i data-lucide="phone" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <div class="text-[10px] text-slate-500 font-bold uppercase">Hotline WhatsApp</div>
-                        <div class="font-semibold text-white font-mono">0852-1958-3336</div>
-                        <div class="text-[11px] text-slate-400">Layanan Akun & Password</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Back to Login Footer Link -->
         <div class="text-center pt-2">
             <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-red-600 transition-colors">
@@ -266,7 +202,7 @@
 
     <!-- Footer Copyright -->
     <footer class="border-t border-slate-200/80 bg-white py-4 text-center text-xs text-slate-400">
-        &copy; {{ date('Y') }} PT. Teknologi Multi Sistem &bull; Kerjasama SMKN 1 Ciamis (PPLG)
+        &copy; {{ date('Y') }} PT. Teknologi Multi Sistem
     </footer>
 
     <script>

@@ -14,9 +14,39 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class SimakController extends Controller
 {
+    // ==========================================
+    // AUTHORIZATION HELPERS (DEFENSE IN DEPTH)
+    // ==========================================
+    /**
+     * Pastikan pengguna saat ini adalah Administrator TMS
+     */
+    private function authorizeAdmin(): User
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'admin_tms') {
+            abort(403, 'Akses Ditolak: Modul ini hanya dapat diakses oleh Administrator TMS.');
+        }
+        return $user;
+    }
+
+    /**
+     * Pastikan pengguna saat ini adalah Mentor atau Administrator TMS
+     */
+    private function authorizeMentorOrAdmin(): User
+    {
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['mentor', 'admin_tms'], true)) {
+            abort(403, 'Akses Ditolak: Modul ini hanya dapat diakses oleh Staff Mentor atau Administrator TMS.');
+        }
+        return $user;
+    }
+
     // ==========================================
     // AUTHENTICATION
     // ==========================================
@@ -36,8 +66,17 @@ class SimakController extends Controller
         ]);
 
         $loginId = trim($request->login_id);
+        $throttleKey = Str::lower($loginId) . '|' . $request->ip();
 
-        // Cari berdasarkan 5-digit account_id, username, atau email
+        // Rate limit: Maksimal 5 percobaan gagal per 1 menit
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors([
+                'login_id' => "Terlalu banyak percobaan login gagal. Demi keamanan, silakan tunggu {$seconds} detik lagi.",
+            ])->onlyInput('login_id');
+        }
+
+        // Cari berdasarkan account_id, username, atau email
         $user = User::where('account_id', $loginId)
                     ->orWhere('username', $loginId)
                     ->orWhere('email', $loginId)
@@ -46,13 +85,22 @@ class SimakController extends Controller
         $remember = $request->boolean('remember') || $request->filled('remember');
 
         if ($user && Hash::check($request->password, $user->password)) {
+            RateLimiter::clear($throttleKey);
             Auth::login($user, $remember);
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));
         }
 
+        // Catat percobaan gagal (lockout 60 detik)
+        RateLimiter::hit($throttleKey, 60);
+
+        $attemptsLeft = RateLimiter::remaining($throttleKey, 5);
+        $warningMsg = $attemptsLeft > 0
+            ? "ID Pengguna atau Kata Sandi salah. (Sisa percobaan: {$attemptsLeft})"
+            : "ID Pengguna atau Kata Sandi salah. Percobaan login terkunci sementara selama 60 detik.";
+
         return back()->withErrors([
-            'login_id' => 'ID Pengguna atau Kata Sandi salah.',
+            'login_id' => $warningMsg,
         ])->onlyInput('login_id');
     }
 
@@ -63,20 +111,6 @@ class SimakController extends Controller
         } while (User::where('account_id', $code)->orWhere('username', $code)->exists());
 
         return $code;
-    }
-
-    // Quick Login Demo Helper for Siswa / Mentor / Admin
-    public function quickLogin($role)
-    {
-        $user = User::where('role', $role)->first();
-        if ($user) {
-            Auth::login($user, true);
-            request()->session()->regenerate();
-            return redirect()->route('dashboard')->with('success', 'Selamat datang, ' . $user->name . ' (' . strtoupper($user->role) . ')');
-        }
-        
-        $roleName = $role === 'mentor' ? 'Staff Mentor' : ($role === 'siswa' ? 'Siswa PKL' : 'Admin');
-        return redirect()->route('login')->with('error', "Belum ada akun {$roleName} terdaftar. Silakan login sebagai Admin TMS terlebih dahulu untuk mendaftarkan akun baru.");
     }
 
     public function logout(Request $request)
@@ -115,24 +149,6 @@ class SimakController extends Controller
         $pendingJournalsCount = DailyJournal::where('user_id', $user->id)->where('status', 'pending')->count();
         $showcaseCount = ShowcaseProject::count();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
-        if (!$evaluation && $user->role === 'siswa') {
-            $mentorId = $user->mentor_id ?? User::where('role', 'mentor')->value('id') ?? 10;
-            $evaluation = Evaluation::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'mentor_id' => $mentorId,
-                    'technical_skill' => 96,
-                    'discipline' => 98,
-                    'teamwork' => 94,
-                    'initiative' => 95,
-                    'final_score' => 95.8,
-                    'certificate_number' => 'TMS-CERT-2026-' . ($user->account_id ?? $user->id),
-                    'issue_date' => now()->toDateString(),
-                    'is_published' => true,
-                    'general_notes' => 'Peserta menunjukkan etos kerja tinggi dan penguasaan koding software engineering yang unggul.',
-                ]
-            );
-        }
 
         return view('dashboard', compact(
             'user',
@@ -172,13 +188,16 @@ class SimakController extends Controller
 
     public function submitTask(Request $request, $id)
     {
+        $user = Auth::user();
+        if ($user->role !== 'siswa') {
+            abort(403, 'Akses Ditolak: Hanya siswa magang yang dapat mengumpulkan tugas.');
+        }
+
         $request->validate([
             'repo_url' => 'nullable|url',
             'demo_url' => 'nullable|url',
             'submission_notes' => 'required|string',
         ]);
-
-        $user = Auth::user();
 
         TaskSubmission::updateOrCreate(
             [
@@ -223,21 +242,35 @@ class SimakController extends Controller
 
     public function storeJournal(Request $request)
     {
+        $user = Auth::user();
+        if ($user->role !== 'siswa') {
+            return redirect()->route('dashboard')->with('error', 'Hanya siswa magang yang dapat mengisi logbook kegiatan harian.');
+        }
+
         $request->validate([
-            'journal_date' => 'required|date',
+            'journal_date' => 'required|date|before_or_equal:today',
             'activity_title' => 'required|string|max:200',
             'activity_detail' => 'required|string',
             'commit_url' => 'nullable|string',
+        ], [
+            'journal_date.before_or_equal' => 'Pengisian logbook tidak dapat dilakukan untuk tanggal di masa depan.',
         ]);
 
-        $user = Auth::user();
-        $isPast = ($request->journal_date < now()->toDateString());
+        $today = now()->toDateString();
+        // Mencegah kecurangan siswa mengisi jurnal untuk hari esok / masa depan
+        if ($request->journal_date > $today) {
+            return redirect()->route('journals.index')->withErrors([
+                'activity_title' => 'Pengisian logbook tidak dapat dilakukan untuk tanggal di masa depan.',
+            ]);
+        }
+
+        $isPast = ($request->journal_date < $today);
         $existing = DailyJournal::where('user_id', $user->id)
             ->where('journal_date', $request->journal_date)
             ->first();
 
         // Mencegah kecurangan siswa mengisi mundur tanggal yang terlewat dan belum diisi
-        if ($isPast && !$existing && $user->role === 'siswa') {
+        if ($isPast && !$existing) {
             return redirect()->route('journals.index')->withErrors([
                 'activity_title' => 'Batas waktu pengisian logbook untuk tanggal tersebut telah ditutup.',
             ]);
@@ -352,6 +385,8 @@ class SimakController extends Controller
     // ==========================================
     public function mentorReview()
     {
+        $this->authorizeMentorOrAdmin();
+
         $journals = DailyJournal::with(['user', 'mentor'])->latest('journal_date')->get();
         $pendingJournalsCount = DailyJournal::whereNull('mentor_feedback')->orWhere('mentor_feedback', '')->count();
         $reviewedJournalsCount = DailyJournal::whereNotNull('mentor_feedback')->where('mentor_feedback', '!=', '')->count();
@@ -362,14 +397,21 @@ class SimakController extends Controller
 
     public function mentorAddNote(Request $request, $id)
     {
+        $user = $this->authorizeMentorOrAdmin();
+
+        $journal = DailyJournal::with('user')->findOrFail($id);
+
+        // Mencegah mentor lain atau siswa mengedit catatan logbook siswa yang bukan bimbingannya
+        if ($user->role === 'mentor' && $journal->user && $journal->user->mentor_id && $journal->user->mentor_id !== $user->id) {
+            abort(403, 'Akses Ditolak: Anda bukan mentor pembimbing resmi untuk siswa pemilik logbook ini.');
+        }
+
         $request->validate([
             'mentor_feedback' => 'required|string',
         ]);
 
-        $journal = DailyJournal::findOrFail($id);
-        $mentor = Auth::user();
         $journal->update([
-            'mentor_id' => $mentor ? $mentor->id : $journal->mentor_id,
+            'mentor_id' => $user->id,
             'mentor_feedback' => $request->mentor_feedback,
             'status' => 'approved',
         ]);
@@ -379,11 +421,18 @@ class SimakController extends Controller
 
     public function approveJournal($id)
     {
-        $journal = DailyJournal::findOrFail($id);
-        $mentor = Auth::user();
+        $user = $this->authorizeMentorOrAdmin();
+
+        $journal = DailyJournal::with('user')->findOrFail($id);
+
+        // Mencegah kecurangan self-approval atau mentor lain menyetujui di luar penugasannya
+        if ($user->role === 'mentor' && $journal->user && $journal->user->mentor_id && $journal->user->mentor_id !== $user->id) {
+            abort(403, 'Akses Ditolak: Anda bukan mentor pembimbing resmi untuk siswa pemilik logbook ini.');
+        }
+
         $journal->update([
             'status' => 'approved',
-            'mentor_id' => $mentor ? $mentor->id : $journal->mentor_id,
+            'mentor_id' => $user->role === 'mentor' ? $user->id : ($journal->mentor_id ?? $user->id),
             'mentor_feedback' => $journal->mentor_feedback ?: 'Aktivitas terverifikasi dan memenuhi standar dokumentasi kerja PT. Teknologi Multi Sistem.',
         ]);
 
@@ -392,10 +441,23 @@ class SimakController extends Controller
 
     public function gradeSubmission(Request $request, $id)
     {
-        $submission = TaskSubmission::findOrFail($id);
+        $user = $this->authorizeMentorOrAdmin();
+
+        $submission = TaskSubmission::with('user')->findOrFail($id);
+
+        // Mencegah kecurangan self-grading siswa atau intervensi mentor yang tidak berwenang
+        if ($user->role === 'mentor' && $submission->user && $submission->user->mentor_id && $submission->user->mentor_id !== $user->id) {
+            abort(403, 'Akses Ditolak: Anda bukan mentor pembimbing untuk siswa pemilik tugas ini.');
+        }
+
+        $request->validate([
+            'score' => 'required|numeric|min:0|max:100',
+            'feedback' => 'nullable|string|max:1000',
+        ]);
+
         $submission->update([
             'status' => 'approved',
-            'score' => $request->score ?? 95,
+            'score' => $request->score,
             'feedback' => $request->feedback ?? 'Pengerjaan modul sesuai spesifikasi.',
         ]);
 
@@ -428,42 +490,11 @@ class SimakController extends Controller
         $journals = DailyJournal::where('user_id', $user->id)->latest()->take(10)->get();
         $submissions = TaskSubmission::with('task')->where('user_id', $user->id)->latest()->get();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
-        if (!$evaluation && $user->role === 'siswa') {
-            $mentorId = $user->mentor_id ?? User::where('role', 'mentor')->value('id') ?? 10;
-            $evaluation = Evaluation::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'mentor_id' => $mentorId,
-                    'technical_skill' => 96,
-                    'discipline' => 98,
-                    'teamwork' => 94,
-                    'initiative' => 95,
-                    'final_score' => 95.8,
-                    'certificate_number' => 'TMS-CERT-2026-' . ($user->account_id ?? $user->id),
-                    'issue_date' => now()->toDateString(),
-                    'is_published' => true,
-                    'general_notes' => 'Peserta menunjukkan etos kerja tinggi dan penguasaan koding software engineering yang unggul.',
-                ]
-            );
-        }
         
         $totalCommits = 47;
         $totalJournals = DailyJournal::where('user_id', $user->id)->count();
         $totalSubmissions = TaskSubmission::where('user_id', $user->id)->count();
         $totalContributions = $totalCommits + $totalJournals + $totalSubmissions;
-
-        // Matrix heatmap gaya GitHub (35 hari terakhir)
-        $heatmap = [];
-        for ($i = 34; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $count = ($i % 3 == 0 || $i % 7 == 2 || $i == 0) ? rand(2, 6) : ($i % 4 == 0 ? rand(1, 2) : 0);
-            $heatmap[] = [
-                'date' => $date->format('Y-m-d'),
-                'label' => $date->translatedFormat('d M Y'),
-                'count' => $count,
-                'level' => $count == 0 ? 0 : ($count <= 2 ? 1 : ($count <= 4 ? 2 : 3))
-            ];
-        }
 
         $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
         $qrCodeUrl = route('qr.generate', $user->account_id ?? $user->username ?? $user->id);
@@ -477,7 +508,6 @@ class SimakController extends Controller
             'totalContributions',
             'totalCommits',
             'totalJournals',
-            'heatmap',
             'publicUrl',
             'qrCodeUrl'
         ));
@@ -486,22 +516,174 @@ class SimakController extends Controller
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
+        
+        $reservedUsernames = ['admin', 'administrator', 'root', 'system', 'superuser', 'mentor', 'siswa', 'tms', 'simak', 'staff', 'support', 'help', 'api'];
+
         $validated = $request->validate([
-            'username' => 'nullable|string|max:60',
+            'username' => [
+                'nullable',
+                'string',
+                'min:3',
+                'max:50',
+                'alpha_dash',
+                Rule::unique('users', 'username')->ignore($user->id),
+                function ($attribute, $value, $fail) use ($user, $reservedUsernames) {
+                    if ($user->role !== 'admin_tms' && in_array(strtolower($value), $reservedUsernames, true)) {
+                        $fail("Username '{$value}' dicadangkan untuk sistem dan tidak dapat digunakan.");
+                    }
+                    if (User::where('account_id', $value)->where('id', '!=', $user->id)->exists()) {
+                        $fail("Username '{$value}' bertabrakan dengan ID pengguna lain di sistem.");
+                    }
+                },
+            ],
             'headline' => 'nullable|string|max:180',
-            'bio' => 'nullable|string',
-            'github_url' => 'nullable|url',
-            'linkedin_url' => 'nullable|url',
-            'instagram_url' => 'nullable|url',
-            'website_url' => 'nullable|url',
-            'skills' => 'nullable|string',
+            'bio' => 'nullable|string|max:1000',
+            'github_url' => 'nullable|url|max:200',
+            'linkedin_url' => 'nullable|url|max:200',
+            'instagram_url' => 'nullable|url|max:200',
+            'website_url' => 'nullable|url|max:200',
+            'skills' => 'nullable|string|max:300',
             'location' => 'nullable|string|max:100',
             'avatar' => 'nullable|string',
+        ], [
+            'username.unique' => 'Username tersebut sudah digunakan oleh pengguna lain. Silakan pilih username lain.',
+            'username.alpha_dash' => 'Username hanya boleh berisi huruf, angka, tanda strip (-), dan garis bawah (_).',
+            'username.min' => 'Username minimal terdiri dari 3 karakter.',
         ]);
 
         $user->update($validated);
 
         return back()->with('success', 'Profil Developer & Tautan Media Sosial berhasil diperbarui!');
+    }
+
+    /**
+     * Upload & Crop Avatar (Kamera & File Upload - Max 2MB, Rasio 1:1)
+     * Dilengkapi validasi ekstensi ketat, allowlist MIME, serta verifikasi integritas bitmap
+     */
+    public function updateAvatar(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'avatar_file' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:2048',
+            'avatar_base64' => 'nullable|string',
+        ]);
+
+        $avatarPath = null;
+        $dir = public_path('uploads/avatars');
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+
+        if ($request->hasFile('avatar_file')) {
+            $file = $request->file('avatar_file');
+            
+            // Validasi ukuran maksimal 2MB
+            if ($file->getSize() > 2048 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ukuran file foto melebihi batas maksimal 2MB!'
+                ], 422);
+            }
+
+            $mime = $file->getMimeType();
+            if (!in_array($mime, $allowedMimes, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format file gambar tidak diizinkan. Hanya file JPG, PNG, dan WebP yang diperbolehkan.'
+                ], 422);
+            }
+
+            $ext = strtolower($file->getClientOriginalExtension());
+            if (!in_array($ext, $allowedExts, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ekstensi file tidak valid!'
+                ], 422);
+            }
+            if ($ext === 'jpeg') $ext = 'jpg';
+
+            $filename = 'avatar_' . $user->id . '_' . bin2hex(random_bytes(10)) . '.' . $ext;
+            $file->move($dir, $filename);
+            $avatarPath = '/uploads/avatars/' . $filename;
+        } elseif ($request->filled('avatar_base64')) {
+            $base64 = $request->input('avatar_base64');
+            
+            // Validasi format data URL dengan ekstensi ketat
+            if (!preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+\/=\r\n]+)$/', $base64, $matches)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Format payload gambar base64 tidak valid atau ekstensi tidak diizinkan!'
+                ], 422);
+            }
+
+            $ext = strtolower($matches[1]);
+            if (!in_array($ext, $allowedExts, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ekstensi file gambar tidak diizinkan.'
+                ], 422);
+            }
+            if ($ext === 'jpeg') $ext = 'jpg';
+
+            $decoded = base64_decode($matches[2], true);
+            if ($decoded === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data base64 gambar rusak atau tidak valid.'
+                ], 422);
+            }
+
+            if (strlen($decoded) > 2048 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ukuran file hasil pemotongan melebihi batas 2MB!'
+                ], 422);
+            }
+
+            // Validasi integritas bitmap gambar nyata (mencegah script berbahaya diselipkan)
+            $imageInfo = @getimagesizefromstring($decoded);
+            if (!$imageInfo || !isset($imageInfo['mime']) || !in_array($imageInfo['mime'], $allowedMimes, true)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File terindikasi rusak atau bukan format gambar valid!'
+                ], 422);
+            }
+
+            $filename = 'avatar_' . $user->id . '_' . bin2hex(random_bytes(10)) . '.' . $ext;
+            file_put_contents($dir . '/' . $filename, $decoded);
+            $avatarPath = '/uploads/avatars/' . $filename;
+        }
+
+        if ($avatarPath) {
+            // Hapus file avatar lokal lama jika ada (agar hemat storage)
+            if ($user->avatar && str_starts_with($user->avatar, '/uploads/avatars/')) {
+                $oldFile = public_path(ltrim($user->avatar, '/'));
+                if (file_exists($oldFile) && is_file($oldFile)) {
+                    @unlink($oldFile);
+                }
+            }
+
+            $user->update(['avatar' => $avatarPath]);
+
+            if ($request->expectsJson() || $request->ajax() || $request->isJson() || $request->wantsJson() || $request->header('Content-Type') === 'application/json') {
+                return response()->json([
+                    'success' => true,
+                    'avatar_url' => $avatarPath,
+                    'message' => 'Foto profil berhasil diperbarui!'
+                ]);
+            }
+
+            return back()->with('success', 'Foto profil berhasil diperbarui!');
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada file gambar yang valid untuk diproses.'
+        ], 422);
     }
 
     /**
@@ -519,43 +701,21 @@ class SimakController extends Controller
             abort(404, 'Profil pengguna SIMAK-TMS tidak ditemukan.');
         }
 
+        // Siswa yang belum terdaftar (belum memiliki ID & pembimbing mentor) belum bisa dibuka profilnya
+        if ($user->role === 'siswa' && empty($user->account_id)) {
+            if (Auth::check() && Auth::user()->role === 'admin_tms') {
+                return redirect()->route('admin.students')->with('error', "Profil {$user->name} belum dapat diakses karena masih berstatus (belum terdaftar). Silakan klik Edit Data untuk memilih mentor terlebih dahulu agar ID resmi siswa diterbitkan.");
+            }
+            abort(404, 'Profil siswa belum tersedia karena siswa belum terdaftar resmi di PT. TMS.');
+        }
+
         $projects = ShowcaseProject::where('creator_id', $user->id)->get();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
-        if (!$evaluation && $user->role === 'siswa') {
-            $evaluation = Evaluation::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'mentor_id' => $user->mentor_id ?? 10,
-                    'technical_skill' => 96,
-                    'discipline' => 98,
-                    'teamwork' => 94,
-                    'initiative' => 95,
-                    'final_score' => 95.8,
-                    'certificate_number' => 'TMS-CERT-2026-' . ($user->account_id ?? $user->id),
-                    'issue_date' => now()->toDateString(),
-                    'is_published' => true,
-                    'general_notes' => 'Peserta menunjukkan etos kerja tinggi dan penguasaan koding software engineering yang unggul.',
-                ]
-            );
-        }
 
         $totalJournals = DailyJournal::where('user_id', $user->id)->count();
         $totalProjects = $projects->count();
         $totalCommits = 47;
         $totalContributions = $totalCommits + $totalJournals + $totalProjects;
-
-        // Matrix heatmap (35 hari terakhir)
-        $heatmap = [];
-        for ($i = 34; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $count = ($i % 3 == 0 || $i % 7 == 2 || $i == 0) ? rand(2, 6) : ($i % 4 == 0 ? rand(1, 2) : 0);
-            $heatmap[] = [
-                'date' => $date->format('Y-m-d'),
-                'label' => $date->translatedFormat('d M Y'),
-                'count' => $count,
-                'level' => $count == 0 ? 0 : ($count <= 2 ? 1 : ($count <= 4 ? 2 : 3))
-            ];
-        }
 
         $isOwner = Auth::check() && Auth::id() === $user->id;
         $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
@@ -568,7 +728,6 @@ class SimakController extends Controller
             'totalJournals',
             'totalProjects',
             'totalContributions',
-            'heatmap',
             'isOwner',
             'publicUrl',
             'qrCodeUrl'
@@ -610,7 +769,7 @@ class SimakController extends Controller
     // ==========================================
     public function mentorDashboard()
     {
-        $mentor = Auth::user() ?? User::where('role', 'mentor')->first();
+        $mentor = $this->authorizeMentorOrAdmin();
         $activeBatch = Batch::where('is_active', true)->first() ?? Batch::first();
         
         // Siswa aktif bimbingan saat ini (Yang Sekarang)
@@ -649,6 +808,8 @@ class SimakController extends Controller
     // ==========================================
     public function adminDashboard()
     {
+        $this->authorizeAdmin();
+
         $interns = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'showcaseProjects', 'submissions'])->get();
         $mentors = User::where('role', 'mentor')->get();
         $batches = Batch::withCount('showcaseProjects')->get();
@@ -679,6 +840,8 @@ class SimakController extends Controller
 
     public function adminStudents(Request $request)
     {
+        $this->authorizeAdmin();
+
         $query = User::where('role', 'siswa')->with(['mentor', 'batch', 'evaluation', 'showcaseProjects', 'submissions']);
 
         if ($request->filled('search')) {
@@ -714,6 +877,8 @@ class SimakController extends Controller
 
     public function adminCreateTask(Request $request)
     {
+        $this->authorizeAdmin();
+
         $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'required|string',
@@ -743,6 +908,8 @@ class SimakController extends Controller
     // 1. Admin: Bisa mendaftarkan Mentor & Siswa
     public function adminStoreUser(Request $request)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|string|max:150',
@@ -785,7 +952,7 @@ class SimakController extends Controller
     // ==========================================
     public function mentorStudents()
     {
-        $mentor = Auth::user() ?? User::where('role', 'mentor')->first();
+        $mentor = $this->authorizeMentorOrAdmin();
         $students = User::where('role', 'siswa')
             ->with(['journals' => function($q) {
                 $q->latest();
@@ -803,6 +970,8 @@ class SimakController extends Controller
     // ==========================================
     public function adminUpdateStudent(Request $request, $id)
     {
+        $this->authorizeAdmin();
+
         $student = User::where('role', 'siswa')->findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -828,6 +997,8 @@ class SimakController extends Controller
 
     public function adminDeleteStudent($id)
     {
+        $this->authorizeAdmin();
+
         $student = User::where('role', 'siswa')->findOrFail($id);
         $name = $student->name;
         
@@ -847,6 +1018,8 @@ class SimakController extends Controller
     // ==========================================
     public function adminMentors(Request $request)
     {
+        $this->authorizeAdmin();
+
         $query = User::where('role', 'mentor')->with(['students.evaluation', 'tasks']);
 
         if ($request->filled('search')) {
@@ -877,6 +1050,8 @@ class SimakController extends Controller
 
     public function adminStoreMentor(Request $request)
     {
+        $this->authorizeAdmin();
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'nullable|string|max:150',
@@ -916,6 +1091,8 @@ class SimakController extends Controller
 
     public function adminUpdateMentor(Request $request, $id)
     {
+        $this->authorizeAdmin();
+
         $mentor = User::where('role', 'mentor')->findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -941,6 +1118,8 @@ class SimakController extends Controller
 
     public function adminDeleteMentor($id)
     {
+        $this->authorizeAdmin();
+
         $mentor = User::where('role', 'mentor')->findOrFail($id);
         $name = $mentor->name;
 
@@ -957,9 +1136,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminResetPassword($id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas khusus Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $target = User::findOrFail($id);
         $target->update([
@@ -1033,7 +1210,7 @@ class SimakController extends Controller
             })
             ->first();
 
-        if (!$evaluation) {
+        if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
             return response()->view('certificate.verify_not_found', ['certificate_number' => $certNo], 404);
         }
 
@@ -1062,10 +1239,10 @@ class SimakController extends Controller
             })
             ->first();
 
-        if (!$evaluation) {
+        if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
             return response()->json([
                 'found' => false,
-                'message' => 'Sertifikat tidak ditemukan dalam database resmi PT. TMS.'
+                'message' => 'Sertifikat tidak ditemukan atau belum diterbitkan secara resmi oleh PT. TMS.'
             ], 404);
         }
 
@@ -1100,7 +1277,11 @@ class SimakController extends Controller
             ->orWhereHas('user', function ($q) use ($certNo) {
                 $q->where('account_id', $certNo);
             })
-            ->firstOrFail();
+            ->first();
+
+        if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
+            abort(403, 'Sertifikat kelulusan belum dapat dicetak. Siswa masih berstatus magang aktif atau belum menyelesaikan evaluasi nilai akhir oleh pembimbing mentor industri PT. TMS.');
+        }
 
         $student = $evaluation->user;
         $mentor = $evaluation->mentor ?? $student->mentor;
@@ -1114,9 +1295,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminBatches(Request $request)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $batches = Batch::withCount(['users', 'showcaseProjects'])->get();
         $selectedBatchId = $request->get('batch_id', $batches->first()->id ?? 1);
@@ -1134,9 +1313,7 @@ class SimakController extends Controller
 
     public function adminStoreBatch(Request $request)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $request->validate([
             'batch_name' => 'required|string|max:100',
@@ -1158,9 +1335,7 @@ class SimakController extends Controller
 
     public function adminUpdateBatch(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $batch = Batch::findOrFail($id);
         $batch->update([
@@ -1176,9 +1351,7 @@ class SimakController extends Controller
 
     public function adminStoreProject(Request $request)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $request->validate([
             'batch_id' => 'required|exists:batches,id',
@@ -1214,9 +1387,7 @@ class SimakController extends Controller
 
     public function adminUpdateProject(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $project = ShowcaseProject::findOrFail($id);
         $project->update([
@@ -1236,9 +1407,7 @@ class SimakController extends Controller
 
     public function adminDeleteProject($id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $project = ShowcaseProject::findOrFail($id);
         $title = $project->title;
@@ -1252,9 +1421,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminInstitutions()
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $institutions = PartnerInstitution::withCount('students')->get();
         $totalInstitutions = $institutions->count();
@@ -1266,9 +1433,7 @@ class SimakController extends Controller
 
     public function adminStoreInstitution(Request $request)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $request->validate([
             'name' => 'required|string|max:150',
@@ -1296,9 +1461,7 @@ class SimakController extends Controller
 
     public function adminUpdateInstitution(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $inst = PartnerInstitution::findOrFail($id);
         $inst->update([
@@ -1318,9 +1481,7 @@ class SimakController extends Controller
 
     public function adminDeleteInstitution($id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $inst = PartnerInstitution::findOrFail($id);
         $name = $inst->name;
@@ -1334,9 +1495,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminSaveEvaluation(Request $request, $userId)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $user = User::findOrFail($userId);
         $tech = (float)($request->technical_skill ?? 90);
@@ -1407,9 +1566,23 @@ class SimakController extends Controller
             'religion' => 'nullable|string|max:50',
             'skill_competency' => 'required|string|max:100',
             'school_origin' => 'nullable|string|max:150',
-            'email' => 'required|email|max:150',
+            'email' => 'required|email|max:150|unique:users,email',
             'phone_number' => 'required|string|max:30',
+        ], [
+            'email.unique' => 'Email ini sudah terdaftar sebagai akun aktif di SIMAK-TMS. Silakan login atau gunakan email lain.',
         ]);
+
+        // Cek pendaftaran pending duplikat dengan email yang sama
+        $existingPending = PklRegistration::where('email', $validated['email'])
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existingPending) {
+            return redirect()->route('registry.index', [
+                'tab' => 'check',
+                'code' => $existingPending->registration_code,
+            ])->with('info', "Anda sudah memiliki pendaftaran antrian aktif dengan kode: {$existingPending->registration_code}. Silakan tunggu verifikasi admin.");
+        }
 
         $regCode = $this->generateUniqueRegistrationCode();
 
@@ -1462,9 +1635,7 @@ class SimakController extends Controller
     // ==========================================
     public function adminRegistrations(Request $request)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $status = $request->get('status', 'all');
 
@@ -1489,14 +1660,17 @@ class SimakController extends Controller
 
     public function adminApproveRegistration(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $reg = PklRegistration::findOrFail($id);
 
         if ($reg->status === 'approved') {
             return back()->with('info', "Pendaftaran {$reg->full_name} sudah disetujui sebelumnya.");
+        }
+
+        // Mencegah crash SQL 1062 Integrity Constraint jika email sudah terdaftar di users
+        if (User::where('email', $reg->email)->exists()) {
+            return back()->with('error', "Gagal menyetujui: Email '{$reg->email}' sudah digunakan oleh pengguna lain di sistem. Silakan periksa atau ubah data pendaftar.");
         }
 
         $activeBatch = Batch::where('is_active', true)->first() ?? Batch::first();
@@ -1532,9 +1706,7 @@ class SimakController extends Controller
 
     public function adminRejectRegistration(Request $request, $id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $reg = PklRegistration::findOrFail($id);
         $reason = $request->input('rejection_reason', 'Mohon maaf, kuota penerimaan magang periode ini telah penuh / kualifikasi belum memenuhi.');
@@ -1549,9 +1721,7 @@ class SimakController extends Controller
 
     public function adminDeleteRegistration($id)
     {
-        if (Auth::user()->role !== 'admin_tms') {
-            abort(403, 'Akses terbatas Administrator TMS.');
-        }
+        $this->authorizeAdmin();
 
         $reg = PklRegistration::findOrFail($id);
         $name = $reg->full_name;

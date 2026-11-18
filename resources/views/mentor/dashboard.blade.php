@@ -269,10 +269,17 @@
                             <i data-lucide="eye" class="w-3.5 h-3.5 text-red-400"></i>
                             <span>Inspect</span>
                         </a>
-                        <a href="{{ route('profile') }}" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1">
-                            <i data-lucide="user" class="w-3.5 h-3.5 text-red-600"></i>
-                            <span>Profil</span>
-                        </a>
+                        @if(!empty($intern->account_id))
+                            <a href="{{ url('/profile/' . $intern->account_id) }}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1">
+                                <i data-lucide="user" class="w-3.5 h-3.5 text-red-600"></i>
+                                <span>Profil</span>
+                            </a>
+                        @else
+                            <button type="button" onclick="alert('Profil {{ addslashes($intern->name) }} belum dapat dibuka karena belum terdaftar resmi.')" class="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-400 text-[11px] font-semibold cursor-not-allowed opacity-60 flex items-center gap-1" title="Siswa belum terdaftar">
+                                <i data-lucide="user-x" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>Profil</span>
+                            </button>
+                        @endif
                         <a href="{{ route('mentor.review') }}" class="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold transition-colors">
                             Validasi
                         </a>

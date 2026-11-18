@@ -102,20 +102,6 @@
         </div>
     </header>
 
-    <!-- Public Notification Bar (Read-Only Mode Notice) -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white text-xs py-2 px-4 border-b border-slate-700">
-        <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-semibold text-slate-200">Mode Pratinjau Publik (View Mode)</span>
-                <span class="text-slate-400 hidden sm:inline">• Dokumen Portofolio Resmi Terverifikasi</span>
-            </div>
-            <div class="flex items-center gap-1.5 text-[11px] text-slate-300 font-mono">
-                <span>ID: {{ $user->account_id ?? $user->username ?? $user->id }}</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content Container -->
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full space-y-8">
 
@@ -250,14 +236,25 @@
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Jurnal Harian</div>
                 <div class="text-2xl font-black text-slate-900 font-mono mt-1">{{ $totalJournals }} <span class="text-xs font-normal text-slate-500">Logbook</span></div>
             </div>
-            <div class="mas-card p-4 text-center">
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nilai Evaluasi</div>
-                <div class="text-2xl font-black text-emerald-600 font-mono mt-1">{{ $evaluation->final_score ?? 95.8 }} <span class="text-xs font-bold text-slate-800">[ A ]</span></div>
-            </div>
-            <div class="mas-card p-4 text-center">
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status DUDI</div>
-                <div class="text-2xl font-black text-slate-900 font-mono mt-1">100% <span class="text-xs font-normal text-emerald-600 font-bold">Lulus</span></div>
-            </div>
+            @if($evaluation && $evaluation->is_published)
+                <div class="mas-card p-4 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nilai Evaluasi</div>
+                    <div class="text-2xl font-black text-emerald-600 font-mono mt-1">{{ $evaluation->final_score }} <span class="text-xs font-bold text-slate-800">[ {{ $evaluation->final_score >= 85 ? 'A' : ($evaluation->final_score >= 75 ? 'B' : 'C') }} ]</span></div>
+                </div>
+                <div class="mas-card p-4 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status DUDI</div>
+                    <div class="text-2xl font-black text-slate-900 font-mono mt-1">100% <span class="text-xs font-normal text-emerald-600 font-bold">Lulus</span></div>
+                </div>
+            @else
+                <div class="mas-card p-4 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nilai Evaluasi</div>
+                    <div class="text-lg font-black text-amber-600 mt-2 font-mono">Masa Magang</div>
+                </div>
+                <div class="mas-card p-4 text-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status DUDI</div>
+                    <div class="text-lg font-black text-slate-900 mt-2"><span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Aktif Magang</span></div>
+                </div>
+            @endif
         </div>
 
         <!-- Skills & Tech Stacks -->
@@ -340,44 +337,6 @@
                     <p class="text-xs font-medium">Belum ada portofolio proyek publik yang dipublikasikan.</p>
                 </div>
             @endif
-        </div>
-
-        <!-- Activity Heatmap Matrix (GitHub Style) -->
-        <div class="mas-card p-6 space-y-3">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Aktivitas & Kontribusi Koding</h3>
-                    <p class="text-xs text-slate-600 font-medium">Rekam jejak konsistensi pengerjaan jurnal harian & commit proyek.</p>
-                </div>
-                <span class="text-xs font-mono font-bold text-emerald-600">100% Aktif Real-Time</span>
-            </div>
-
-            <!-- Heatmap Blocks -->
-            <div class="overflow-x-auto pb-2">
-                <div class="flex items-center gap-1.5 min-w-[340px]">
-                    @foreach($heatmap as $day)
-                        <div class="w-5 h-5 rounded-md transition-all
-                            @if($day['level'] == 0) bg-slate-100 border border-slate-200
-                            @elseif($day['level'] == 1) bg-red-200 border border-red-300
-                            @elseif($day['level'] == 2) bg-red-400 border border-red-500
-                            @else bg-red-600 border border-red-700 shadow-xs @endif"
-                            title="{{ $day['label'] }}: {{ $day['count'] }} Aktivitas">
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                <span>35 Hari Terakhir</span>
-                <div class="flex items-center gap-1.5">
-                    <span>Kurang</span>
-                    <span class="w-3 h-3 rounded-xs bg-slate-100 border border-slate-200"></span>
-                    <span class="w-3 h-3 rounded-xs bg-red-200"></span>
-                    <span class="w-3 h-3 rounded-xs bg-red-400"></span>
-                    <span class="w-3 h-3 rounded-xs bg-red-600"></span>
-                    <span>Sering</span>
-                </div>
-            </div>
         </div>
 
         <!-- Bottom Official Authenticity Card -->

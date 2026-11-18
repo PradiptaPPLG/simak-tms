@@ -33,6 +33,7 @@ Route::get('/sertifikat/{certificate_number}', function ($certificate_number) {
 Route::get('/sertifikat/{certificate_number}/cetak', [SimakController::class, 'printCertificate'])->name('certificate.print');
 
 // Formulir Pendaftaran PKL Online & Cek Status Antrian (/registry-pkl)
+// Rate limiting 10 requests per minute on POST to prevent bot spam
 Route::get('/registry-pkl', [SimakController::class, 'registryIndex'])->name('registry.index');
 Route::get('/registrasi-pkl', function () {
     return redirect()->route('registry.index');
@@ -40,152 +41,28 @@ Route::get('/registrasi-pkl', function () {
 Route::get('/daftar-pkl', function () {
     return redirect()->route('registry.index');
 });
-Route::post('/registry-pkl', [SimakController::class, 'registryStore'])->name('registry.store');
+Route::post('/registry-pkl', [SimakController::class, 'registryStore'])->middleware('throttle:10,1')->name('registry.store');
 Route::get('/registry-pkl/check', [SimakController::class, 'registryCheck'])->name('registry.check');
 
-// Preview routes for testing (Auto-login & redirect to real named routes)
-Route::get('/preview/verifikasi', function () {
-    $eval = \App\Models\Evaluation::first();
-    $cert = $eval ? $eval->certificate_number : 'TMS-CERT-2026-20239';
-    return redirect()->route('verify.show', $cert);
-})->name('preview.verifikasi');
-
-Route::get('/preview/sertifikat', function () {
-    $eval = \App\Models\Evaluation::first();
-    $cert = $eval ? $eval->certificate_number : 'TMS-CERT-2026-20239';
-    return redirect()->route('certificate.print', $cert);
-})->name('preview.sertifikat');
-
-Route::get('/preview/admin/angkatan', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.batches');
-})->name('preview.admin.batches');
-
-Route::get('/preview/admin/instansi', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.institutions');
-})->name('preview.admin.institutions');
-
-// Preview routes for testing (Auto-login & redirect to real named routes)
-Route::get('/preview/dashboard', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('dashboard');
-})->name('preview.dashboard');
-
-Route::get('/preview/informasi', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('informasi');
-})->name('preview.informasi');
-
-Route::get('/preview/tugas', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('showcase.index');
-})->name('preview.tugas');
-
-Route::get('/preview/jurnal', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('journals.index');
-})->name('preview.jurnal');
-
-Route::get('/preview/jurnal/cetak', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('journals.print');
-})->name('preview.journals.print');
-
-Route::get('/preview/jurnal/portofolio', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('journals.portfolio.print');
-})->name('preview.journals.portfolio.print');
-
-Route::get('/preview/arsip', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('showcase.index');
-})->name('preview.arsip');
-
-Route::get('/preview/evaluasi', function () {
-    $user = \App\Models\User::first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('evaluation.index');
-})->name('preview.evaluasi');
-
-Route::get('/preview/review', function () {
-    $mentor = \App\Models\User::where('role', 'mentor')->first();
-    \Illuminate\Support\Facades\Auth::login($mentor);
-    return redirect()->route('mentor.review');
-})->name('preview.review');
-
-Route::get('/preview/mentor', function () {
-    $mentor = \App\Models\User::where('role', 'mentor')->first();
-    \Illuminate\Support\Facades\Auth::login($mentor);
-    return redirect()->route('mentor.dashboard');
-})->name('preview.mentor');
-
-Route::get('/preview/mentor/siswa', function () {
-    $mentor = \App\Models\User::where('role', 'mentor')->first();
-    \Illuminate\Support\Facades\Auth::login($mentor);
-    return redirect()->route('mentor.students');
-})->name('preview.mentor.students');
-
-Route::get('/preview/profile', function () {
-    $user = \App\Models\User::where('role', 'siswa')->first();
-    \Illuminate\Support\Facades\Auth::login($user);
-    return redirect()->route('profile');
-})->name('preview.profile');
-
-Route::get('/preview/admin/profile', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('profile');
-})->name('preview.admin.profile');
-
-Route::get('/preview/admin', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.dashboard');
-})->name('preview.admin');
-
-Route::get('/preview/admin/siswa', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.students');
-})->name('preview.admin.students');
-
-Route::get('/preview/admin/mentor', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.mentors');
-})->name('preview.admin.mentors');
-
-Route::get('/preview/admin/pendaftaran', function () {
-    $admin = \App\Models\User::where('role', 'admin_tms')->first();
-    \Illuminate\Support\Facades\Auth::login($admin);
-    return redirect()->route('admin.registrations');
-})->name('preview.admin.registrations');
-
-// Authentication routes
+// Authentication routes (Rate-limited POST login to prevent brute force)
 Route::get('/login', [SimakController::class, 'showLogin'])->name('login');
-Route::post('/login', [SimakController::class, 'login'])->name('login.post');
-Route::get('/login/quick/{role}', [SimakController::class, 'quickLogin'])->name('login.quick');
+Route::post('/login', [SimakController::class, 'login'])->middleware('throttle:10,1')->name('login.post');
 Route::post('/logout', [SimakController::class, 'logout'])->name('logout');
 
 // Public View-Only Profile Mode & Dynamic QR Code (Aman & Bebas Akses Tanpa Login)
+Route::get('/profile/{identifier}', [SimakController::class, 'publicProfile'])->name('profile.show');
 Route::get('/p/{identifier}', [SimakController::class, 'publicProfile'])->name('profile.public');
+Route::get('/profil/{identifier}', [SimakController::class, 'publicProfile']);
+Route::get('/profile', function () {
+    return redirect()->route('profile');
+});
 Route::get('/qr/{identifier}', [SimakController::class, 'generateQr'])->name('qr.generate');
 
 // Protected routes (Must be logged in!)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [SimakController::class, 'dashboard'])->name('dashboard');
     Route::get('/panduan', [SimakController::class, 'guide'])->name('guide.index');
-    
+
     // LMS & Tasks (Deprecated - Redirected to Showcase Portofolio)
     Route::get('/tugas', function () {
         return redirect()->route('showcase.index');
@@ -197,58 +74,66 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jurnal/portofolio/cetak', [SimakController::class, 'printPortfolio'])->name('journals.portfolio.print');
     Route::post('/jurnal', [SimakController::class, 'storeJournal'])->name('journals.store');
 
+    // Task Submission
+    Route::post('/tugas/{id}/submit', [SimakController::class, 'submitTask'])->name('tasks.submit');
+
     // Showcase & Archive
     Route::get('/arsip', [SimakController::class, 'showcase'])->name('showcase.index');
 
     // Evaluations & Score
     Route::get('/evaluasi', [SimakController::class, 'evaluation'])->name('evaluation.index');
 
-    // Mentor Review & Monitoring Hub
-    Route::get('/mentor/monitoring', [SimakController::class, 'mentorDashboard'])->name('mentor.dashboard');
-    Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
-    Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
-    Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
-    Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
-    Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
-
     // Developer Profile ala GitHub
     Route::get('/profil', [SimakController::class, 'profile'])->name('profile');
     Route::post('/profil', [SimakController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/avatar', [SimakController::class, 'updateAvatar'])->name('profile.avatar.update');
     Route::post('/password/update', [SimakController::class, 'updatePassword'])->name('password.update');
 
-    // Admin TMS Management Hub
-    Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
-    Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
-    Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
-    Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
-    Route::get('/admin/mentor', [SimakController::class, 'adminMentors'])->name('admin.mentors');
-    Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
-    Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
-    Route::delete('/admin/mentor/{id}', [SimakController::class, 'adminDeleteMentor'])->name('admin.mentors.destroy');
-    Route::post('/admin/users/{id}/reset-password', [SimakController::class, 'adminResetPassword'])->name('admin.users.reset_password');
-    Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
-    Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
+    // Mentor Review & Monitoring Hub (Staff Mentor & Admin TMS)
+    Route::middleware(['role:mentor,admin_tms'])->group(function () {
+        Route::get('/mentor/monitoring', [SimakController::class, 'mentorDashboard'])->name('mentor.dashboard');
+        Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
+        Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
+        Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
+        Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
+        Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
+    });
 
-    // Admin Angkatan & Project per Angkatan (1 Angkatan > 1 Project)
-    Route::get('/admin/angkatan', [SimakController::class, 'adminBatches'])->name('admin.batches');
-    Route::post('/admin/angkatan', [SimakController::class, 'adminStoreBatch'])->name('admin.batches.store');
-    Route::put('/admin/angkatan/{id}', [SimakController::class, 'adminUpdateBatch'])->name('admin.batches.update');
-    Route::post('/admin/projects', [SimakController::class, 'adminStoreProject'])->name('admin.projects.store');
-    Route::put('/admin/projects/{id}', [SimakController::class, 'adminUpdateProject'])->name('admin.projects.update');
-    Route::delete('/admin/projects/{id}', [SimakController::class, 'adminDeleteProject'])->name('admin.projects.destroy');
+    // Admin TMS Management Hub (Khusus Administrator TMS)
+    Route::middleware(['role:admin_tms'])->group(function () {
+        Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
+        Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
+        Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
+        Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
+        Route::get('/admin/mentor', [SimakController::class, 'adminMentors'])->name('admin.mentors');
+        Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
+        Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
+        Route::delete('/admin/mentor/{id}', [SimakController::class, 'adminDeleteMentor'])->name('admin.mentors.destroy');
+        Route::post('/admin/users/{id}/reset-password', [SimakController::class, 'adminResetPassword'])->name('admin.users.reset_password');
+        Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
+        Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');
 
-    // Admin Data Asal Instansi (Sekolah / Kampus Mitra & Kontak Pembimbing)
-    Route::get('/admin/instansi', [SimakController::class, 'adminInstitutions'])->name('admin.institutions');
-    Route::post('/admin/instansi', [SimakController::class, 'adminStoreInstitution'])->name('admin.institutions.store');
-    Route::put('/admin/instansi/{id}', [SimakController::class, 'adminUpdateInstitution'])->name('admin.institutions.update');
-    Route::delete('/admin/instansi/{id}', [SimakController::class, 'adminDeleteInstitution'])->name('admin.institutions.destroy');
+        // Admin Angkatan & Project per Angkatan (1 Angkatan > 1 Project)
+        Route::get('/admin/angkatan', [SimakController::class, 'adminBatches'])->name('admin.batches');
+        Route::post('/admin/angkatan', [SimakController::class, 'adminStoreBatch'])->name('admin.batches.store');
+        Route::put('/admin/angkatan/{id}', [SimakController::class, 'adminUpdateBatch'])->name('admin.batches.update');
+        Route::post('/admin/projects', [SimakController::class, 'adminStoreProject'])->name('admin.projects.store');
+        Route::put('/admin/projects/{id}', [SimakController::class, 'adminUpdateProject'])->name('admin.projects.update');
+        Route::delete('/admin/projects/{id}', [SimakController::class, 'adminDeleteProject'])->name('admin.projects.destroy');
 
-    // Admin Manajemen Pendaftaran PKL Online (/admin/pendaftaran)
-    Route::get('/admin/pendaftaran', [SimakController::class, 'adminRegistrations'])->name('admin.registrations');
-    Route::post('/admin/pendaftaran/{id}/approve', [SimakController::class, 'adminApproveRegistration'])->name('admin.registrations.approve');
-    Route::post('/admin/pendaftaran/{id}/reject', [SimakController::class, 'adminRejectRegistration'])->name('admin.registrations.reject');
-    Route::delete('/admin/pendaftaran/{id}', [SimakController::class, 'adminDeleteRegistration'])->name('admin.registrations.destroy');
+        // Admin Data Asal Instansi (Sekolah / Kampus Mitra & Kontak Pembimbing)
+        Route::get('/admin/instansi', [SimakController::class, 'adminInstitutions'])->name('admin.institutions');
+        Route::post('/admin/instansi', [SimakController::class, 'adminStoreInstitution'])->name('admin.institutions.store');
+        Route::put('/admin/instansi/{id}', [SimakController::class, 'adminUpdateInstitution'])->name('admin.institutions.update');
+        Route::delete('/admin/instansi/{id}', [SimakController::class, 'adminDeleteInstitution'])->name('admin.institutions.destroy');
 
-    // Admin Evaluasi & Penilaian Nilai Sertifikat Siswa
-    Route::post('/admin/evaluasi/{userId}', [SimakController::class, 'adminSaveEvaluation'])->name('admin.evaluation.save');
+        // Admin Manajemen Pendaftaran PKL Online (/admin/pendaftaran)
+        Route::get('/admin/pendaftaran', [SimakController::class, 'adminRegistrations'])->name('admin.registrations');
+        Route::post('/admin/pendaftaran/{id}/approve', [SimakController::class, 'adminApproveRegistration'])->name('admin.registrations.approve');
+        Route::post('/admin/pendaftaran/{id}/reject', [SimakController::class, 'adminRejectRegistration'])->name('admin.registrations.reject');
+        Route::delete('/admin/pendaftaran/{id}', [SimakController::class, 'adminDeleteRegistration'])->name('admin.registrations.destroy');
+
+        // Admin Evaluasi & Penilaian Nilai Sertifikat Siswa
+        Route::post('/admin/evaluasi/{userId}', [SimakController::class, 'adminSaveEvaluation'])->name('admin.evaluation.save');
+    });
 });
