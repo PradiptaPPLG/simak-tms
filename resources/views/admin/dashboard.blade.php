@@ -321,7 +321,19 @@
                                 <div class="text-[10px] text-slate-400">Portofolio Digital</div>
                             </td>
                             <td class="py-3.5 px-4 whitespace-nowrap">
-                                @if($intern->evaluation)
+                                @if($intern->status === 'alumni')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[10px] whitespace-nowrap leading-none shadow-2xs">
+                                        <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                        Alumni Magang
+                                    </span>
+                                    @if($intern->evaluation)
+                                        <div class="mt-1">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-[9px] font-bold">
+                                                Nilai: {{ $intern->evaluation->final_score }} [A]
+                                            </span>
+                                        </div>
+                                    @endif
+                                @elseif($intern->evaluation)
                                     <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[11px] whitespace-nowrap leading-none shadow-2xs">
                                         Nilai: {{ $intern->evaluation->final_score }} [A]
                                     </span>
@@ -337,7 +349,7 @@
                                     <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-2xs flex items-center justify-center cursor-pointer ml-auto" title="Opsi Aksi Siswa">
                                         <i data-lucide="more-vertical" class="w-4 h-4"></i>
                                     </button>
-                                    <div class="action-dropdown hidden absolute right-0 mt-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
+                                    <div class="action-dropdown hidden absolute right-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
                                         <div class="py-1">
                                             @if(!empty($intern->account_id))
                                                 <a href="{{ url('/profile/' . $intern->account_id) }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
@@ -356,7 +368,26 @@
                                             </a>
                                         </div>
                                         <div class="py-1">
-                                            <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
+                                            @if($intern->status === 'alumni')
+                                                <form action="{{ route('admin.students.alumni', $intern->id) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="aktif">
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors text-left cursor-pointer">
+                                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                                        <span>Kembalikan ke Aktif</span>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('admin.students.alumni', $intern->id) }}" method="POST" onsubmit="return confirm('Luluskan siswa {{ addslashes($intern->name) }} dan pindahkan ke Alumni Magang? Data portofolio dan sertifikat akan tetap tersimpan aman.');">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="alumni">
+                                                    <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors text-left cursor-pointer">
+                                                        <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-indigo-600"></i>
+                                                        <span>Luluskan / Jadi Alumni</span>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                            <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}', '{{ $intern->status ?? 'aktif' }}', '{{ $intern->alumni_status ?? 'bekerja' }}', '{{ addslashes($intern->alumni_current_at ?? '') }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
                                                 <i data-lucide="edit-2" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Edit Data</span>
                                             </button>
@@ -366,14 +397,10 @@
                                             </button>
                                         </div>
                                         <div class="py-1">
-                                            <form action="{{ route('admin.students.destroy', $intern->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa {{ $intern->name }}? Tindakan ini permanen jika siswa dipulangkan atau pindah.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer">
-                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
-                                                    <span>Hapus Siswa</span>
-                                                </button>
-                                            </form>
+                                            <button type="button" onclick="openStudentDeletionModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->status ?? 'aktif' }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+                                                <span>Hapus Siswa</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

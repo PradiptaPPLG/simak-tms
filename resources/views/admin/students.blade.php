@@ -587,8 +587,80 @@
         </div>
     </div>
 
+    <!-- 7. Modal Pilihan Hapus / Jadikan Alumni (Smart Deletion Modal) -->
+    <div id="modal-delete-student-choice" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div class="mas-card p-6 bg-white w-full max-w-md shadow-2xl space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900">Kelola Status / Hapus Siswa</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Pilih tindakan untuk siswa <b id="delete-modal-student-name" class="text-slate-800">Nama Siswa</b></p>
+                </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2 leading-relaxed">
+                <p>Apakah siswa ini <b>telah menyelesaikan masa PKL (Lulus)</b> atau Anda ingin <b>menghapus permanen</b> dari sistem?</p>
+            </div>
+
+            <!-- 2 Pilihan Tindakan Utama -->
+            <div class="space-y-2.5">
+                <!-- Pilihan A: Pindahkan ke Alumni PKL -->
+                <form id="form-choice-alumni" method="POST">
+                    @csrf
+                    <input type="hidden" name="status" value="alumni">
+                    <button type="submit" class="w-full p-3.5 rounded-xl border-2 border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-left transition-all flex items-start gap-3 group cursor-pointer">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-black text-indigo-950">Pindahkan ke Alumni PKL</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-200 text-indigo-800 uppercase tracking-wider">Direkomendasikan</span>
+                            </div>
+                            <p class="text-[11px] text-indigo-700/90 mt-0.5">Siswa lulus magang. Seluruh sertifikat, rapor nilai, portofolio, dan logbook <b>tetap aman tersimpan abadi</b>.</p>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- Pilihan B: Hapus Permanen dari Database -->
+                <form id="form-choice-delete" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" onclick="return confirm('PERINGATAN: Seluruh data jurnal, tugas, dan nilai sertifikat siswa ini akan DIHAPUS PERMANEN dan tidak dapat dipulihkan. Yakin ingin melanjutkan?');" class="w-full p-3.5 rounded-xl border border-red-200 bg-red-50/40 hover:bg-red-50 text-left transition-all flex items-start gap-3 group cursor-pointer">
+                        <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-xs font-bold text-red-800">Hapus Permanen Dari Database</span>
+                            <p class="text-[11px] text-red-600/90 mt-0.5">Gunakan jika akun ini pendaftar fiktif/batal magang. Seluruh data & riwayat akan dimusnahkan.</p>
+                        </div>
+                    </button>
+                </form>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button type="button" onclick="closeStudentDeletionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function openEditModal(id, name, email, school, major, mentorId) {
+        function toggleAlumniFields(status) {
+            const sec = document.getElementById('edit-alumni-section');
+            if (sec) {
+                if (status === 'alumni') {
+                    sec.classList.remove('hidden');
+                } else {
+                    sec.classList.add('hidden');
+                }
+            }
+        }
+
+        function openEditModal(id, name, email, school, major, mentorId, status, alumniStatus, alumniCurrentAt) {
             const modal = document.getElementById('modal-edit-student');
             const form = document.getElementById('form-edit-student');
             form.action = "{{ url('/admin/siswa') }}/" + id;
@@ -597,11 +669,40 @@
             document.getElementById('edit-school').value = school;
             document.getElementById('edit-major').value = major;
             document.getElementById('edit-mentor-id').value = mentorId || '';
+            
+            const statusEl = document.getElementById('edit-status');
+            if (statusEl) {
+                statusEl.value = status || 'aktif';
+                toggleAlumniFields(statusEl.value);
+            }
+            const alumniStatusEl = document.getElementById('edit-alumni-status');
+            if (alumniStatusEl) {
+                alumniStatusEl.value = alumniStatus || 'bekerja';
+            }
+            const alumniCurrentAtEl = document.getElementById('edit-alumni-current-at');
+            if (alumniCurrentAtEl) {
+                alumniCurrentAtEl.value = alumniCurrentAt || '';
+            }
+
             modal.classList.remove('hidden');
+            if (window.lucide) { lucide.createIcons(); }
         }
 
         function closeEditModal() {
             document.getElementById('modal-edit-student').classList.add('hidden');
+        }
+
+        function openStudentDeletionModal(id, name, currentStatus) {
+            const modal = document.getElementById('modal-delete-student-choice');
+            document.getElementById('delete-modal-student-name').textContent = name;
+            document.getElementById('form-choice-alumni').action = "{{ url('/admin/siswa') }}/" + id + "/alumni";
+            document.getElementById('form-choice-delete').action = "{{ url('/admin/siswa') }}/" + id;
+            modal.classList.remove('hidden');
+            if (window.lucide) { lucide.createIcons(); }
+        }
+
+        function closeStudentDeletionModal() {
+            document.getElementById('modal-delete-student-choice').classList.add('hidden');
         }
 
         function openEvaluationModal(id, name, accountId, tech, disc, team, init, certNo, issueDate, notes) {
