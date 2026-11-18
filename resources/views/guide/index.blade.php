@@ -247,10 +247,70 @@
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-                    Menu Utama: <b>Monitoring Global, Data Siswa, Data Mentor, Angkatan & Project DUDI, Sekolah Mitra, Laporan Rekap</b>
+                    Menu Utama: <b>Monitoring Global, Pendaftaran PKL, Data Siswa, Data Mentor, Angkatan & Project DUDI, Sekolah Mitra, Laporan Rekap</b>
                 </div>
             </div>
 
+        </div>
+
+        <!-- Alur Operasional: Verifikasi Pendaftaran PKL & Penerbitan ID Akun Siswa -->
+        <div class="mas-card p-6 bg-gradient-to-r from-red-50/50 via-white to-amber-50/40 border border-slate-200 space-y-4">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                <div class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold shadow-xs">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900">Alur Verifikasi Pendaftaran PKL & Penerbitan ID Akun Siswa</h3>
+                    <p class="text-[11px] text-slate-500">Standar operasional penerimaan siswa magang baru dari antrian online hingga resmi memiliki ID akun industri.</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <!-- Step 1 -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1 font-mono font-bold text-red-600 text-[11px]">
+                            <span class="w-5 h-5 rounded-lg bg-red-100 text-red-700 flex items-center justify-center text-[10px]">1</span>
+                            LANGKAH 01
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono text-[10px] font-bold">Portal Publik</span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-xs">Calon Siswa Mendaftar Online</h4>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Calon siswa mendaftar di <code class="px-1.5 py-0.5 rounded bg-slate-100 text-red-600 font-mono font-bold">/registry-pkl</code> & mendapatkan <b>Kode Antrian</b> unik.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1 font-mono font-bold text-amber-600 text-[11px]">
+                            <span class="w-5 h-5 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-[10px]">2</span>
+                            LANGKAH 02
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-mono text-[10px] font-bold">Review Admin</span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-xs">Persetujuan Formulir Masuk</h4>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Klik <strong>"Setujui"</strong> untuk menerima pendaftar. Sistem otomatis meng-autofill biodata ke <strong>Data Siswa</strong> dengan status <code class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-mono font-bold">(belum terdaftar)</code>.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs space-y-2 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1 font-mono font-bold text-emerald-600 text-[11px]">
+                            <span class="w-5 h-5 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
+                            LANGKAH 03
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold">Penerbitan ID</span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-xs">Tetapkan Mentor & Terbitkan ID</h4>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Buka menu <strong>Data Siswa</strong>, klik tombol <strong>"Edit"</strong> untuk memilih <strong>Mentor Pembimbing TMS</strong>. Saat disimpan, sistem akan secara resmi menerbitkan <strong>ID Akun 5-Digit</strong> unik siswa!
+                    </p>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -339,6 +399,33 @@
                             <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-slate-900 text-white font-bold text-[10px]">Mentor</span></td>
                             <td class="py-3 px-3 text-slate-600">Antarmuka review cepat untuk memeriksa jurnal harian siswa dan menyisipkan catatan mentor.</td>
                             <td class="py-3 px-3 text-slate-500">Tulis saran di kolom catatan atau klik rekomendasi cepat, lalu klik "Simpan Catatan".</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Pendaftaran PKL</span>
+                            </td>
+                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">Admin</span></td>
+                            <td class="py-3 px-3 text-slate-600">Portal verifikasi antrian pendaftaran magang online, pemeriksaan berkas administrasi, dan seleksi calon peserta PKL.</td>
+                            <td class="py-3 px-3 text-slate-500">Gunakan tombol titik-tiga Aksi untuk Setujui atau Tolak pendaftar. Klik Setujui untuk memindahkan calon siswa ke Data Siswa.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Data Siswa (Semua Batch)</span>
+                            </td>
+                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">Admin</span></td>
+                            <td class="py-3 px-3 text-slate-600">Master database seluruh siswa magang lintas periode, penetapan mentor pembimbing, divisi, dan status alumni.</td>
+                            <td class="py-3 px-3 text-slate-500">Klik "Edit Data" untuk menetapkan mentor & menerbitkan ID 5-digit resmi, atau kelola status kelulusan alumni.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Data Mentor & Staff</span>
+                            </td>
+                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">Admin</span></td>
+                            <td class="py-3 px-3 text-slate-600">Manajemen akun instruktur/mentor industri TMS, keahlian divisi, dan alokasi kapasitas bimbingan siswa.</td>
+                            <td class="py-3 px-3 text-slate-500">Tambah akun mentor baru, atur divisi teknis, pantau rasio beban pembimbingan siswa tiap mentor.</td>
                         </tr>
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
@@ -431,6 +518,53 @@
                     <li>Memperoleh nilai rata-rata akhir minimal <b>75.0 (Memuaskan / B)</b> dari mentor.</li>
                     <li>Sertifikat resmi terbit berformat digital lengkap dengan QR code dan verifikasi publik.</li>
                 </ul>
+            </div>
+
+            <!-- 5. Alur Verifikasi Pendaftaran PKL Online & Penerbitan ID Akun Siswa -->
+            <div class="mas-card p-6 space-y-4 md:col-span-2 bg-gradient-to-r from-red-50/50 via-white to-amber-50/40 border border-slate-200">
+                <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                    <div class="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-bold shadow-xs">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">5. Alur Verifikasi Pendaftaran PKL Online & Penerbitan ID Akun Siswa</h3>
+                        <p class="text-[11px] text-slate-500">Standar operasional penerimaan siswa magang baru dari formulir online hingga aktif memiliki ID akun resmi.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="p-3.5 rounded-xl bg-white border border-slate-200/80 space-y-1.5 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-red-600 font-mono text-[11px]">LANGKAH 01</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-[10px]">Publik</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-xs">Calon Siswa Mendaftar Online</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Calon siswa mendaftar di <code class="px-1 py-0.5 rounded bg-slate-100 text-red-600 font-mono">/registry-pkl</code> & mendapatkan <b>Kode Antrian</b> unik.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-white border border-slate-200/80 space-y-1.5 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-600 font-mono text-[11px]">LANGKAH 02</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-mono text-[10px]">Admin Review</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-xs">Klik "Setujui" di Pendaftaran</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Klik <strong>"Setujui"</strong> untuk menerima pendaftar. Sistem otomatis meng-autofill biodata ke <strong>Data Siswa</strong> dengan status <code class="px-1 py-0.5 rounded bg-amber-100 text-amber-800 font-mono font-bold">(belum terdaftar)</code>.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-white border border-slate-200/80 space-y-1.5 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-emerald-600 font-mono text-[11px]">LANGKAH 03</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono text-[10px]">Terbitkan ID</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-xs">Tetapkan Mentor & Terbitkan ID</h4>
+                        <p class="text-[11px] text-slate-500 leading-relaxed">
+                            Buka menu <strong>Data Siswa</strong>, klik tombol <strong>"Edit"</strong> untuk memilih <strong>Mentor Pembimbing TMS</strong>. Saat disimpan, sistem akan secara resmi menerbitkan <strong>ID Akun 5-Digit</strong> unik siswa!
+                        </p>
+                    </div>
+                </div>
             </div>
 
         </div>

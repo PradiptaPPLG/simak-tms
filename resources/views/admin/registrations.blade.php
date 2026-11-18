@@ -86,22 +86,7 @@
         </a>
     </div>
 
-    <!-- 2. Workflow Guide Alert -->
-    <div class="p-4 rounded-2xl bg-gradient-to-r from-red-500/10 via-amber-500/10 to-transparent border border-red-200/80 flex items-start gap-3">
-        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-            <i data-lucide="info" class="w-4 h-4"></i>
-        </div>
-        <div class="text-xs text-slate-700 leading-relaxed">
-            <span class="font-bold text-slate-900">Alur Verifikasi Pendaftaran PKL Online:</span>
-            <span class="block mt-0.5 text-slate-600">
-                1. Calon siswa mendaftar di <code class="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-red-600 font-bold">/registry-pkl</code> & mendapatkan <strong>Kode Antrian</strong> unik.
-                <br>2. Klik <strong>"Setujui"</strong> untuk menerima pendaftar. Sistem otomatis meng-autofill biodata ke <strong>Data Siswa</strong> dengan status <code class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-mono font-bold">(belum terdaftar)</code>.
-                <br>3. Buka menu <strong>Data Siswa</strong>, klik tombol <strong>"Edit"</strong> untuk memilih <strong>Mentor Pembimbing TMS</strong>. Saat disimpan, sistem akan secara resmi menerbitkan <strong>ID Akun 5-Digit</strong> unik siswa!
-            </span>
-        </div>
-    </div>
-
-    <!-- 3. Filter Navigation Tabs & Search -->
+    <!-- 2. Filter Navigation Tabs & Search -->
     <div class="mas-card p-4">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <!-- Tabs -->
