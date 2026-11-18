@@ -159,7 +159,7 @@
                     </div>
                     <div class="p-2 sm:p-3 rounded-xl bg-slate-50 border border-slate-100 min-w-0">
                         <div class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Portofolio</div>
-                        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalProjects ?? 2 }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Proyek</span></div>
+                        <div class="text-base sm:text-lg font-black text-slate-900 font-mono mt-0.5 truncate">{{ $totalProjects }} <span class="text-[10px] sm:text-[11px] font-normal text-slate-500">Proyek</span></div>
                     </div>
                 </div>
 
@@ -703,18 +703,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Dataset for Monitoring Activity Chart
-        const chartDataWeekly = {
-            labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-            journals: [2, 2, 1, 2, 2, 0],
-            tasks: [1, 0, 2, 1, 1, 0]
-        };
+        // 1. Dataset for Monitoring Activity Chart (100% Real Database Aggregation)
+        const chartDataWeekly = @json($chartDataWeekly);
+        const chartDataMonthly = @json($chartDataMonthly);
 
-        const chartDataMonthly = {
-            labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
-            journals: [10, 12, 11, 8],
-            tasks: [4, 6, 5, 3]
-        };
+        const maxWeekly = Math.max(...(chartDataWeekly.journals || [0]), ...(chartDataWeekly.tasks || [0]), 3);
+        const maxMonthly = Math.max(...(chartDataMonthly.journals || [0]), ...(chartDataMonthly.tasks || [0]), 5);
 
         // 2. Initialize Combined Bar & Line Chart
         const ctxMonitoring = document.getElementById('adminMonitoringChart');
@@ -768,12 +762,12 @@
                         },
                         y: {
                             beginAtZero: true,
-                            suggestedMax: 3,
+                            suggestedMax: maxWeekly,
                             grid: {
                                 color: '#f1f5f9'
                             },
                             ticks: {
-                                stepSize: 1,
+                                stepSize: maxWeekly > 10 ? 2 : 1,
                                 font: { family: "'Outfit', sans-serif", size: 11 },
                                 color: '#94a3b8'
                             }
@@ -802,8 +796,8 @@
                     monitoringChart.data.labels = chartDataWeekly.labels;
                     monitoringChart.data.datasets[0].data = chartDataWeekly.journals;
                     monitoringChart.data.datasets[1].data = chartDataWeekly.tasks;
-                    monitoringChart.options.scales.y.suggestedMax = 3;
-                    monitoringChart.options.scales.y.ticks.stepSize = 1;
+                    monitoringChart.options.scales.y.suggestedMax = maxWeekly;
+                    monitoringChart.options.scales.y.ticks.stepSize = maxWeekly > 10 ? 2 : 1;
 
                     btnW.className = 'px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all';
                     btnM.className = 'px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all';
@@ -811,8 +805,8 @@
                     monitoringChart.data.labels = chartDataMonthly.labels;
                     monitoringChart.data.datasets[0].data = chartDataMonthly.journals;
                     monitoringChart.data.datasets[1].data = chartDataMonthly.tasks;
-                    monitoringChart.options.scales.y.suggestedMax = 15;
-                    monitoringChart.options.scales.y.ticks.stepSize = 3;
+                    monitoringChart.options.scales.y.suggestedMax = maxMonthly;
+                    monitoringChart.options.scales.y.ticks.stepSize = maxMonthly > 10 ? 2 : 1;
 
                     btnM.className = 'px-3 py-1 rounded-lg bg-red-600 text-white shadow-xs transition-all';
                     btnW.className = 'px-3 py-1 rounded-lg bg-transparent text-slate-600 hover:text-slate-900 transition-all';

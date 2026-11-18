@@ -830,6 +830,59 @@ class SimakController extends Controller
         $totalTasks = Task::count();
         $totalProjects = $allProjects->count();
 
+        // Telemetri Mingguan Riil dari Database (Senin s/d Sabtu Minggu Ini)
+        $startOfWeek = now()->startOfWeek();
+        $chartDataWeekly = [
+            'labels' => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+            'journals' => [],
+            'tasks' => [] // Presensi Masuk Lab (siswa unik yang mencatat aktivitas / logbook)
+        ];
+
+        for ($i = 0; $i < 6; $i++) {
+            $dayDate = $startOfWeek->copy()->addDays($i)->toDateString();
+            $journalCount = DailyJournal::whereDate('journal_date', $dayDate)->count();
+            $presenceCount = DailyJournal::whereDate('journal_date', $dayDate)->distinct('user_id')->count();
+
+            $chartDataWeekly['journals'][] = $journalCount;
+            $chartDataWeekly['tasks'][] = $presenceCount;
+        }
+
+        // Telemetri Bulanan Riil dari Database (Minggu 1 s/d Minggu 4 Bulan Berjalan)
+        $currentYear = now()->year;
+        $currentMonth = now()->month;
+        $chartDataMonthly = [
+            'labels' => ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+            'journals' => [],
+            'tasks' => []
+        ];
+
+        $monthRanges = [
+            [
+                \Carbon\Carbon::create($currentYear, $currentMonth, 1)->toDateString(),
+                \Carbon\Carbon::create($currentYear, $currentMonth, 7)->toDateString()
+            ],
+            [
+                \Carbon\Carbon::create($currentYear, $currentMonth, 8)->toDateString(),
+                \Carbon\Carbon::create($currentYear, $currentMonth, 14)->toDateString()
+            ],
+            [
+                \Carbon\Carbon::create($currentYear, $currentMonth, 15)->toDateString(),
+                \Carbon\Carbon::create($currentYear, $currentMonth, 21)->toDateString()
+            ],
+            [
+                \Carbon\Carbon::create($currentYear, $currentMonth, 22)->toDateString(),
+                now()->endOfMonth()->toDateString()
+            ],
+        ];
+
+        foreach ($monthRanges as $range) {
+            $jCount = DailyJournal::whereBetween('journal_date', [$range[0], $range[1]])->count();
+            $pCount = DailyJournal::whereBetween('journal_date', [$range[0], $range[1]])->distinct('user_id')->count();
+
+            $chartDataMonthly['journals'][] = $jCount;
+            $chartDataMonthly['tasks'][] = $pCount;
+        }
+
         return view('admin.dashboard', compact(
             'interns',
             'mentors',
@@ -841,7 +894,9 @@ class SimakController extends Controller
             'totalJournals',
             'pendingJournals',
             'totalTasks',
-            'totalProjects'
+            'totalProjects',
+            'chartDataWeekly',
+            'chartDataMonthly'
         ));
     }
 
