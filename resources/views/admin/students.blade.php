@@ -130,8 +130,21 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="font-bold text-slate-900 text-xs">{{ $intern->name }} <span class="font-mono text-red-600 font-bold text-[11px]">({{ $intern->account_id ?? $intern->username ?? $intern->id }})</span></div>
-                                        <div class="text-[10px] text-slate-400 font-mono">ID: {{ $intern->account_id ?? $intern->username ?? $intern->id }} • {{ $intern->email }}</div>
+                                        <div class="font-bold text-slate-900 text-xs">
+                                            {{ $intern->name }} 
+                                            @if(!empty($intern->account_id))
+                                                <span class="font-mono text-red-600 font-bold text-[11px]">({{ $intern->account_id }})</span>
+                                            @else
+                                                <span class="font-mono text-amber-700 bg-amber-100/90 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-300">(belum terdaftar)</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-mono">
+                                            @if(!empty($intern->account_id))
+                                                ID: {{ $intern->account_id }} • {{ $intern->email }}
+                                            @else
+                                                <span class="text-amber-600 font-semibold">Menunggu Penetapan Mentor</span> • {{ $intern->email }}
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -148,7 +161,11 @@
                                         <span>Divisi: {{ $intern->mentor->location ?? 'IT / Software Engineering' }}</span>
                                     </div>
                                 @else
-                                    <span class="text-slate-400 italic text-[11px]">Belum di-assign</span>
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold animate-pulse">
+                                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+                                        <span>Belum Memilih Mentor</span>
+                                    </div>
+                                    <p class="text-[9.5px] text-slate-400 mt-0.5">Klik Edit Data untuk memilih mentor & menerbitkan ID.</p>
                                 @endif
                             </td>
                             <td class="py-3.5 px-4">
@@ -349,6 +366,10 @@
                             <option value="{{ $mentor->id }}">{{ $mentor->name }} (Mentor TMS)</option>
                         @endforeach
                     </select>
+                    <p class="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 mt-1.5 flex items-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+                        <span>Jika siswa berstatus <b>(belum terdaftar)</b>, memilih mentor dan menekan Simpan akan otomatis menerbitkan ID resmi 5-digit siswa.</span>
+                    </p>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">

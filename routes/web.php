@@ -32,6 +32,17 @@ Route::get('/sertifikat/{certificate_number}', function ($certificate_number) {
 });
 Route::get('/sertifikat/{certificate_number}/cetak', [SimakController::class, 'printCertificate'])->name('certificate.print');
 
+// Formulir Pendaftaran PKL Online & Cek Status Antrian (/registry-pkl)
+Route::get('/registry-pkl', [SimakController::class, 'registryIndex'])->name('registry.index');
+Route::get('/registrasi-pkl', function () {
+    return redirect()->route('registry.index');
+});
+Route::get('/daftar-pkl', function () {
+    return redirect()->route('registry.index');
+});
+Route::post('/registry-pkl', [SimakController::class, 'registryStore'])->name('registry.store');
+Route::get('/registry-pkl/check', [SimakController::class, 'registryCheck'])->name('registry.check');
+
 // Preview routes for testing (Auto-login & redirect to real named routes)
 Route::get('/preview/verifikasi', function () {
     $eval = \App\Models\Evaluation::first();
@@ -154,6 +165,12 @@ Route::get('/preview/admin/mentor', function () {
     return redirect()->route('admin.mentors');
 })->name('preview.admin.mentors');
 
+Route::get('/preview/admin/pendaftaran', function () {
+    $admin = \App\Models\User::where('role', 'admin_tms')->first();
+    \Illuminate\Support\Facades\Auth::login($admin);
+    return redirect()->route('admin.registrations');
+})->name('preview.admin.registrations');
+
 // Authentication routes
 Route::get('/login', [SimakController::class, 'showLogin'])->name('login');
 Route::post('/login', [SimakController::class, 'login'])->name('login.post');
@@ -225,6 +242,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/instansi', [SimakController::class, 'adminStoreInstitution'])->name('admin.institutions.store');
     Route::put('/admin/instansi/{id}', [SimakController::class, 'adminUpdateInstitution'])->name('admin.institutions.update');
     Route::delete('/admin/instansi/{id}', [SimakController::class, 'adminDeleteInstitution'])->name('admin.institutions.destroy');
+
+    // Admin Manajemen Pendaftaran PKL Online (/admin/pendaftaran)
+    Route::get('/admin/pendaftaran', [SimakController::class, 'adminRegistrations'])->name('admin.registrations');
+    Route::post('/admin/pendaftaran/{id}/approve', [SimakController::class, 'adminApproveRegistration'])->name('admin.registrations.approve');
+    Route::post('/admin/pendaftaran/{id}/reject', [SimakController::class, 'adminRejectRegistration'])->name('admin.registrations.reject');
+    Route::delete('/admin/pendaftaran/{id}', [SimakController::class, 'adminDeleteRegistration'])->name('admin.registrations.destroy');
 
     // Admin Evaluasi & Penilaian Nilai Sertifikat Siswa
     Route::post('/admin/evaluasi/{userId}', [SimakController::class, 'adminSaveEvaluation'])->name('admin.evaluation.save');

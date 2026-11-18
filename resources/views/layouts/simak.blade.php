@@ -189,6 +189,22 @@
                         <span class="truncate">Monitoring Global & Arsip</span>
                     </a>
 
+                    <!-- Pendaftaran PKL Online (Antrian & Seleksi) -->
+                    @php
+                        $pendingRegistrationsCount = \App\Models\PklRegistration::where('status', 'pending')->count();
+                    @endphp
+                    <a href="{{ route('admin.registrations') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.registrations*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                        <div class="flex items-center gap-2.5 truncate">
+                            <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.registrations*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                            <span class="truncate">Pendaftaran PKL</span>
+                        </div>
+                        @if($pendingRegistrationsCount > 0)
+                            <span class="px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold shrink-0">
+                                {{ $pendingRegistrationsCount }}
+                            </span>
+                        @endif
+                    </a>
+
                     <!-- Data Siswa (Semua Batch) -->
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="users" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
@@ -315,6 +331,17 @@
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ (request()->routeIs('admin.dashboard') || (request()->routeIs('dashboard') && $role === 'admin_tms')) && !request()->routeIs('admin.students*') && !request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
                         <span>Monitoring Global & Arsip</span>
+                    </a>
+                    <a href="{{ route('admin.registrations') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.registrations*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                            <span>Pendaftaran PKL</span>
+                        </div>
+                        @if(($pendingRegistrationsCount ?? 0) > 0)
+                            <span class="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">
+                                {{ $pendingRegistrationsCount }}
+                            </span>
+                        @endif
                     </a>
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="users" class="w-4 h-4"></i>

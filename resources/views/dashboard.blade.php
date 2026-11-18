@@ -140,29 +140,5 @@
 
         </div>
     </div>
-
-    <!-- 3. Portofolio & Karya Siswa PKL Banner (Charcoal / Red Accent) -->
-    <div class="mas-card p-5 bg-gradient-to-r from-slate-950 via-slate-900 to-black text-white rounded-2xl relative overflow-hidden shadow-md border border-slate-800">
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-600/30 text-red-400 border border-red-500/30 text-[10px] font-bold uppercase tracking-wider">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                    Karya Unggulan Siswa Magang
-                </div>
-                <h3 class="text-base sm:text-lg font-black text-white">
-                    TechPulse Engineering Blog & MAS-PKL Management System
-                </h3>
-                <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                    Seluruh proyek dan aplikasi nyata yang dikembangkan selama magang di PT. TMS didokumentasikan dalam portofolio permanen angkatan.
-                </p>
-            </div>
-            <div class="flex-shrink-0 flex items-center gap-3">
-                <a href="{{ route('showcase.index') }}" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30">
-                    Lihat Galeri Karya &rarr;
-                </a>
-            </div>
-        </div>
-    </div>
-
 </div>
 @endsection

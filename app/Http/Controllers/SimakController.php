@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\DailyJournal;
 use App\Models\Evaluation;
 use App\Models\PartnerInstitution;
+use App\Models\PklRegistration;
 use App\Models\ShowcaseProject;
 use App\Models\Task;
 use App\Models\TaskSubmission;
@@ -811,9 +812,18 @@ class SimakController extends Controller
             'mentor_id' => 'nullable|exists:users,id',
         ]);
 
+        $generatedMsg = '';
+        // Jika sebelumnya belum memiliki ID Akun (belum terdaftar) dan sekarang mentor dipilih:
+        if (empty($student->account_id) && !empty($validated['mentor_id'])) {
+            $newAccountId = $this->generateUniqueAccountId();
+            $validated['account_id'] = $newAccountId;
+            $validated['username'] = $newAccountId;
+            $generatedMsg = " ID Akun resmi ({$newAccountId}) telah berhasil diterbitkan dan aktif!";
+        }
+
         $student->update($validated);
 
-        return back()->with('success', "Data siswa {$student->name} berhasil diperbarui oleh Admin!");
+        return back()->with('success', "Data siswa {$student->name} berhasil diperbarui oleh Admin!{$generatedMsg}");
     }
 
     public function adminDeleteStudent($id)
@@ -1355,5 +1365,198 @@ class SimakController extends Controller
         );
 
         return back()->with('success', "Nilai evaluasi & nomor sertifikat resmi untuk {$user->name} berhasil disimpan!");
+    }
+
+    // ==========================================
+    // PENDAFTARAN PKL ONLINE (/registry-pkl)
+    // ==========================================
+    private function generateUniqueRegistrationCode(): string
+    {
+        do {
+            $code = 'TMS-REG-' . mt_rand(10000, 99999);
+        } while (PklRegistration::where('registration_code', $code)->exists());
+
+        return $code;
+    }
+
+    public function registryIndex(Request $request)
+    {
+        $activeTab = $request->get('tab', 'register');
+        $searchedCode = $request->get('code', null);
+        $searchResult = null;
+
+        if ($searchedCode) {
+            $searchResult = PklRegistration::with('user.mentor')
+                ->where('registration_code', strtoupper(trim($searchedCode)))
+                ->first();
+        }
+
+        $activeBatch = Batch::where('is_active', true)->first() ?? Batch::first();
+
+        return view('registry.index', compact('activeTab', 'searchedCode', 'searchResult', 'activeBatch'));
+    }
+
+    public function registryStore(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:100',
+            'gender' => 'required|in:Laki-laki,Perempuan',
+            'nis' => 'required|string|max:40',
+            'birth_place' => 'nullable|string|max:100',
+            'birth_date' => 'nullable|date',
+            'religion' => 'nullable|string|max:50',
+            'skill_competency' => 'required|string|max:100',
+            'school_origin' => 'nullable|string|max:150',
+            'email' => 'required|email|max:150',
+            'phone_number' => 'required|string|max:30',
+        ]);
+
+        $regCode = $this->generateUniqueRegistrationCode();
+
+        $registration = PklRegistration::create([
+            'registration_code' => $regCode,
+            'full_name' => $validated['full_name'],
+            'gender' => $validated['gender'],
+            'nis' => $validated['nis'],
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
+            'religion' => $validated['religion'] ?? null,
+            'skill_competency' => $validated['skill_competency'],
+            'school_origin' => $validated['school_origin'] ?? 'SMKN 1 Ciamis',
+            'email' => $validated['email'],
+            'phone_number' => $validated['phone_number'],
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('registry.index', [
+            'tab' => 'check',
+            'code' => $regCode,
+        ])->with('registration_success', [
+            'code' => $regCode,
+            'name' => $validated['full_name'],
+            'nis' => $validated['nis'],
+        ]);
+    }
+
+    public function registryCheck(Request $request)
+    {
+        $code = strtoupper(trim($request->get('code', '')));
+        if (empty($code)) {
+            return redirect()->route('registry.index', ['tab' => 'check'])->withErrors(['code' => 'Masukkan kode antrian pendaftaran Anda.']);
+        }
+
+        $searchResult = PklRegistration::with('user.mentor')
+            ->where('registration_code', $code)
+            ->first();
+
+        return view('registry.index', [
+            'activeTab' => 'check',
+            'searchedCode' => $code,
+            'searchResult' => $searchResult,
+            'activeBatch' => Batch::where('is_active', true)->first() ?? Batch::first(),
+        ]);
+    }
+
+    // ==========================================
+    // ADMIN: MANAJEMEN PENDAFTARAN PKL
+    // ==========================================
+    public function adminRegistrations(Request $request)
+    {
+        if (Auth::user()->role !== 'admin_tms') {
+            abort(403, 'Akses terbatas Administrator TMS.');
+        }
+
+        $status = $request->get('status', 'all');
+
+        $query = PklRegistration::with('user.mentor')->latest();
+        if ($status !== 'all' && in_array($status, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $status);
+        }
+
+        $registrations = $query->get();
+
+        $counts = [
+            'all' => PklRegistration::count(),
+            'pending' => PklRegistration::where('status', 'pending')->count(),
+            'approved' => PklRegistration::where('status', 'approved')->count(),
+            'rejected' => PklRegistration::where('status', 'rejected')->count(),
+        ];
+
+        $mentors = User::where('role', 'mentor')->get();
+
+        return view('admin.registrations', compact('registrations', 'counts', 'status', 'mentors'));
+    }
+
+    public function adminApproveRegistration(Request $request, $id)
+    {
+        if (Auth::user()->role !== 'admin_tms') {
+            abort(403, 'Akses terbatas Administrator TMS.');
+        }
+
+        $reg = PklRegistration::findOrFail($id);
+
+        if ($reg->status === 'approved') {
+            return back()->with('info', "Pendaftaran {$reg->full_name} sudah disetujui sebelumnya.");
+        }
+
+        $activeBatch = Batch::where('is_active', true)->first() ?? Batch::first();
+
+        // 1. Autofill ke tabel User sebagai siswa PKL baru
+        // Sesuai instruksi: mentor_id = null (belum memilih mentor), account_id = null (belum terdaftar)
+        $user = User::create([
+            'name' => $reg->full_name,
+            'role' => 'siswa',
+            'email' => $reg->email,
+            'phone_number' => $reg->phone_number,
+            'school_origin' => $reg->school_origin ?? 'SMKN 1 Ciamis',
+            'major' => $reg->skill_competency,
+            'nis_nim' => $reg->nis,
+            'batch_id' => $activeBatch ? $activeBatch->id : 1,
+            'mentor_id' => null,  // ALERT: Belum memilih mentor!
+            'account_id' => null, // ALERT: (belum terdaftar)
+            'username' => null,
+            'password' => Hash::make('tmshebatsukses'),
+            'must_change_password' => 1,
+            'status' => 'aktif',
+            'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($reg->full_name) . '&background=ef4444&color=ffffff&bold=true&size=256',
+        ]);
+
+        // 2. Update status pendaftaran
+        $reg->update([
+            'status' => 'approved',
+            'user_id' => $user->id,
+        ]);
+
+        return redirect()->route('admin.students')->with('success', "Pendaftaran {$reg->full_name} berhasil disetujui! Siswa telah otomatis masuk ke Data Siswa dengan status (Belum Terdaftar). Silakan klik tombol 'Edit' untuk memilih mentor pembimbing dan menerbitkan ID akun resmi 5-digit.");
+    }
+
+    public function adminRejectRegistration(Request $request, $id)
+    {
+        if (Auth::user()->role !== 'admin_tms') {
+            abort(403, 'Akses terbatas Administrator TMS.');
+        }
+
+        $reg = PklRegistration::findOrFail($id);
+        $reason = $request->input('rejection_reason', 'Mohon maaf, kuota penerimaan magang periode ini telah penuh / kualifikasi belum memenuhi.');
+
+        $reg->update([
+            'status' => 'rejected',
+            'rejection_reason' => $reason,
+        ]);
+
+        return back()->with('success', "Pendaftaran atas nama {$reg->full_name} telah ditolak.");
+    }
+
+    public function adminDeleteRegistration($id)
+    {
+        if (Auth::user()->role !== 'admin_tms') {
+            abort(403, 'Akses terbatas Administrator TMS.');
+        }
+
+        $reg = PklRegistration::findOrFail($id);
+        $name = $reg->full_name;
+        $reg->delete();
+
+        return back()->with('success', "Data antrian pendaftaran {$name} berhasil dihapus.");
     }
 }

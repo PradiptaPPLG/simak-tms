@@ -1,0 +1,516 @@
+@extends('layouts.simak')
+
+@section('title', 'Manajemen Pendaftaran PKL Online • Admin TMS')
+
+@section('content')
+<div class="space-y-6 min-w-0 max-w-full">
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold uppercase tracking-wider mb-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+                <span>Portal Seleksi & Antrian Calon Peserta Magang</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Manajemen Pendaftaran PKL Online</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Tinjau biodata pendaftar, seleksi administrasi, verifikasi kuota, dan otomatisasi pembuatan data siswa magang.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('registry.index') }}" target="_blank" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                <i data-lucide="external-link" class="w-4 h-4 text-red-400 shrink-0"></i>
+                <span>Buka Form Pendaftaran</span>
+            </a>
+            <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span class="hidden sm:inline">Cetak Rekap</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 1. Stats Counter Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <a href="{{ route('admin.registrations', ['status' => 'all']) }}" class="mas-card p-4 border-l-4 {{ $status === 'all' ? 'border-l-red-600 ring-2 ring-red-500/20' : 'border-l-slate-400' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Pendaftar</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 font-mono mt-0.5">{{ $counts['all'] }}</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Semua formulir masuk</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                    <i data-lucide="inbox" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.registrations', ['status' => 'pending']) }}" class="mas-card p-4 border-l-4 {{ $status === 'pending' ? 'border-l-amber-500 ring-2 ring-amber-500/20' : 'border-l-amber-400' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-600 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                        Menunggu Review
+                    </p>
+                    <h3 class="text-xl sm:text-2xl font-black text-amber-600 font-mono mt-0.5">{{ $counts['pending'] }}</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Perlu diverifikasi</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.registrations', ['status' => 'approved']) }}" class="mas-card p-4 border-l-4 {{ $status === 'approved' ? 'border-l-emerald-600 ring-2 ring-emerald-500/20' : 'border-l-emerald-400' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-emerald-600 text-[10px] font-bold uppercase tracking-wider">Disetujui / Lolos</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-emerald-600 font-mono mt-0.5">{{ $counts['approved'] }}</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Masuk ke data siswa</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.registrations', ['status' => 'rejected']) }}" class="mas-card p-4 border-l-4 {{ $status === 'rejected' ? 'border-l-rose-600 ring-2 ring-rose-500/20' : 'border-l-rose-400' }} hover:shadow-md transition-all">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-rose-600 text-[10px] font-bold uppercase tracking-wider">Ditolak</p>
+                    <h3 class="text-xl sm:text-2xl font-black text-rose-600 font-mono mt-0.5">{{ $counts['rejected'] }}</h3>
+                    <p class="text-[10px] text-slate-500 mt-0.5">Tidak memenuhi kuota</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 2. Workflow Guide Alert -->
+    <div class="p-4 rounded-2xl bg-gradient-to-r from-red-500/10 via-amber-500/10 to-transparent border border-red-200/80 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+            <i data-lucide="info" class="w-4 h-4"></i>
+        </div>
+        <div class="text-xs text-slate-700 leading-relaxed">
+            <span class="font-bold text-slate-900">Alur Verifikasi Pendaftaran PKL Online:</span>
+            <span class="block mt-0.5 text-slate-600">
+                1. Calon siswa mendaftar di <code class="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-red-600 font-bold">/registry-pkl</code> & mendapatkan <strong>Kode Antrian</strong> unik.
+                <br>2. Klik <strong>"Setujui"</strong> untuk menerima pendaftar. Sistem otomatis meng-autofill biodata ke <strong>Data Siswa</strong> dengan status <code class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-mono font-bold">(belum terdaftar)</code>.
+                <br>3. Buka menu <strong>Data Siswa</strong>, klik tombol <strong>"Edit"</strong> untuk memilih <strong>Mentor Pembimbing TMS</strong>. Saat disimpan, sistem akan secara resmi menerbitkan <strong>ID Akun 5-Digit</strong> unik siswa!
+            </span>
+        </div>
+    </div>
+
+    <!-- 3. Filter Navigation Tabs & Search -->
+    <div class="mas-card p-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <!-- Tabs -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none text-xs">
+                <a href="{{ route('admin.registrations', ['status' => 'all']) }}" 
+                   class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 {{ $status === 'all' ? 'bg-red-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' }}">
+                    Semua ({{ $counts['all'] }})
+                </a>
+                <a href="{{ route('admin.registrations', ['status' => 'pending']) }}" 
+                   class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 flex items-center gap-1.5 {{ $status === 'pending' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' }}">
+                    @if($counts['pending'] > 0)
+                        <span class="w-2 h-2 rounded-full bg-amber-200 animate-pulse"></span>
+                    @endif
+                    Menunggu Review ({{ $counts['pending'] }})
+                </a>
+                <a href="{{ route('admin.registrations', ['status' => 'approved']) }}" 
+                   class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 {{ $status === 'approved' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' }}">
+                    Disetujui ({{ $counts['approved'] }})
+                </a>
+                <a href="{{ route('admin.registrations', ['status' => 'rejected']) }}" 
+                   class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 {{ $status === 'rejected' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100' }}">
+                    Ditolak ({{ $counts['rejected'] }})
+                </a>
+            </div>
+
+            <!-- Search Filter Bar -->
+            <div class="relative w-full md:w-72">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="reg-search-input" placeholder="Cari nama, NIS, kode antrian..." 
+                       class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition-all">
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Applicants Table -->
+    <div class="mas-card overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="list-checks" class="w-5 h-5 text-red-600"></i>
+                <h2 class="text-sm font-bold text-slate-900">Daftar Formulir Antrian Pendaftaran ({{ $registrations->count() }})</h2>
+            </div>
+            <span class="text-[11px] text-slate-400">Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs" id="reg-table">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50/50 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                        <th class="py-3 px-4">No</th>
+                        <th class="py-3 px-4">Kode Antrian</th>
+                        <th class="py-3 px-4">Calon Siswa & NIS</th>
+                        <th class="py-3 px-4">Sekolah & Keahlian</th>
+                        <th class="py-3 px-4">Kontak Siswa</th>
+                        <th class="py-3 px-4">Tanggal Masuk</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100" id="reg-tbody">
+                    @forelse($registrations as $index => $reg)
+                        <tr class="hover:bg-slate-50/80 transition-colors reg-row" 
+                            data-search="{{ strtolower($reg->full_name . ' ' . $reg->registration_code . ' ' . $reg->nis . ' ' . $reg->school_origin . ' ' . $reg->skill_competency) }}">
+                            <td class="py-3.5 px-4 font-mono text-slate-400">{{ $index + 1 }}</td>
+                            
+                            <td class="py-3.5 px-4">
+                                <span class="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 tracking-tight">
+                                    {{ $reg->registration_code }}
+                                </span>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-lg overflow-hidden bg-slate-900 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                        {{ substr($reg->full_name, 0, 2) }}
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                            <span>{{ $reg->full_name }}</span>
+                                            @if($reg->gender === 'Laki-laki')
+                                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-600 font-semibold border border-blue-200">L</span>
+                                            @else
+                                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-pink-50 text-pink-600 font-semibold border border-pink-200">P</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 font-mono mt-0.5">NIS: {{ $reg->nis }}</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                <div class="font-semibold text-slate-800">{{ $reg->school_origin ?? 'SMKN 1 Ciamis' }}</div>
+                                <div class="text-[10px] text-red-600 font-medium">{{ $reg->skill_competency }}</div>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                <div class="text-[11px] text-slate-700 flex items-center gap-1">
+                                    <i data-lucide="mail" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                                    <span class="truncate max-w-[140px]">{{ $reg->email }}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 font-mono flex items-center gap-1 mt-0.5">
+                                    <i data-lucide="phone" class="w-3 h-3 text-emerald-500 shrink-0"></i>
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $reg->phone_number) }}" target="_blank" class="hover:text-emerald-600 hover:underline">
+                                        {{ $reg->phone_number }}
+                                    </a>
+                                </div>
+                            </td>
+
+                            <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500">
+                                <div>{{ $reg->created_at->translatedFormat('d M Y') }}</div>
+                                <div class="text-[10px] text-slate-400">{{ $reg->created_at->translatedFormat('H:i') }} WIB</div>
+                            </td>
+
+                            <td class="py-3.5 px-4 text-center">
+                                @if($reg->status === 'pending')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        Pending
+                                    </span>
+                                @elseif($reg->status === 'approved')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                                        Disetujui
+                                    </span>
+                                @elseif($reg->status === 'rejected')
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <i data-lucide="x" class="w-3 h-3 text-rose-600"></i>
+                                        Ditolak
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="py-3.5 px-4 text-right">
+                                <div class="inline-flex items-center justify-end gap-1.5">
+                                    <!-- Detail Modal Trigger -->
+                                    <button type="button" 
+                                            onclick="openDetailModal({{ json_encode($reg) }})" 
+                                            title="Lihat Biodata Lengkap"
+                                            class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    </button>
+
+                                    @if($reg->status === 'pending')
+                                        <!-- Approve Button Form -->
+                                        <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" class="inline" onsubmit="return confirm('Setujui pendaftaran PKL atas nama {{ addslashes($reg->full_name) }}?\n\nSiswa akan otomatis masuk ke menu Data Siswa dengan label (belum terdaftar) sampai Anda menetapkan mentor pembimbing.')">
+                                            @csrf
+                                            <button type="submit" 
+                                                    title="Setujui & Buat Akun Siswa"
+                                                    class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-colors">
+                                                <i data-lucide="check" class="w-3 h-3"></i>
+                                                <span>Setujui</span>
+                                            </button>
+                                        </form>
+
+                                        <!-- Reject Button Form Trigger -->
+                                        <button type="button" 
+                                                onclick="openRejectModal({{ $reg->id }}, '{{ addslashes($reg->full_name) }}')"
+                                                title="Tolak Pendaftaran"
+                                                class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold flex items-center gap-1 transition-colors">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                            <span>Tolak</span>
+                                        </button>
+                                    @elseif($reg->status === 'approved')
+                                        <!-- Go to Student List -->
+                                        <a href="{{ route('admin.students') }}" 
+                                           title="Buka Data Siswa untuk Mengatur Mentor"
+                                           class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold flex items-center gap-1 border border-slate-200 transition-colors">
+                                            <i data-lucide="user-check" class="w-3 h-3 text-red-600"></i>
+                                            <span>Data Siswa</span>
+                                        </a>
+                                    @endif
+
+                                    <!-- Delete Button -->
+                                    <form method="POST" action="{{ route('admin.registrations.destroy', $reg->id) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus antrian pendaftaran ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                title="Hapus Antrian"
+                                                class="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-600 text-slate-400 flex items-center justify-center transition-colors">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-12 text-slate-400">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="inbox" class="w-6 h-6"></i>
+                                </div>
+                                <p class="font-bold text-slate-700 text-sm">Belum Ada Formulir Pendaftaran</p>
+                                <p class="text-xs text-slate-400 mt-1">Calon peserta yang mendaftar melalui tautan formulir akan tampil di sini.</p>
+                                <a href="{{ route('registry.index') }}" target="_blank" class="inline-flex items-center gap-1.5 mt-3 text-xs text-red-600 font-bold hover:underline">
+                                    <span>Buka Form Pendaftaran Calon Siswa</span>
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Biodata Lengkap Calon Siswa -->
+<div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Biodata Calon Siswa Magang</h3>
+                    <p class="text-[11px] text-slate-400" id="modal-queue-code">TMS-REG-XXXXX</p>
+                </div>
+            </div>
+            <button onclick="closeDetailModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <div class="space-y-3.5 text-xs">
+            <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Status Pendaftaran</p>
+                    <div id="modal-status-badge" class="mt-0.5"></div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Tanggal Submit</p>
+                    <p class="font-mono text-slate-700 font-semibold" id="modal-created-at">-</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Nama Lengkap</span>
+                    <span class="font-bold text-slate-900 text-xs" id="modal-full-name">-</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">NIS</span>
+                    <span class="font-mono font-bold text-slate-900 text-xs" id="modal-nis">-</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Jenis Kelamin</span>
+                    <span class="font-semibold text-slate-800" id="modal-gender">-</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Agama</span>
+                    <span class="font-semibold text-slate-800" id="modal-religion">-</span>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Tempat & Tanggal Lahir</span>
+                <span class="font-semibold text-slate-800" id="modal-birth-info">-</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Asal Sekolah</span>
+                    <span class="font-semibold text-slate-800" id="modal-school">-</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Kompetensi Keahlian</span>
+                    <span class="font-semibold text-red-600 font-mono" id="modal-skill">-</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Email Aktif</span>
+                    <span class="font-mono text-slate-800 break-all" id="modal-email">-</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">No. HP / WhatsApp</span>
+                    <a href="#" id="modal-phone-link" target="_blank" class="font-mono text-emerald-600 font-semibold hover:underline block">
+                        <span id="modal-phone">-</span>
+                    </a>
+                </div>
+            </div>
+
+            <div id="modal-rejection-box" class="p-3 bg-rose-50 rounded-xl border border-rose-200 text-rose-800 hidden">
+                <span class="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-rose-600">Alasan Penolakan:</span>
+                <p id="modal-rejection-reason" class="text-xs italic"></p>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <button type="button" onclick="closeDetailModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Alasan Penolakan -->
+<div id="reject-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-sm">Tolak Pendaftaran Calon Siswa</h3>
+                    <p class="text-[11px] text-slate-400" id="reject-applicant-name">Nama Siswa</p>
+                </div>
+            </div>
+            <button onclick="closeRejectModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <form id="reject-form" method="POST" action="" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Alasan Penolakan (Akan tampil saat dicek oleh siswa):</label>
+                <textarea name="rejection_reason" rows="3" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800" placeholder="Tuliskan alasan penolakan, misal kuota jurusan magang telah penuh atau kualifikasi belum sesuai.">Mohon maaf, kuota penerimaan magang periode ini telah penuh / kualifikasi belum memenuhi.</textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeRejectModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                    Konfirmasi Tolak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Search Filter
+    const searchInput = document.getElementById('reg-search-input');
+    const rows = document.querySelectorAll('.reg-row');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            rows.forEach(row => {
+                const searchData = row.getAttribute('data-search') || '';
+                if (searchData.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Detail Modal
+    function openDetailModal(data) {
+        document.getElementById('modal-queue-code').textContent = data.registration_code || '-';
+        document.getElementById('modal-full-name').textContent = data.full_name || '-';
+        document.getElementById('modal-nis').textContent = data.nis || '-';
+        document.getElementById('modal-gender').textContent = data.gender || '-';
+        document.getElementById('modal-religion').textContent = data.religion || '-';
+        
+        let birthStr = (data.birth_place ? data.birth_place : '') + (data.birth_date ? (', ' + data.birth_date) : '');
+        document.getElementById('modal-birth-info').textContent = birthStr || '-';
+        document.getElementById('modal-school').textContent = data.school_origin || 'SMKN 1 Ciamis';
+        document.getElementById('modal-skill').textContent = data.skill_competency || '-';
+        document.getElementById('modal-email').textContent = data.email || '-';
+        document.getElementById('modal-phone').textContent = data.phone_number || '-';
+        
+        const cleanPhone = (data.phone_number || '').replace(/[^0-9]/g, '');
+        document.getElementById('modal-phone-link').href = 'https://wa.me/' + cleanPhone;
+
+        const dateObj = new Date(data.created_at);
+        document.getElementById('modal-created-at').textContent = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const statusBadge = document.getElementById('modal-status-badge');
+        const rejectBox = document.getElementById('modal-rejection-box');
+        
+        if (data.status === 'pending') {
+            statusBadge.innerHTML = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Pending Review</span>';
+            rejectBox.classList.add('hidden');
+        } else if (data.status === 'approved') {
+            statusBadge.innerHTML = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Disetujui</span>';
+            rejectBox.classList.add('hidden');
+        } else if (data.status === 'rejected') {
+            statusBadge.innerHTML = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Ditolak</span>';
+            document.getElementById('modal-rejection-reason').textContent = data.rejection_reason || 'Tidak ada catatan tambahan.';
+            rejectBox.classList.remove('hidden');
+        }
+
+        document.getElementById('detail-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detail-modal').classList.add('hidden');
+    }
+
+    // Reject Modal
+    function openRejectModal(id, name) {
+        document.getElementById('reject-applicant-name').textContent = name;
+        document.getElementById('reject-form').action = '/admin/pendaftaran/' + id + '/reject';
+        document.getElementById('reject-modal').classList.remove('hidden');
+        lucide.createIcons();
+    }
+
+    function closeRejectModal() {
+        document.getElementById('reject-modal').classList.add('hidden');
+    }
+</script>
+@endsection
