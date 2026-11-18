@@ -138,7 +138,7 @@
 
             <!-- Student Meta -->
             <div class="text-xs text-slate-600 font-medium pt-2">
-                NIS/NIM: <b class="font-mono text-slate-900">{{ $student->nis_nim ?? '212210045' }}</b> &bull; 
+                NIS/NIM: <b class="font-mono text-slate-900">{{ $student->nis_nim ?: ($student->account_id ?? '-') }}</b> &bull; 
                 Asal Sekolah/Kampus: <b class="text-slate-900">{{ $student->school_origin }}</b> &bull; 
                 Konsentrasi: <b class="text-slate-900">{{ $student->major }}</b>
             </div>
@@ -148,10 +148,23 @@
                 Telah berhasil menyelesaikan seluruh program <b>Praktik Kerja Lapangan (PKL)</b> pada divisi <b>{{ $student->mentor->location ?? 'IT / Software Engineering' }}</b> di PT. Teknologi Multi Sistem dari tanggal <b>{{ $student->internship_period ?? '1 Juli 2026 s/d 31 Desember 2026' }}</b> dengan predikat:
             </p>
 
+            @php
+                $score = (float) $evaluation->final_score;
+                if ($score >= 85) {
+                    $predTitle = 'PREDIKAT A (SANGAT MEMUASKAN)';
+                } elseif ($score >= 75) {
+                    $predTitle = 'PREDIKAT B (MEMUASKAN)';
+                } elseif ($score >= 60) {
+                    $predTitle = 'PREDIKAT C (CUKUP)';
+                } else {
+                    $predTitle = 'PREDIKAT D (KURANG)';
+                }
+            @endphp
+
             <!-- Grade Callout -->
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold">
                 <i data-lucide="award" class="w-4 h-4 text-amber-600"></i>
-                <span>PREDIKAT A (SANGAT MEMUASKAN) &bull; SKOR AKHIR: {{ $evaluation->final_score }} / 100</span>
+                <span>{{ $predTitle }} &bull; SKOR AKHIR: {{ $evaluation->final_score }} / 100</span>
             </div>
         </div>
 
@@ -195,7 +208,7 @@
                     </div>
                 </div>
                 <div class="text-[9px] text-slate-500 mt-1 font-medium italic">
-                    Project: SIMAK-TMS & TechPulse Engineering Blog
+                    Project: {{ $student->batch->batch_name ?? 'Industri Software House' }} &bull; Portofolio Digital
                 </div>
             </div>
 
@@ -215,9 +228,9 @@
                 <div class="grid grid-cols-2 gap-2 text-center pt-5">
                     <div>
                         <!-- Tanda Tangan Pembimbing Industri -->
-                        <div class="font-script text-xs font-bold text-slate-900 italic font-mono">{{ $mentor->name ?? 'Farhan Ramadhan' }}</div>
+                        <div class="font-script text-xs font-bold text-slate-900 italic font-mono">{{ $mentor->name ?? ($student->mentor->name ?? 'Staff Mentor TMS') }}</div>
                         <div class="border-t border-slate-400 mt-1 pt-0.5 text-[8px] font-bold text-slate-700">Mentor Pembimbing</div>
-                        <div class="text-[7px] text-slate-400">Head of Software TMS</div>
+                        <div class="text-[7px] text-slate-400">{{ $mentor->location ?? ($mentor->headline ?? 'Software Engineering') }}</div>
                     </div>
 
                     <div>

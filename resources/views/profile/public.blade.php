@@ -293,11 +293,11 @@
                                 <div class="flex items-start justify-between gap-2">
                                     <h4 class="text-sm font-bold text-slate-900 leading-snug">{{ $p->title }}</h4>
                                     <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 shrink-0">
-                                        {{ $p->category ?? 'Web App' }}
+                                        {{ $p->project_category ?? ($p->category ?? 'Web Application') }}
                                     </span>
                                 </div>
                                 <p class="text-xs text-slate-600 mt-2 line-clamp-3 leading-relaxed">
-                                    {{ $p->description }}
+                                    {{ $p->short_description ?? ($p->full_description ?? ($p->description ?? '')) }}
                                 </p>
                             </div>
 
@@ -321,8 +321,8 @@
                                     <span class="text-slate-400 text-[11px]">Private Repo</span>
                                 @endif
 
-                                @if($p->demo_url)
-                                    <a href="{{ $p->demo_url }}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 shadow-xs transition-all">
+                                @if($p->live_url || $p->demo_url)
+                                    <a href="{{ $p->live_url ?? $p->demo_url }}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 shadow-xs transition-all">
                                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                                         <span>Live Demo</span>
                                     </a>

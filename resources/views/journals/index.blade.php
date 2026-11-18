@@ -224,6 +224,8 @@
 
         @php
             $isDateExpired = ($selectedDate < now()->toDateString() && !$selectedJournal);
+            $isDateFuture = ($selectedDate > now()->toDateString());
+            $isFormLocked = ($isDateExpired || $isDateFuture);
         @endphp
 
         <!-- Notice Terkunci jika Tanggal Terlewat & Belum Pernah Diisi (Mencegah Kecurangan Numpuk Tugas) -->
@@ -240,6 +242,21 @@
                 </div>
                 <p class="text-xs text-slate-600 bg-white/70 p-3 rounded-xl border border-slate-200">
                     Pengisian jurnal untuk tanggal ini telah terkunci secara otomatis guna menjamin kedisiplinan industri dan mencegah kecurangan penumpukan tugas oleh siswa PKL. Silakan isi logbook untuk hari kerja aktif hari ini.
+                </p>
+            </div>
+        @elseif($isDateFuture)
+            <div class="p-4 rounded-2xl bg-amber-50 border border-dashed border-amber-300 text-amber-900 space-y-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black uppercase tracking-wider text-amber-900">Tanggal Masa Depan Belum Dibuka</h3>
+                        <p class="text-[11px] text-amber-700">Tanggal: <b>{{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d F Y') }}</b></p>
+                    </div>
+                </div>
+                <p class="text-xs text-amber-800 bg-white/70 p-3 rounded-xl border border-amber-200">
+                    Jurnal kegiatan harian hanya dapat diisi pada hari kerja yang sedang berjalan atau hari ini. Siswa PKL tidak diperkenankan mencicil atau mengisi logbook untuk hari masa depan demi menjaga integritas data industri.
                 </p>
             </div>
         @endif
@@ -266,13 +283,13 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Pengisian</label>
                     <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="{{ $selectedJournal ? 'check-circle-2' : ($isDateExpired ? 'ban' : 'clock') }}" class="w-4 h-4 {{ $selectedJournal ? 'text-emerald-600' : ($isDateExpired ? 'text-slate-400' : 'text-slate-500') }}"></i>
-                            <span class="font-bold {{ $selectedJournal ? 'text-emerald-700' : ($isDateExpired ? 'text-slate-500' : 'text-slate-700') }}">
-                                {{ $selectedJournal ? 'Jurnal Sudah Diisi' : ($isDateExpired ? 'Terkunci (Terlewat)' : 'Belum Ada Jurnal') }}
+                            <i data-lucide="{{ $selectedJournal ? 'check-circle-2' : ($isDateExpired ? 'ban' : ($isDateFuture ? 'clock' : 'file-edit')) }}" class="w-4 h-4 {{ $selectedJournal ? 'text-emerald-600' : ($isDateExpired ? 'text-slate-400' : ($isDateFuture ? 'text-amber-500' : 'text-slate-500')) }}"></i>
+                            <span class="font-bold {{ $selectedJournal ? 'text-emerald-700' : ($isDateExpired ? 'text-slate-500' : ($isDateFuture ? 'text-amber-700' : 'text-slate-700')) }}">
+                                {{ $selectedJournal ? 'Jurnal Sudah Diisi' : ($isDateExpired ? 'Terkunci (Terlewat)' : ($isDateFuture ? 'Terkunci (Masa Depan)' : 'Belum Ada Jurnal')) }}
                             </span>
                         </div>
-                        <span class="text-[10px] {{ $selectedJournal ? 'bg-emerald-100 text-emerald-800' : ($isDateExpired ? 'bg-slate-200 text-slate-500' : 'bg-slate-200 text-slate-600') }} font-bold px-2 py-0.5 rounded">
-                            {{ $selectedJournal ? 'Tersimpan' : ($isDateExpired ? 'Terkunci' : 'Draft') }}
+                        <span class="text-[10px] {{ $selectedJournal ? 'bg-emerald-100 text-emerald-800' : ($isDateExpired ? 'bg-slate-200 text-slate-500' : ($isDateFuture ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600')) }} font-bold px-2 py-0.5 rounded">
+                            {{ $selectedJournal ? 'Tersimpan' : ($isDateExpired ? 'Terkunci' : ($isDateFuture ? 'Belum Buka' : 'Draft')) }}
                         </span>
                     </div>
                 </div>
@@ -281,10 +298,10 @@
             <!-- Row 2: Pekerjaan / Fitur yang Dikerjakan -->
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Pekerjaan / Fitur yang Dikerjakan <span class="text-red-500">*</span></label>
-                <input type="text" name="activity_title" required {{ $isDateExpired ? 'disabled' : '' }}
+                <input type="text" name="activity_title" required {{ $isFormLocked ? 'disabled' : '' }}
                        value="{{ old('activity_title', $selectedJournal->activity_title ?? '') }}"
                        placeholder="Contoh: Implementasi modul autentikasi login & integrasi database logbook"
-                       class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 {{ $isDateExpired ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">
+                       class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 {{ $isFormLocked ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">
             </div>
 
             <!-- Row 3: Dua Kolom (Dropzone Foto Bukti & Deskripsi Kegiatan/Catatan Harian) -->
@@ -296,7 +313,7 @@
                         <span>Foto Bukti Kegiatan</span>
                         <span class="text-[10px] font-semibold text-slate-400">(opsional)</span>
                     </label>
-                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-7 flex flex-col items-center justify-center text-center hover:bg-slate-50 hover:border-slate-300 transition-colors {{ $isDateExpired ? 'cursor-not-allowed opacity-60' : 'cursor-pointer' }} group h-[calc(100%-24px)] min-h-[170px]">
+                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-7 flex flex-col items-center justify-center text-center hover:bg-slate-50 hover:border-slate-300 transition-colors {{ $isFormLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer' }} group h-[calc(100%-24px)] min-h-[170px]">
                         <div class="w-11 h-11 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                             <i data-lucide="camera" class="w-5 h-5"></i>
                         </div>
@@ -309,9 +326,9 @@
                 <div class="space-y-3.5">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Deskripsi Kegiatan / Catatan Harian <span class="text-red-500">*</span></label>
-                        <textarea name="activity_detail" rows="4" required {{ $isDateExpired ? 'disabled' : '' }}
+                        <textarea name="activity_detail" rows="4" required {{ $isFormLocked ? 'disabled' : '' }}
                                   placeholder="Tuliskan ringkasan aktivitas, fitur yang dikembangkan, alur kerja, atau catatan pembelajaran hari ini..."
-                                  class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 leading-relaxed {{ $isDateExpired ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">{{ old('activity_detail', $selectedJournal->activity_detail ?? '') }}</textarea>
+                                  class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 leading-relaxed {{ $isFormLocked ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">{{ old('activity_detail', $selectedJournal->activity_detail ?? '') }}</textarea>
                     </div>
 
                     <div>
@@ -319,10 +336,10 @@
                             <span>Tautan Bukti / Link Drive / Git</span>
                             <span class="text-[10px] font-semibold text-slate-400">(opsional)</span>
                         </label>
-                        <input type="url" name="commit_url" {{ $isDateExpired ? 'disabled' : '' }}
+                        <input type="url" name="commit_url" {{ $isFormLocked ? 'disabled' : '' }}
                                value="{{ old('commit_url', $selectedJournal->commit_url ?? '') }}"
                                placeholder="https://drive.google.com/... atau https://github.com/..."
-                               class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500 {{ $isDateExpired ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">
+                               class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500 {{ $isFormLocked ? 'bg-slate-100 cursor-not-allowed opacity-60' : '' }}">
                         <p class="text-[10px] text-slate-400 mt-1">Bisa menyematkan link folder Google Drive, repository GitHub, commit git, Figma, atau dokumen lainnya.</p>
                     </div>
                 </div>
@@ -334,16 +351,23 @@
                 <span class="text-xs text-slate-400">
                     @if($isDateExpired)
                         Pengisian untuk tanggal ini ditutup. Hubungi mentor jika terdapat kendala teknis.
+                    @elseif($isDateFuture)
+                        Pengisian untuk tanggal ini belum dibuka. Silakan kembali pada hari kegiatan berlangsung.
                     @else
                         {{ $selectedJournal ? 'Perubahan akan memperbarui data jurnal untuk tanggal ' . \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') . '.' : 'Jurnal baru akan dicatat untuk tanggal ' . \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') . '.' }}
                     @endif
                 </span>
 
-                @if(!$isDateExpired)
+                @if(!$isFormLocked)
                     <button type="submit" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 active:scale-98 text-white font-bold text-xs rounded-xl shadow-md shadow-red-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer">
                         <i data-lucide="save" class="w-4 h-4"></i>
                         <span>{{ $selectedJournal ? 'Perbarui Jurnal Kegiatan' : 'Simpan Jurnal Baru' }}</span>
                     </button>
+                @elseif($isDateFuture)
+                    <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 font-bold text-xs cursor-not-allowed select-none">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span>Pengisian Terkunci (Tanggal Masa Depan)</span>
+                    </div>
                 @else
                     <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 font-bold text-xs cursor-not-allowed select-none">
                         <i data-lucide="ban" class="w-4 h-4"></i>

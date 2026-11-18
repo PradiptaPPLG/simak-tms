@@ -237,10 +237,17 @@
                                                     </button>
                                                 @endif
                                             @endif
-                                            <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
-                                                <i data-lucide="award" class="w-3.5 h-3.5 text-slate-400"></i>
-                                                <span>Rapor & Nilai</span>
-                                            </a>
+                                            @if(empty($intern->account_id) || empty($intern->mentor_id))
+                                                <button type="button" onclick="alert('Evaluasi & nilai belum dapat diisi untuk {{ addslashes($intern->name) }} karena siswa belum terdaftar resmi / belum memiliki mentor pembimbing. Silakan tentukan mentor terlebih dahulu dengan klik Edit Data.')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 transition-colors text-left cursor-not-allowed opacity-60" title="Siswa belum terdaftar resmi">
+                                                    <i data-lucide="award" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                    <span>Rapor & Nilai</span>
+                                                </button>
+                                            @else
+                                                <button type="button" onclick="openEvaluationModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id }}', {{ $intern->evaluation->technical_skill ?? 85 }}, {{ $intern->evaluation->discipline ?? 90 }}, {{ $intern->evaluation->teamwork ?? 85 }}, {{ $intern->evaluation->initiative ?? 85 }}, '{{ $intern->evaluation->certificate_number ?? ('TMS-CERT-' . date('Y') . '-' . $intern->account_id) }}', '{{ $intern->evaluation->issue_date ?? date('Y-m-d') }}', '{{ addslashes($intern->evaluation->general_notes ?? 'Peserta menunjukkan progres koding sangat baik dan integritas disiplin kerja industri memuaskan.') }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
+                                                    <i data-lucide="award" class="w-3.5 h-3.5 text-red-500"></i>
+                                                    <span>Rapor & Nilai</span>
+                                                </button>
+                                            @endif
                                         </div>
                                         <div class="py-1">
                                             <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left cursor-pointer">
@@ -419,6 +426,93 @@
         </div>
     </div>
 
+    <!-- 6. Modal Evaluasi & Input Nilai Rapor Siswa (Admin TMS) -->
+    <div id="modal-evaluation-student" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+        <div class="mas-card p-6 bg-white w-full max-w-lg shadow-2xl space-y-4 my-8">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0 aspect-square">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900">Rapor & Nilai Evaluasi Industri</h3>
+                        <p class="text-[11px] text-slate-400" id="eval-student-subtitle">Penetapan 4 standar kompetensi & penerbitan sertifikat resmi.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEvaluationModal()" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center text-lg cursor-pointer">&times;</button>
+            </div>
+
+            <form id="form-evaluation-student" method="POST" class="space-y-4">
+                @csrf
+
+                <!-- Score Preview Bar -->
+                <div class="p-3.5 rounded-2xl bg-slate-900 text-white flex items-center justify-between">
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Perhitungan Skor Akhir</div>
+                        <div class="text-xs text-slate-300">Teknis 35% + Disiplin 25% + Team 20% + Inisiatif 20%</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xl font-black font-mono text-emerald-400" id="eval-live-score">86.3</div>
+                        <div class="text-[10px] font-bold text-slate-300 uppercase" id="eval-live-grade">Predikat: A (Sangat Memuaskan)</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Teknis Koding (35%)
+                        </label>
+                        <input type="number" step="0.1" min="0" max="100" id="eval-tech" name="technical_skill" required oninput="calcEvaluationScore()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Kedisiplinan & SOP (25%)
+                        </label>
+                        <input type="number" step="0.1" min="0" max="100" id="eval-disc" name="discipline" required oninput="calcEvaluationScore()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Teamwork & Agile (20%)
+                        </label>
+                        <input type="number" step="0.1" min="0" max="100" id="eval-team" name="teamwork" required oninput="calcEvaluationScore()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">
+                            Inisiatif & Solusi (20%)
+                        </label>
+                        <input type="number" step="0.1" min="0" max="100" id="eval-init" name="initiative" required oninput="calcEvaluationScore()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Sertifikat Resmi</label>
+                        <input type="text" id="eval-cert-no" name="certificate_number" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Penerbitan</label>
+                        <input type="date" id="eval-issue-date" name="issue_date" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Kualitatif / Feedback Industri</label>
+                    <textarea id="eval-notes" name="general_notes" rows="2" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500" placeholder="Catatan evaluasi kompetensi magang siswa..."></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeEvaluationModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/30 flex items-center gap-1.5 cursor-pointer">
+                        <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                        <span>Simpan & Sahkan Nilai</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function openEditModal(id, name, email, school, major, mentorId) {
             const modal = document.getElementById('modal-edit-student');
@@ -434,6 +528,41 @@
 
         function closeEditModal() {
             document.getElementById('modal-edit-student').classList.add('hidden');
+        }
+
+        function openEvaluationModal(id, name, accountId, tech, disc, team, init, certNo, issueDate, notes) {
+            const modal = document.getElementById('modal-evaluation-student');
+            const form = document.getElementById('form-evaluation-student');
+            form.action = "{{ url('/admin/evaluasi') }}/" + id;
+            document.getElementById('eval-student-subtitle').textContent = "Siswa: " + name + " (ID: " + accountId + ")";
+            document.getElementById('eval-tech').value = tech;
+            document.getElementById('eval-disc').value = disc;
+            document.getElementById('eval-team').value = team;
+            document.getElementById('eval-init').value = init;
+            document.getElementById('eval-cert-no').value = certNo;
+            document.getElementById('eval-issue-date').value = issueDate;
+            document.getElementById('eval-notes').value = notes;
+            calcEvaluationScore();
+            modal.classList.remove('hidden');
+            if (window.lucide) { lucide.createIcons(); }
+        }
+
+        function closeEvaluationModal() {
+            document.getElementById('modal-evaluation-student').classList.add('hidden');
+        }
+
+        function calcEvaluationScore() {
+            const t = parseFloat(document.getElementById('eval-tech').value) || 0;
+            const d = parseFloat(document.getElementById('eval-disc').value) || 0;
+            const tm = parseFloat(document.getElementById('eval-team').value) || 0;
+            const i = parseFloat(document.getElementById('eval-init').value) || 0;
+            const finalScore = Math.round(((t * 0.35) + (d * 0.25) + (tm * 0.20) + (i * 0.20)) * 10) / 10;
+            document.getElementById('eval-live-score').textContent = finalScore.toFixed(1);
+            let grade = 'Predikat: D (Kurang)';
+            if (finalScore >= 85) grade = 'Predikat: A (Sangat Memuaskan)';
+            else if (finalScore >= 75) grade = 'Predikat: B (Memuaskan)';
+            else if (finalScore >= 60) grade = 'Predikat: C (Cukup)';
+            document.getElementById('eval-live-grade').textContent = grade;
         }
     </script>
 </div>

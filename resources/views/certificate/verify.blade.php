@@ -74,7 +74,7 @@
                             </div>
                             <h2 class="text-xl sm:text-2xl font-black text-slate-900 leading-tight">{{ $student->name }}</h2>
                             <div class="text-xs text-slate-500 font-mono mt-0.5">
-                                NIS/NIM: <b class="text-slate-800">{{ $student->nis_nim ?? '212210045' }}</b> • ID Akun: <b class="text-slate-800">{{ $student->account_id ?? $student->id }}</b>
+                                NIS/NIM: <b class="text-slate-800">{{ $student->nis_nim ?: ($student->account_id ?? '-') }}</b> • ID Akun: <b class="text-slate-800">{{ $student->account_id ?? $student->id }}</b>
                             </div>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                             <div class="text-2xl font-black font-mono text-slate-900">{{ $evaluation->final_score }}<span class="text-xs text-slate-400 font-normal">/100</span></div>
                         </div>
                         <div class="w-12 h-12 rounded-xl bg-red-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-red-600/30">
-                            {{ $evaluation->final_score >= 85 ? 'A' : 'B' }}
+                            {{ $evaluation->final_score >= 85 ? 'A' : ($evaluation->final_score >= 75 ? 'B' : ($evaluation->final_score >= 60 ? 'C' : 'D')) }}
                         </div>
                     </div>
                 </div>

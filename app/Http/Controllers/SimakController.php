@@ -85,6 +85,13 @@ class SimakController extends Controller
         $remember = $request->boolean('remember') || $request->filled('remember');
 
         if ($user && Hash::check($request->password, $user->password)) {
+            // Mencegah siswa yang belum resmi terdaftar (menunggu penetapan mentor & penerbitan ID) masuk ke sistem
+            if ($user->role === 'siswa' && (empty($user->account_id) || empty($user->mentor_id))) {
+                return back()->withErrors([
+                    'login_id' => 'Pendaftaran Anda telah diterima, namun akun Anda saat ini sedang dalam proses penetapan mentor pembimbing dan penerbitan ID resmi 5-digit oleh Administrator. Silakan cek status pendaftaran secara berkala di menu Cek Status Pendaftaran.',
+                ])->onlyInput('login_id');
+            }
+
             RateLimiter::clear($throttleKey);
             Auth::login($user, $remember);
             $request->session()->regenerate();
@@ -1123,12 +1130,23 @@ class SimakController extends Controller
         $mentor = User::where('role', 'mentor')->findOrFail($id);
         $name = $mentor->name;
 
-        // Reassign or unassign students who have this mentor
+        // Cari mentor pengganti atau admin sebagai penampung relasi data kritis
+        $fallbackUser = User::where('role', 'mentor')->where('id', '!=', $mentor->id)->first()
+            ?? User::where('role', 'admin_tms')->first();
+
+        // Mencegah MySQL cascadeOnDelete menghapus sertifikat kelulusan siswa & tugas yang pernah dibuat
+        if ($fallbackUser) {
+            Evaluation::where('mentor_id', $mentor->id)->update(['mentor_id' => $fallbackUser->id]);
+            Task::where('mentor_id', $mentor->id)->update(['mentor_id' => $fallbackUser->id]);
+            DailyJournal::where('mentor_id', $mentor->id)->update(['mentor_id' => $fallbackUser->id]);
+        }
+
+        // Lepaskan siswa dari mentor yang dihapus agar dapat dipilihkan mentor baru
         User::where('mentor_id', $mentor->id)->update(['mentor_id' => null]);
 
         $mentor->delete();
 
-        return back()->with('success', "Akun mentor {$name} berhasil dihapus dari sistem.");
+        return back()->with('success', "Akun mentor {$name} berhasil dihapus dari sistem. Seluruh sertifikat & riwayat evaluasi siswa tetap aman dan dialihkan.");
     }
 
     // ==========================================
@@ -1497,15 +1515,40 @@ class SimakController extends Controller
     {
         $this->authorizeAdmin();
 
-        $user = User::findOrFail($userId);
-        $tech = (float)($request->technical_skill ?? 90);
-        $disc = (float)($request->discipline ?? 90);
-        $team = (float)($request->teamwork ?? 90);
-        $init = (float)($request->initiative ?? 90);
+        $user = User::where('role', 'siswa')->findOrFail($userId);
 
-        // Bobot: Teknis 35%, Disiplin 25%, Teamwork 20%, Inisiatif 20%
+        if (empty($user->account_id) || empty($user->mentor_id)) {
+            return back()->with('error', "Siswa {$user->name} berstatus (belum terdaftar) / belum memiliki mentor pembimbing. Silakan tentukan mentor dan terbitkan ID akun resmi 5-digit terlebih dahulu sebelum menerbitkan nilai rapor & sertifikat.");
+        }
+
+        $validated = $request->validate([
+            'technical_skill' => 'required|numeric|min:0|max:100',
+            'discipline' => 'required|numeric|min:0|max:100',
+            'teamwork' => 'required|numeric|min:0|max:100',
+            'initiative' => 'required|numeric|min:0|max:100',
+            'certificate_number' => 'nullable|string|max:100',
+            'issue_date' => 'nullable|date',
+            'general_notes' => 'nullable|string|max:1000',
+        ], [
+            'technical_skill.required' => 'Nilai teknis wajib diisi (0-100).',
+            'technical_skill.numeric' => 'Nilai teknis harus berupa angka.',
+            'technical_skill.min' => 'Nilai teknis minimal 0.',
+            'technical_skill.max' => 'Nilai teknis maksimal 100.',
+            'discipline.required' => 'Nilai disiplin wajib diisi (0-100).',
+            'teamwork.required' => 'Nilai teamwork wajib diisi (0-100).',
+            'initiative.required' => 'Nilai inisiatif wajib diisi (0-100).',
+        ]);
+
+        $tech = (float)$validated['technical_skill'];
+        $disc = (float)$validated['discipline'];
+        $team = (float)$validated['teamwork'];
+        $init = (float)$validated['initiative'];
+
+        // Bobot Industri TMS: Teknis 35%, Disiplin 25%, Teamwork 20%, Inisiatif 20%
         $finalScore = round(($tech * 0.35) + ($disc * 0.25) + ($team * 0.20) + ($init * 0.20), 1);
-        $certNo = $request->certificate_number ?: ('TMS-CERT-' . date('Y') . '-' . ($user->account_id ?? $user->id));
+        $certNo = !empty($validated['certificate_number']) 
+            ? trim($validated['certificate_number']) 
+            : ('TMS-CERT-' . date('Y') . '-' . $user->account_id);
 
         Evaluation::updateOrCreate(
             ['user_id' => $user->id],
@@ -1517,13 +1560,13 @@ class SimakController extends Controller
                 'initiative' => $init,
                 'final_score' => $finalScore,
                 'certificate_number' => $certNo,
-                'issue_date' => $request->issue_date ?? now()->toDateString(),
+                'issue_date' => $validated['issue_date'] ?? now()->toDateString(),
                 'is_published' => true,
-                'general_notes' => $request->general_notes ?? 'Peserta menunjukkan progres koding sangat baik dan integritas disiplin kerja industri memuaskan.',
+                'general_notes' => $validated['general_notes'] ?? 'Peserta menunjukkan progres koding sangat baik dan integritas disiplin kerja industri memuaskan.',
             ]
         );
 
-        return back()->with('success', "Nilai evaluasi & nomor sertifikat resmi untuk {$user->name} berhasil disimpan!");
+        return back()->with('success', "Nilai evaluasi & sertifikat resmi ({$certNo}) untuk {$user->name} berhasil disimpan dan diterbitkan!");
     }
 
     // ==========================================

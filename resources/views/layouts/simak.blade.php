@@ -171,8 +171,8 @@
                     </a>
 
                     <!-- Evaluasi Nilai Siswa Bimbingan -->
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
-                        <i data-lucide="award" class="w-4 h-4 shrink-0 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                        <i data-lucide="award" class="w-4 h-4 shrink-0 {{ request()->routeIs('mentor.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Penilaian & Rapor Siswa</span>
                     </a>
 
@@ -242,8 +242,8 @@
                     </a>
 
                     <!-- Rekapitulasi Nilai & Laporan -->
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0 {{ request()->routeIs('evaluation.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                    <a href="{{ route('admin.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                         <span class="truncate">Rekap Nilai & Laporan DUDI</span>
                     </a>
                 @endif
@@ -322,7 +322,7 @@
                         <i data-lucide="check-check" class="w-4 h-4"></i>
                         <span>Validasi Jurnal Masuk</span>
                     </a>
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="award" class="w-4 h-4"></i>
                         <span>Penilaian & Rapor</span>
                     </a>
@@ -366,7 +366,7 @@
                         <i data-lucide="archive" class="w-4 h-4"></i>
                         <span>Master Arsip Portofolio</span>
                     </a>
-                    <a href="{{ route('evaluation.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('evaluation.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
                         <span>Rekap Nilai & Laporan DUDI</span>
                     </a>
@@ -392,7 +392,15 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-slate-900 leading-tight">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }} <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? auth()->user()->id }})</span></div>
+                            <div class="text-[10px] text-red-600 font-bold uppercase">
+                                @if(auth()->user()->role === 'admin_tms')
+                                    ADMIN <span class="text-slate-400 font-mono font-bold">(admin)</span>
+                                @elseif(auth()->user()->role === 'mentor')
+                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                @else
+                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     <form action="{{ route('logout') }}" method="POST">
@@ -447,7 +455,15 @@
                         </div>
                         <div class="text-left">
                             <div class="text-xs font-bold text-slate-900 leading-tight uppercase group-hover:text-red-600 transition-colors">{{ auth()->user()->name }}</div>
-                            <div class="text-[10px] text-red-600 font-bold uppercase">{{ auth()->user()->role }} <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->username ?? auth()->user()->id }})</span></div>
+                            <div class="text-[10px] text-red-600 font-bold uppercase">
+                                @if(auth()->user()->role === 'admin_tms')
+                                    ADMIN <span class="text-slate-400 font-mono font-bold">(admin)</span>
+                                @elseif(auth()->user()->role === 'mentor')
+                                    MENTOR <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                @else
+                                    SISWA PKL <span class="text-slate-400 font-mono font-bold">({{ auth()->user()->account_id ?? auth()->user()->id }})</span>
+                                @endif
+                            </div>
                         </div>
                     </a>
 
