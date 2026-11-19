@@ -13,11 +13,12 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto no-print">
-            <!-- Green Export Button (Matches user screenshot) -->
-            <a href="{{ route('admin.students.export', request()->query()) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center shrink-0" title="Unduh Spreadsheet Data Siswa (.CSV)">
+            <!-- Green Export Button (Opens Format Choice Modal) -->
+            <button type="button" onclick="openExportModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Unduh Berkas Spreadsheet Data Siswa (Excel / CSV)">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
                 <span>Ekspor Excel / CSV</span>
-            </a>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
+            </button>
 
             <!-- Daftarkan Siswa Baru Button -->
             <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center shrink-0">
@@ -739,6 +740,23 @@
             document.getElementById('modal-evaluation-student').classList.add('hidden');
         }
 
+        
+        function openExportModal() {
+            const m = document.getElementById('modal-export-student');
+            if (m) {
+                m.classList.remove('hidden');
+                m.classList.add('flex');
+                if (window.lucide) { lucide.createIcons(); }
+            }
+        }
+        function closeExportModal() {
+            const m = document.getElementById('modal-export-student');
+            if (m) {
+                m.classList.add('hidden');
+                m.classList.remove('flex');
+            }
+        }
+
         function calcEvaluationScore() {
             const t = parseFloat(document.getElementById('eval-tech').value) || 0;
             const d = parseFloat(document.getElementById('eval-disc').value) || 0;
@@ -753,5 +771,76 @@
             document.getElementById('eval-live-grade').textContent = grade;
         }
     </script>
+
+    <!-- MODAL PILIH FORMAT EKSPOR (EXCEL / CSV) -->
+    <div id="modal-export-student" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Pilih Format Ekspor Data</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Pilih format berkas rekapitulasi siswa yang diinginkan:</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeExportModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body: Choices -->
+            <div class="p-6 space-y-3">
+                <!-- Option 1: Microsoft Excel (.xls) -->
+                <a href="{{ route('admin.students.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
+                   onclick="closeExportModal()"
+                   class="group p-4 rounded-2xl border-2 border-emerald-100 hover:border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50 transition-all flex items-start gap-3.5 block text-left">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
+                        XLS
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">Microsoft Excel (.xls)</h4>
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Rekomendasi</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                            Format spreadsheet dengan warna header hijau TMS, border tabel rapi, dan kop resmi. Langsung siap dibuka di MS Excel & WPS.
+                        </p>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-emerald-600 shrink-0 mt-1 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all"></i>
+                </a>
+
+                <!-- Option 2: CSV Universal (.csv) -->
+                <a href="{{ route('admin.students.export', array_merge(request()->query(), ['format' => 'csv'])) }}" 
+                   onclick="closeExportModal()"
+                   class="group p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-800 bg-slate-50/50 hover:bg-slate-100 transition-all flex items-start gap-3.5 block text-left">
+                    <div class="w-11 h-11 rounded-xl bg-slate-800 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md shadow-slate-800/20 group-hover:scale-105 transition-transform">
+                        CSV
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-900 group-hover:text-black transition-colors">Comma Separated Values (.csv)</h4>
+                            <span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">Universal</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                            Format teks data terpisah koma dengan UTF-8 BOM. Sangat cocok untuk Google Sheets, SQL database, atau script data.
+                        </p>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-slate-600 shrink-0 mt-1 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all"></i>
+                </a>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Klik opsi untuk langsung mengunduh</span>
+                <button type="button" onclick="closeExportModal()" class="px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
