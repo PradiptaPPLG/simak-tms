@@ -60,16 +60,10 @@
             </a>
             
             <div class="flex items-center gap-2">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
-                        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-red-500"></i>
-                        <span>Ke Dasbor SIMAK</span>
-                    </a>
-                @else
-                    <a href="{{ route('login') }}" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all">
-                        Login SIMAK
-                    </a>
-                @endauth
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span class="hidden sm:inline">Portal Verifikasi Resmi</span>
+                </span>
             </div>
         </div>
     </header>
