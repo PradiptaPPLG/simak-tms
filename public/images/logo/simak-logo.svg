@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="540" height="120">
+  <defs>
+    <linearGradient id="hTmsRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a38"/>
+      <stop offset="100%" stop-color="#b8000b"/>
+    </linearGradient>
+    <radialGradient id="hTmsDark" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#141a24"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Circular Emblem on the Left (Scale 100x100 at x=10, y=10) -->
+  <g transform="translate(10, 10) scale(0.1953125)">
+    <!-- Base -->
+    <circle cx="256" cy="256" r="248" fill="url(#hTmsDark)" />
+    <circle cx="256" cy="256" r="242" fill="none" stroke="url(#hTmsRed)" stroke-width="14" />
+    <circle cx="256" cy="256" r="226" fill="none" stroke="#ff4d5a" stroke-width="2.5" stroke-opacity="0.5" />
+    <circle cx="256" cy="256" r="186" fill="url(#hTmsRed)" stroke="#ffffff" stroke-width="2" stroke-opacity="0.25" />
+
+    <!-- Motif -->
+    <polygon points="256,112 364,162 256,212 148,162" fill="#ffffff" />
+    <path d="M184,180 L184,218 C184,244 328,244 328,218 L328,180 Z" fill="#ffffff" opacity="0.95" />
+    <path d="M364,162 C376,182 384,204 380,230" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+    <circle cx="380" cy="235" r="5.5" fill="#ffffff" />
+    <path d="M176,252 C220,268 292,268 336,252" fill="none" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round" />
+    <path d="M192,274 C226,286 286,286 320,274" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.85" />
+    <path d="M214,294 C236,302 276,302 298,294" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" opacity="0.7" />
+
+    <!-- Text -->
+    <text x="256" y="362" text-anchor="middle" fill="#ffffff" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="44" font-weight="900" letter-spacing="5">SIMAK</text>
+    <rect x="186" y="382" width="140" height="30" rx="15" fill="#090d16" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3" />
+    <text x="256" y="402" text-anchor="middle" fill="#ff4d5a" font-family="monospace" font-size="13" font-weight="800" letter-spacing="2.5">PKL • TMS</text>
+  </g>
+
+  <!-- Typography on the Right -->
+  <text x="130" y="58" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="34" font-weight="900" fill="#0f172a" letter-spacing="-0.5">
+    SIMAK<tspan fill="#e50914">-TMS</tspan>
+  </text>
+  <rect x="330" y="35" width="48" height="22" rx="6" fill="#fef2f2" stroke="#fecaca" stroke-width="1" />
+  <text x="354" y="50" text-anchor="middle" fill="#dc2626" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="800">PKL</text>
+
+  <text x="130" y="80" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="700" fill="#475569" letter-spacing="0.5">
+    PT. TEKNOLOGI MULTI SISTEM
+  </text>
+  <text x="130" y="98" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10.5" font-weight="500" fill="#94a3b8">
+    Sistem Informasi Manajemen Aktivitas &amp; Karya Siswa PKL
+  </text>
+</svg>

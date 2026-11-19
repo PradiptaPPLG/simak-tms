@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="tmsRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a38"/>
+      <stop offset="50%" stop-color="#e50914"/>
+      <stop offset="100%" stop-color="#b8000b"/>
+    </linearGradient>
+    <radialGradient id="tmsDark" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#141a24"/>
+      <stop offset="70%" stop-color="#0a0d14"/>
+      <stop offset="100%" stop-color="#050608"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 1. Outer Dark Circular Base -->
+  <circle cx="256" cy="256" r="246" fill="url(#tmsDark)" />
+
+  <!-- 2. Outer Vibrant Red Ring -->
+  <circle cx="256" cy="256" r="240" fill="none" stroke="url(#tmsRed)" stroke-width="13" />
+
+  <!-- 3. Inner Accent Ring -->
+  <circle cx="256" cy="256" r="226" fill="none" stroke="#ff4d5a" stroke-width="2" stroke-opacity="0.5" />
+
+  <!-- 4. Inner Red Core Badge -->
+  <circle cx="256" cy="256" r="186" fill="url(#tmsRed)" stroke="#ffffff" stroke-width="2" stroke-opacity="0.25" />
+
+  <!-- 5. Academic Graduation Cap (Toga) -->
+  <polygon points="256,98 355,140 256,182 157,140" fill="#ffffff" />
+  <path d="M192,155 L192,188 C218,208 294,208 320,188 L320,155 Z" fill="#f1f5f9" />
+  <path d="M355,140 L372,168 L374,205" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+  <circle cx="374" cy="210" r="7" fill="#ffffff" />
+
+  <!-- 6. Stacked Activity Layers Underneath -->
+  <!-- Layer 1 -->
+  <polygon points="256,228 325,253 256,278 187,253" fill="#ffffff" />
+  <polygon points="187,253 256,278 325,253 325,259 256,284 187,259" fill="#e2e8f0" />
+  <!-- Layer 2 Rim -->
+  <polygon points="195,268 256,290 317,268 317,275 256,298 195,275" fill="#ffffff" opacity="0.9" />
+
+  <!-- 7. Typography: SIMAK -->
+  <text x="256" y="375" 
+        text-anchor="middle" 
+        fill="#ffffff" 
+        font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" 
+        font-size="54" 
+        font-weight="900" 
+        letter-spacing="4">SIMAK</text>
+
+  <!-- 8. Pill Badge: PKL • TMS -->
+  <rect x="186" y="411" width="140" height="30" rx="15" fill="#0a0e16" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.35" />
+  <text x="256" y="431" 
+        text-anchor="middle" 
+        fill="#ff4d5a" 
+        font-family="'JetBrains Mono', 'Segoe UI', monospace" 
+        font-size="14" 
+        font-weight="800" 
+        letter-spacing="2">PKL • TMS</text>
+</svg>
