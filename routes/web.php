@@ -104,6 +104,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin TMS Management Hub (Khusus Administrator TMS)
     Route::middleware(['role:admin_tms'])->group(function () {
+        // Export Data Siswa & Alumni (Excel/CSV)
+        Route::get('/admin/siswa/export', [SimakController::class, 'adminExportStudents'])->name('admin.students.export');
+        Route::get('/admin/alumni/export', [SimakController::class, 'adminExportAlumni'])->name('admin.alumni.export');
+        Route::get('/admin/pendaftaran/export', [SimakController::class, 'adminExportRegistrations'])->name('admin.registrations.export');
+
         Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
         Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');
         Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');

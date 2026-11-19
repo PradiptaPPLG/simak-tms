@@ -15,7 +15,12 @@
             <p class="text-xs text-slate-500 mt-0.5">Pusat rekam jejak, direktori karir, dan showcase talenta lulusan Praktik Kerja Lapangan.</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 no-print">
+            <!-- Green Export Button (Matches user screenshot) -->
+            <a href="{{ route('admin.alumni.export', request()->query()) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5" title="Unduh Spreadsheet Data Alumni (.CSV)">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
+                <span>Ekspor Excel / CSV</span>
+            </a>
             <a href="{{ route('admin.students', ['status' => 'alumni']) }}" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
                 <i data-lucide="table" class="w-4 h-4 text-slate-500 shrink-0"></i>
                 <span class="hidden sm:inline">Mode Tabel Siswa</span>
@@ -79,7 +84,7 @@
     </div>
 
     <!-- 2. Filter Navigation & Search Bar -->
-    <div class="mas-card p-4">
+    <div class="mas-card p-4 no-print">
         <form method="GET" action="{{ route('admin.alumni') }}" class="space-y-3">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <!-- Angkatan Pills -->

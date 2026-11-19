@@ -1186,6 +1186,270 @@ class SimakController extends Controller
     }
 
     // ==========================================
+    // DATA EXPORT (EXCEL / CSV / SPREADSHEET)
+    // ==========================================
+    public function adminExportStudents(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $query = User::where('role', 'siswa')
+            ->with(['batch', 'mentor', 'evaluation', 'journals']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('batch_id')) {
+            $query->where('batch_id', $request->batch_id);
+        }
+        if ($request->filled('mentor_id')) {
+            $query->where('mentor_id', $request->mentor_id);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($w) use ($search) {
+                $w->where('name', 'like', "%{$search}%")
+                  ->orWhere('account_id', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('school_origin', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->orderBy('name', 'asc')->get();
+        $filename = 'Data_Siswa_Magang_TMS_' . date('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($students) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'No',
+                'ID Akun 5-Digit',
+                'Nama Lengkap Siswa',
+                'Email Siswa',
+                'NIS / NIM',
+                'No. Telepon / WhatsApp',
+                'Asal Sekolah / Kampus',
+                'Kompetensi Keahlian (Jurusan)',
+                'Angkatan',
+                'Mentor Pembimbing TMS',
+                'Status Magang',
+                'Status Karir Alumni',
+                'Instansi / Kampus Alumni',
+                'Jumlah Logbook Terisi',
+                'Nilai Akhir Magang',
+                'Predikat Nilai',
+                'Nomor E-Sertifikat'
+            ]);
+
+            $no = 1;
+            foreach ($students as $student) {
+                $eval = $student->evaluation;
+                $statusLabel = match($student->status) {
+                    'aktif' => 'Aktif Magang',
+                    'alumni' => 'Alumni (Lulus)',
+                    'pending' => 'Pending Review',
+                    default => ucfirst($student->status ?? 'Aktif')
+                };
+
+                fputcsv($handle, [
+                    $no++,
+                    $student->account_id ? "'" . $student->account_id : '(belum terdaftar)',
+                    $student->name,
+                    $student->email,
+                    $student->nis_nim ? "'" . $student->nis_nim : '-',
+                    $student->phone_number ? "'" . $student->phone_number : '-',
+                    $student->school_origin ?? 'SMKN 1 Ciamis',
+                    $student->major ?? 'PPLG',
+                    $student->batch->batch_name ?? 'Angkatan 2026',
+                    $student->mentor ? $student->mentor->name : 'Belum di-assign',
+                    $statusLabel,
+                    $student->alumni_status ? ucfirst($student->alumni_status) : '-',
+                    $student->alumni_current_at ?? '-',
+                    $student->journals->count(),
+                    $eval ? number_format($eval->final_score, 1) : '-',
+                    $eval ? $eval->grade : '-',
+                    $eval && $eval->certificate_number ? "'" . $eval->certificate_number : '-'
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function adminExportAlumni(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $query = User::where('role', 'siswa')
+            ->where('status', 'alumni')
+            ->with(['batch', 'mentor', 'evaluation', 'showcaseProjects']);
+
+        if ($request->filled('batch_id')) {
+            $query->where('batch_id', $request->batch_id);
+        }
+        if ($request->filled('career_status')) {
+            $query->where('alumni_status', $request->career_status);
+        }
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($w) use ($search) {
+                $w->where('name', 'like', "%{$search}%")
+                  ->orWhere('account_id', 'like', "%{$search}%")
+                  ->orWhere('skills', 'like', "%{$search}%")
+                  ->orWhere('school_origin', 'like', "%{$search}%")
+                  ->orWhere('alumni_current_at', 'like', "%{$search}%");
+            });
+        }
+
+        $alumni = $query->orderBy('name', 'asc')->get();
+        $filename = 'Direktori_Alumni_PKL_TMS_' . date('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($alumni) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'No',
+                'ID Akun',
+                'Nama Lengkap Alumni',
+                'Email',
+                'No. Telepon / WhatsApp',
+                'Asal Sekolah / Kampus',
+                'Jurusan',
+                'Angkatan',
+                'Status Karir Pasca-PKL',
+                'Tempat Bekerja / Kuliah',
+                'Keahlian (Tech Stack)',
+                'Nilai Akhir',
+                'Predikat',
+                'Nomor E-Sertifikat'
+            ]);
+
+            $no = 1;
+            foreach ($alumni as $item) {
+                $eval = $item->evaluation;
+                fputcsv($handle, [
+                    $no++,
+                    $item->account_id ? "'" . $item->account_id : '-',
+                    $item->name,
+                    $item->email,
+                    $item->phone_number ? "'" . $item->phone_number : '-',
+                    $item->school_origin ?? 'SMKN 1 Ciamis',
+                    $item->major ?? 'PPLG',
+                    $item->batch->batch_name ?? 'Angkatan 2026',
+                    $item->alumni_status ? ucfirst($item->alumni_status) : 'Lulusan PKL',
+                    $item->alumni_current_at ?? '-',
+                    $item->skills ?? '-',
+                    $eval ? number_format($eval->final_score, 1) : '-',
+                    $eval ? $eval->grade : '-',
+                    $eval && $eval->certificate_number ? "'" . $eval->certificate_number : '-'
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    public function adminExportRegistrations(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $query = PklRegistration::query();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($w) use ($search) {
+                $w->where('full_name', 'like', "%{$search}%")
+                  ->orWhere('registration_code', 'like', "%{$search}%")
+                  ->orWhere('school_origin', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $registrations = $query->latest()->get();
+        $filename = 'Pendaftaran_PKL_Online_TMS_' . date('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($registrations) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'No',
+                'Kode Antrian',
+                'Nama Lengkap Pendaftar',
+                'Jenis Kelamin',
+                'NIS / NISN',
+                'Tempat Lahir',
+                'Tanggal Lahir',
+                'Agama',
+                'Email',
+                'No. Telepon / WhatsApp',
+                'Asal Sekolah',
+                'Kompetensi Keahlian',
+                'Status Pendaftaran',
+                'Catatan / Alasan Tolak',
+                'Waktu Mendaftar'
+            ]);
+
+            $no = 1;
+            foreach ($registrations as $reg) {
+                $statusLabel = match($reg->status) {
+                    'approved' => 'Disetujui',
+                    'rejected' => 'Ditolak',
+                    default => 'Pending Review'
+                };
+
+                fputcsv($handle, [
+                    $no++,
+                    "'" . $reg->registration_code,
+                    $reg->full_name,
+                    $reg->gender === 'L' ? 'Laki-laki' : 'Perempuan',
+                    $reg->nis ? "'" . $reg->nis : '-',
+                    $reg->birth_place ?? '-',
+                    $reg->birth_date ? date('d-m-Y', strtotime($reg->birth_date)) : '-',
+                    $reg->religion ?? '-',
+                    $reg->email,
+                    $reg->phone_number ? "'" . $reg->phone_number : '-',
+                    $reg->school_origin,
+                    $reg->skill_competency,
+                    $statusLabel,
+                    $reg->rejection_reason ?? '-',
+                    $reg->created_at ? $reg->created_at->format('d-m-Y H:i') : '-'
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    // ==========================================
     // ADMIN MENTOR MANAGEMENT (MASTER DATA MENTOR)
     // ==========================================
     public function adminMentors(Request $request)

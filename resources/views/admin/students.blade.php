@@ -12,13 +12,22 @@
             <p class="text-xs text-slate-500 mt-0.5">Kelola data seluruh siswa magang lintas sekolah mitra, pembagian mentor pembimbing, serta rekapitulasi penugasan.</p>
         </div>
 
-        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
-            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="w-full sm:w-auto px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center">
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto no-print">
+            <!-- Green Export Button (Matches user screenshot) -->
+            <a href="{{ route('admin.students.export', request()->query()) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center shrink-0" title="Unduh Spreadsheet Data Siswa (.CSV)">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
+                <span>Ekspor Excel / CSV</span>
+            </a>
+
+            <!-- Daftarkan Siswa Baru Button -->
+            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center shrink-0">
                 <i data-lucide="user-plus" class="w-4 h-4 shrink-0"></i>
                 <span class="hidden sm:inline">Daftarkan Siswa Baru</span>
                 <span class="sm:hidden">Daftar Siswa</span>
             </button>
-            <button onclick="window.print()" class="w-full sm:w-auto px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center">
+
+            <!-- Cetak Rekap Button -->
+            <button onclick="window.print()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center shrink-0">
                 <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
                 <span>Cetak Rekap</span>
             </button>
@@ -69,7 +78,7 @@
     </div>
 
     <!-- 2. Filter & Search Bar -->
-    <div class="mas-card p-4">
+    <div class="mas-card p-4 no-print">
         <form method="GET" action="{{ route('admin.students') }}" class="flex flex-col md:flex-row gap-3 items-center justify-between">
             <div class="relative flex-1 w-full">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
@@ -114,7 +123,7 @@
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">Seluruh data siswa aktif dan alumni magang di PT. Teknologi Multi Sistem.</p>
             </div>
-            <a href="{{ route('admin.alumni') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
+            <a href="{{ route('admin.alumni') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0 self-start sm:self-auto no-print">
                 <i data-lucide="graduation-cap" class="w-4 h-4 text-red-400"></i>
                 <span>Direktori Alumni PKL &rarr;</span>
             </a>
@@ -129,7 +138,7 @@
                         <th class="py-3 px-4">Pembimbing TMS</th>
                         <th class="py-3 px-4">Karya Proyek</th>
                         <th class="py-3 px-4">Status & Nilai Akhir</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                        <th class="py-3 px-4 text-right action-col no-print">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -215,7 +224,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="py-3.5 px-4 text-right">
+                            <td class="py-3.5 px-4 text-right action-col no-print">
                                 <!-- Menu Aksi Titik 3 (More Actions Dropdown) -->
                                 <div class="relative inline-block text-left dropdown-container">
                                     <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-2xs flex items-center justify-center cursor-pointer ml-auto" title="Opsi Aksi Siswa">
@@ -331,7 +340,7 @@
     </div>
 
     <!-- 4. Form Registrasi Akun Siswa Baru -->
-    <div id="form-register-student" class="mas-card p-6 bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200">
+    <div id="form-register-student" class="mas-card p-6 bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 no-print">
         <div class="flex items-start sm:items-center gap-3 mb-4 pb-3 border-b border-slate-200">
             <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-600/30 shrink-0 aspect-square mt-0.5 sm:mt-0">
                 <i data-lucide="user-plus" class="w-5 h-5"></i>

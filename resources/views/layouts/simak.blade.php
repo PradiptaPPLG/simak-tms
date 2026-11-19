@@ -78,6 +78,105 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Default: hide official print letterhead on screen */
+        .print-header {
+            display: none;
+        }
+
+        /* Dedicated Official Print Stylesheet (Clean corporate paper document) */
+        @media print {
+            aside,
+            header,
+            nav,
+            #mobile-drawer,
+            #mobile-backdrop,
+            .no-print,
+            button,
+            form,
+            .action-col,
+            th:last-child,
+            td:last-child,
+            .mas-card-hover,
+            .pagination,
+            .dropdown,
+            .action-dropdown,
+            .badge-pulse {
+                display: none !important;
+            }
+
+            html, body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 9.5pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-height: auto !important;
+                overflow: visible !important;
+            }
+
+            div.flex-1.flex.flex-col.min-w-0.md\:pl-64.min-h-screen.pt-16 {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .print-header {
+                display: block !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 8.5pt !important;
+                margin-top: 8px !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+            }
+
+            thead {
+                display: table-header-group !important;
+            }
+
+            th, td {
+                border: 1px solid #334155 !important;
+                padding: 5px 8px !important;
+                color: #000000 !important;
+                background: transparent !important;
+            }
+
+            th {
+                background-color: #f1f5f9 !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                font-size: 7.5pt !important;
+            }
+
+            .mas-card {
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+                border-radius: 8px !important;
+                background: #ffffff !important;
+                page-break-inside: avoid !important;
+            }
+
+            a {
+                text-decoration: none !important;
+                color: #000000 !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 1.2cm 1cm 1.2cm 1cm;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 overflow-x-hidden">
@@ -504,6 +603,27 @@
 
         <!-- Main Body Content (With comfortable mobile bottom padding for bottom nav) -->
         <main class="flex-1 p-4 sm:p-8 pb-24 md:pb-8 min-w-0">
+            <!-- Kop Surat Resmi PT. TMS (Hanya Muncul Saat Print / PDF) -->
+            <div class="print-header">
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2.5px solid #000; padding-bottom: 8px; margin-bottom: 3px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 46px; height: 46px; background: #0f172a; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; letter-spacing: -1px;">
+                            TMS
+                        </div>
+                        <div>
+                            <h2 style="font-size: 13pt; font-weight: 900; margin: 0; line-height: 1.1; letter-spacing: -0.5px; color: #000;">PT. TEKNOLOGI MULTI SISTEM</h2>
+                            <p style="font-size: 7.5pt; margin: 2px 0 0 0; color: #333; font-weight: 600;">Software Engineering, Digital Media & Pusat Prakerin Industri Terpadu</p>
+                            <p style="font-size: 7pt; margin: 1px 0 0 0; color: #555;">Jl. Ir. H. Juanda No. 106, Ciamis, Jawa Barat • Email: info@tms.co.id • Sistem SIMAK-TMS</p>
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 7.5pt; color: #333;">
+                        <p style="margin: 0; font-weight: 800; font-size: 8pt; color: #000; text-transform: uppercase;">Laporan Dokumen Resmi</p>
+                        <p style="margin: 2px 0 0 0;">Cetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
+                        <p style="margin: 1px 0 0 0;">Dicetak oleh: {{ auth()->check() ? auth()->user()->name : 'Admin TMS' }}</p>
+                    </div>
+                </div>
+                <div style="border-top: 1px solid #000; margin-bottom: 12px;"></div>
+            </div>
             @if(session('success'))
                 <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between shadow-xs">
                     <span class="flex items-center gap-2">
