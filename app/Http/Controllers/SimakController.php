@@ -1108,6 +1108,84 @@ class SimakController extends Controller
     }
 
     // ==========================================
+    // ADMIN ALUMNI DIRECTORY (DIREKTORI ALUMNI PKL)
+    // ==========================================
+    public function adminAlumni(Request $request)
+    {
+        $query = User::where('role', 'siswa')
+            ->where('status', 'alumni')
+            ->with(['batch', 'mentor', 'evaluation', 'showcaseProjects']);
+
+        // Filter by Angkatan / Batch
+        $selectedBatchId = $request->query('batch_id');
+        if ($selectedBatchId) {
+            $query->where('batch_id', $selectedBatchId);
+        }
+
+        // Filter by Career Status
+        $careerStatus = $request->query('career_status');
+        if ($careerStatus) {
+            $query->where('alumni_status', $careerStatus);
+        }
+
+        // Search Query
+        $search = $request->query('q');
+        if ($search) {
+            $query->where(function ($w) use ($search) {
+                $w->where('name', 'like', "%{$search}%")
+                  ->orWhere('account_id', 'like', "%{$search}%")
+                  ->orWhere('skills', 'like', "%{$search}%")
+                  ->orWhere('school_origin', 'like', "%{$search}%")
+                  ->orWhere('alumni_current_at', 'like', "%{$search}%");
+            });
+        }
+
+        $alumni = $query->latest('updated_at')->paginate(20)->withQueryString();
+
+        // Counters
+        $allAlumni = User::where('role', 'siswa')->where('status', 'alumni')->get();
+        $totalAlumni = $allAlumni->count();
+        $workingCount = $allAlumni->where('alumni_status', 'bekerja')->count();
+        $collegeCount = $allAlumni->where('alumni_status', 'kuliah')->count();
+        $freelanceCount = $allAlumni->whereIn('alumni_status', ['wirausaha', 'freelance'])->count();
+        $seekingCount = $allAlumni->where('alumni_status', 'mencari_kerja')->count();
+
+        $batches = Batch::orderBy('period_year', 'desc')->get();
+
+        return view('admin.alumni', compact(
+            'alumni',
+            'batches',
+            'selectedBatchId',
+            'careerStatus',
+            'search',
+            'totalAlumni',
+            'workingCount',
+            'collegeCount',
+            'freelanceCount',
+            'seekingCount'
+        ));
+    }
+
+    public function adminUpdateAlumniCareer(Request $request, $id)
+    {
+        $this->authorizeAdmin();
+
+        $student = User::where('role', 'siswa')->findOrFail($id);
+
+        $validated = $request->validate([
+            'alumni_status' => 'required|string|in:bekerja,kuliah,wirausaha,mencari_kerja,lainnya',
+            'alumni_current_at' => 'nullable|string|max:150',
+        ]);
+
+        $student->update([
+            'alumni_status' => $validated['alumni_status'],
+            'alumni_current_at' => $validated['alumni_current_at'],
+        ]);
+
+        return back()->with('success', "Status karir alumni {$student->name} berhasil diperbarui!");
+    }
+
+    // ==========================================
     // ADMIN MENTOR MANAGEMENT (MASTER DATA MENTOR)
     // ==========================================
     public function adminMentors(Request $request)

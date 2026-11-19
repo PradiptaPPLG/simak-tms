@@ -416,6 +416,15 @@
                         </tr>
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="graduation-cap" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Direktori Alumni PKL</span>
+                            </td>
+                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px]">Admin</span></td>
+                            <td class="py-3 px-3 text-slate-600">Galeri grid talenta alumni lulusan PKL, tracking karir pasca-magang (bekerja/kuliah/usaha), dan rekam jejak angkatan.</td>
+                            <td class="py-3 px-3 text-slate-500">Filter berdasarkan angkatan tahun, cari nama alumni, klik profil untuk membuka portofolio lengkap, atau perbarui karir.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
                                 <span>Data Mentor & Staff</span>
                             </td>

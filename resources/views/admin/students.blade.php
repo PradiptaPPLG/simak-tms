@@ -106,7 +106,7 @@
 
     <!-- 3. Tabel Data Siswa Lengkap -->
     <div class="mas-card p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <i data-lucide="users" class="w-5 h-5 text-red-600"></i>
@@ -114,6 +114,10 @@
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">Seluruh data siswa aktif dan alumni magang di PT. Teknologi Multi Sistem.</p>
             </div>
+            <a href="{{ route('admin.alumni') }}" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
+                <i data-lucide="graduation-cap" class="w-4 h-4 text-red-400"></i>
+                <span>Direktori Alumni PKL &rarr;</span>
+            </a>
         </div>
 
         <div class="overflow-x-auto">

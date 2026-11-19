@@ -214,6 +214,12 @@
                         <span class="truncate">Data Siswa (Semua Batch)</span>
                     </a>
 
+                    <!-- Direktori Alumni PKL -->
+                    <a href="{{ route('admin.alumni') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.alumni*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.alumni*') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span class="truncate">Direktori Alumni PKL</span>
+                    </a>
+
                     <!-- Data Mentor & Staff Pembimbing -->
                     <a href="{{ route('admin.mentors') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                         <i data-lucide="user-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.mentors*') ? 'text-red-600' : 'text-slate-400' }}"></i>
@@ -349,6 +355,10 @@
                     <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>Data Siswa (Semua Batch)</span>
+                    </a>
+                    <a href="{{ route('admin.alumni') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.alumni*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                        <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                        <span>Direktori Alumni PKL</span>
                     </a>
                     <a href="{{ route('admin.mentors') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.mentors*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="user-check" class="w-4 h-4"></i>

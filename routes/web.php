@@ -80,6 +80,9 @@ Route::middleware(['auth'])->group(function () {
     // Showcase & Archive
     Route::get('/arsip', [SimakController::class, 'showcase'])->name('showcase.index');
 
+    // Direktori Alumni PKL
+    Route::get('/alumni', [SimakController::class, 'adminAlumni'])->name('alumni.index');
+
     // Evaluations & Score
     Route::get('/evaluasi', [SimakController::class, 'evaluation'])->name('evaluation.index');
 
@@ -106,6 +109,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/admin/siswa/{id}', [SimakController::class, 'adminUpdateStudent'])->name('admin.students.update');
         Route::post('/admin/siswa/{id}/alumni', [SimakController::class, 'adminGraduateStudent'])->name('admin.students.alumni');
         Route::delete('/admin/siswa/{id}', [SimakController::class, 'adminDeleteStudent'])->name('admin.students.destroy');
+        Route::get('/admin/alumni', [SimakController::class, 'adminAlumni'])->name('admin.alumni');
+        Route::post('/admin/alumni/{id}/career', [SimakController::class, 'adminUpdateAlumniCareer'])->name('admin.alumni.career');
         Route::get('/admin/mentor', [SimakController::class, 'adminMentors'])->name('admin.mentors');
         Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
         Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
