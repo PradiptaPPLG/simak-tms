@@ -31,9 +31,7 @@
 
         <!-- Header -->
         <div class="text-center space-y-2">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-900 to-red-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-red-500/20 mb-3">
-                <i data-lucide="shield-check" class="w-7 h-7 text-white"></i>
-            </div>
+            <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-16 h-16 mx-auto rounded-full shadow-lg shadow-red-500/20 mb-3 object-contain hover:scale-105 transition-transform">
             <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Verifikasi Sertifikat PKL PT. TMS</h1>
             <p class="text-xs text-slate-300">Masukkan nomor sertifikat atau ID peserta magang untuk memvalidasi keaslian dokumen kelulusan industri secara instan.</p>
         </div>

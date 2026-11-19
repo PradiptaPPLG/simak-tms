@@ -42,9 +42,7 @@
     <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <a href="{{ route('login') }}" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-900 to-black text-white flex items-center justify-center shadow-md shadow-slate-900/10 group-hover:scale-105 transition-transform">
-                    <i data-lucide="layers" class="w-5 h-5 text-red-500"></i>
-                </div>
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-10 h-10 rounded-full shadow-md shadow-red-500/20 shrink-0 object-contain group-hover:scale-105 transition-transform">
                 <div>
                     <div class="flex items-center gap-1.5">
                         <span class="font-black text-base tracking-tight text-slate-900">SIMAK-TMS</span>
