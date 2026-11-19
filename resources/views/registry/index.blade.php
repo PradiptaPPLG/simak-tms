@@ -90,7 +90,51 @@
         </div>
 
         <!-- Success Flash Alert (Tampilkan Kode Antrian Jika Baru Submit) -->
-        @if(session('registration_success'))
+        @if(session('team_registration_success'))
+            @php $team = session('team_registration_success'); @endphp
+            <div class="p-5 sm:p-6 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 space-y-4 shadow-md animate-in fade-in duration-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-600/30">
+                        <i data-lucide="check-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-emerald-900">Pendaftaran Berhasil Dikirim ke Tim PT. TMS!</h3>
+                        <p class="text-xs text-emerald-700">Total <b>{{ $team['total'] }} Siswa / Anggota Tim</b> telah berhasil didaftarkan ke dalam antrian verifikasi seleksi.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5">
+                    @foreach($team['members'] as $idx => $m)
+                        <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-bold font-mono text-xs flex items-center justify-center shrink-0">
+                                    {{ $idx + 1 }}
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-900">{{ $m['name'] }}</h4>
+                                    <p class="text-[11px] text-slate-500 font-mono">NIS: {{ $m['nis'] }} • {{ $m['school'] }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 self-start sm:self-auto">
+                                <span class="font-mono text-xs font-black text-red-600 bg-red-50 border border-red-200 px-2.5 py-1 rounded-lg tracking-wider">{{ $m['code'] }}</span>
+                                <button type="button" onclick="copyCode('{{ $m['code'] }}')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                    <span>Salin</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="text-[11px] text-slate-600 bg-white/80 p-3.5 rounded-xl border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <p>Simpan kode antrian masing-masing siswa di atas untuk mengecek status persetujuan di tab <b>Cek Status Pendaftaran</b>.</p>
+                    <button type="button" onclick="copyAllTeamCodes()" class="px-3 py-1.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-xs">
+                        <i data-lucide="copy-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span id="copy-all-btn-text">Salin Semua Kode Tim</span>
+                    </button>
+                </div>
+            </div>
+        @elseif(session('registration_success'))
             @php $res = session('registration_success'); @endphp
             <div class="p-5 sm:p-6 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 space-y-3 shadow-md animate-in fade-in duration-300">
                 <div class="flex items-center gap-3">
@@ -152,136 +196,180 @@
         </div>
 
         <!-- ======================================================== -->
-        <!-- TAB 1: FORMULIR PENDAFTARAN PKL                          -->
+        <!-- TAB 1: FORMULIR PENDAFTARAN SISWA & TIM PKL              -->
         <!-- ======================================================== -->
         <div id="tab-content-register" class="form-card p-6 sm:p-8 space-y-6 {{ $isCheckTab ? 'hidden' : '' }}">
-            <div class="border-b border-slate-100 pb-3">
-                <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Biodata Calon Siswa Magang</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Lengkapi seluruh kolom identitas di bawah ini dengan data yang valid.</p>
+            <!-- Header Form dengan Counter Jumlah Tim Otomatis -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 tracking-tight">Biodata Calon Siswa & Tim Magang</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Lengkapi identitas siswa. Bisa mendaftar perorangan atau kolektif satu kelompok/tim sekaligus.</p>
+                </div>
+                <!-- Counting Jumlah Tim di Bagian Paling Atas -->
+                <div id="team-counter-badge" class="px-3.5 py-1.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center gap-2 self-start sm:self-auto shrink-0 shadow-2xs">
+                    <i data-lucide="users" class="w-4 h-4 text-red-500"></i>
+                    <span>Jumlah Tim: <strong id="team-count-display" class="font-mono text-sm text-red-700 font-black">1</strong> Siswa</span>
+                </div>
             </div>
 
-            <form action="{{ route('registry.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('registry.store') }}" method="POST" id="team-registration-form" class="space-y-6">
                 @csrf
 
-                <!-- 1. Nama Lengkap -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                        Nama Lengkap <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="full_name" value="{{ old('full_name') }}" required
-                           placeholder="Contoh: Pradipta Endra Maulana"
-                           class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                <!-- Container Anggota Tim Dinamis -->
+                <div id="team-members-container" class="space-y-6">
+
+                    <!-- ==================================================== -->
+                    <!-- ANGGOTA #1 (KETUA / PENDAFTAR UTAMA)                  -->
+                    <!-- ==================================================== -->
+                    <div class="member-card rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-6 space-y-4 transition-all relative shadow-2xs" data-index="0">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-lg bg-slate-900 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 member-num-badge">
+                                    1
+                                </div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-900 member-title">Anggota #1 (Ketua / Perwakilan Tim)</h3>
+                                    <p class="text-[10px] text-slate-400">Data pendaftar utama</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-md">Ketua Tim</span>
+                        </div>
+
+                        <!-- 1. Nama Lengkap -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Nama Lengkap <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="students[0][full_name]" value="{{ old('students.0.full_name', old('full_name')) }}" required
+                                   placeholder="Contoh: Pradipta Endra Maulana"
+                                   class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-semibold">
+                        </div>
+
+                        <!-- 2. Jenis Kelamin & NIS (2 Kolom) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Jenis Kelamin <span class="text-red-500">*</span>
+                                </label>
+                                <select name="students[0][gender]" required class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-semibold">
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="Laki-laki" {{ old('students.0.gender', old('gender')) === 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="Perempuan" {{ old('students.0.gender', old('gender')) === 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Nomor Induk Siswa (NIS) <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="students[0][nis]" value="{{ old('students.0.nis', old('nis')) }}" required
+                                       placeholder="Contoh: 212210045"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-mono">
+                            </div>
+                        </div>
+
+                        <!-- 3. Tempat Lahir & Tanggal Lahir (2 Kolom) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Tempat Lahir
+                                </label>
+                                <input type="text" name="students[0][birth_place]" value="{{ old('students.0.birth_place', old('birth_place')) }}"
+                                       placeholder="Contoh: Ciamis"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-medium">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Tanggal Lahir
+                                </label>
+                                <input type="date" name="students[0][birth_date]" value="{{ old('students.0.birth_date', old('birth_date')) }}"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-medium">
+                            </div>
+                        </div>
+
+                        <!-- 4. Agama & Asal Sekolah (2 Kolom) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Agama
+                                </label>
+                                <select name="students[0][religion]" class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-medium">
+                                    <option value="">-- Pilih Agama --</option>
+                                    <option value="Islam" {{ old('students.0.religion', old('religion')) === 'Islam' ? 'selected' : '' }}>Islam</option>
+                                    <option value="Kristen" {{ old('students.0.religion', old('religion')) === 'Kristen' ? 'selected' : '' }}>Kristen Protestan</option>
+                                    <option value="Katolik" {{ old('students.0.religion', old('religion')) === 'Katolik' ? 'selected' : '' }}>Katolik</option>
+                                    <option value="Hindu" {{ old('students.0.religion', old('religion')) === 'Hindu' ? 'selected' : '' }}>Hindu</option>
+                                    <option value="Buddha" {{ old('students.0.religion', old('religion')) === 'Buddha' ? 'selected' : '' }}>Buddha</option>
+                                    <option value="Khonghucu" {{ old('students.0.religion', old('religion')) === 'Khonghucu' ? 'selected' : '' }}>Khonghucu</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Asal Sekolah Mitra
+                                </label>
+                                <input type="text" name="students[0][school_origin]" id="member-school-0" value="{{ old('students.0.school_origin', old('school_origin', 'SMKN 1 Ciamis')) }}"
+                                       placeholder="Contoh: SMKN 1 Ciamis"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-semibold">
+                            </div>
+                        </div>
+
+                        <!-- 5. Kompetensi Keahlian (Ketik Aja) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Kompetensi Keahlian / Jurusan <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="students[0][skill_competency]" id="member-skill-0" value="{{ old('students.0.skill_competency', old('skill_competency', 'PPLG (Pengembangan Perangkat Lunak & Gim)')) }}" required
+                                   placeholder="Ketik keahlian Anda, contoh: PPLG / Rekayasa Perangkat Lunak, TKJ, dll"
+                                   class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all font-medium">
+                        </div>
+
+                        <!-- 6. Email Aktif & Nomor HP / WA (2 Kolom) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Email Aktif <span class="text-red-500">*</span>
+                                </label>
+                                <input type="email" name="students[0][email]" value="{{ old('students.0.email', old('email')) }}" required
+                                       placeholder="nama@gmail.com"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Nomor Aktif (WhatsApp / Telepon) <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" name="students[0][phone_number]" value="{{ old('students.0.phone_number', old('phone_number')) }}" required
+                                       placeholder="08xxxxxxxxxx"
+                                       class="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white transition-all">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 2. Jenis Kelamin & NIS (2 Kolom) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Jenis Kelamin <span class="text-red-500">*</span>
-                        </label>
-                        <select name="gender" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
-                            <option value="">-- Pilih Jenis Kelamin --</option>
-                            <option value="Laki-laki" {{ old('gender') === 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="Perempuan" {{ old('gender') === 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Nomor Induk Siswa (NIS) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="nis" value="{{ old('nis') }}" required
-                               placeholder="Contoh: 212210045"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
-                    </div>
+                <!-- Tombol + Tambah Anggota Tim di Akhir Form -->
+                <div class="pt-1">
+                    <button type="button" onclick="addTeamMember()" id="btn-add-member" 
+                            class="w-full py-3.5 px-4 border-2 border-dashed border-red-300 hover:border-red-500 bg-red-50/40 hover:bg-red-50 text-red-600 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs group">
+                        <div class="w-6 h-6 rounded-lg bg-red-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span>+ Tambah Anggota Tim (Maksimal 10 Siswa per Tim)</span>
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center mt-1.5">
+                        Asal sekolah dan jurusan anggota otomatis mengikuti data ketua tim agar tidak perlu mengisi ulang.
+                    </p>
                 </div>
 
-                <!-- 3. Tempat Lahir & Tanggal Lahir (2 Kolom) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Tempat Lahir
-                        </label>
-                        <input type="text" name="birth_place" value="{{ old('birth_place') }}"
-                               placeholder="Contoh: Ciamis"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Tanggal Lahir
-                        </label>
-                        <input type="date" name="birth_date" value="{{ old('birth_date') }}"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
-                    </div>
-                </div>
-
-                <!-- 4. Agama & Asal Sekolah (2 Kolom) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Agama
-                        </label>
-                        <select name="religion" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
-                            <option value="">-- Pilih Agama --</option>
-                            <option value="Islam" {{ old('religion') === 'Islam' ? 'selected' : '' }}>Islam</option>
-                            <option value="Kristen" {{ old('religion') === 'Kristen' ? 'selected' : '' }}>Kristen Protestan</option>
-                            <option value="Katolik" {{ old('religion') === 'Katolik' ? 'selected' : '' }}>Katolik</option>
-                            <option value="Hindu" {{ old('religion') === 'Hindu' ? 'selected' : '' }}>Hindu</option>
-                            <option value="Buddha" {{ old('religion') === 'Buddha' ? 'selected' : '' }}>Buddha</option>
-                            <option value="Khonghucu" {{ old('religion') === 'Khonghucu' ? 'selected' : '' }}>Khonghucu</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Asal Sekolah Mitra
-                        </label>
-                        <input type="text" name="school_origin" value="{{ old('school_origin', 'SMKN 1 Ciamis') }}"
-                               placeholder="Contoh: SMKN 1 Ciamis"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
-                    </div>
-                </div>
-
-                <!-- 5. Kompetensi Keahlian (Ketik Aja) -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                        Kompetensi Keahlian / Jurusan <span class="text-red-500">*</span>
-                    </label>
-                    <input type="text" name="skill_competency" value="{{ old('skill_competency', 'PPLG (Pengembangan Perangkat Lunak & Gim)') }}" required
-                           placeholder="Ketik keahlian Anda, contoh: PPLG / Rekayasa Perangkat Lunak, TKJ, dll"
-                           class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
-                </div>
-
-                <!-- 6. Email Aktif & Nomor HP / WA (2 Kolom) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Email Aktif <span class="text-red-500">*</span>
-                        </label>
-                        <input type="email" name="email" value="{{ old('email') }}" required
-                               placeholder="nama@gmail.com"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Nomor Aktif (WhatsApp / Telepon) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="tel" name="phone_number" value="{{ old('phone_number') }}" required
-                               placeholder="08xxxxxxxxxx"
-                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
+                <!-- Submit Button Bar -->
                 <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <p class="text-[11px] text-slate-400">
-                        Dengan menekan tombol kirim, Anda menyetujui data biodata disimpan untuk keperluan seleksi PKL PT. TMS.
+                        Dengan menekan tombol kirim, seluruh biodata anggota tim akan disimpan untuk verifikasi seleksi PKL PT. TMS.
                     </p>
-                    <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-red-600 hover:bg-red-700 active:scale-98 text-white text-xs font-bold rounded-xl shadow-md shadow-red-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                    <button type="submit" id="btn-submit-team" class="w-full sm:w-auto px-7 py-3 bg-red-600 hover:bg-red-700 active:scale-98 text-white text-xs font-bold rounded-xl shadow-md shadow-red-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0">
                         <i data-lucide="send" class="w-4 h-4"></i>
-                        <span>Kirim Pendaftaran PKL</span>
+                        <span id="submit-btn-text">Kirim Pendaftaran PKL (1 Siswa)</span>
                     </button>
                 </div>
             </form>
@@ -520,6 +608,248 @@
                     setTimeout(() => { btnText.innerText = 'Salin Kode'; }, 2000);
                 }
             });
+        }
+
+        function copyAllTeamCodes() {
+            const codes = Array.from(document.querySelectorAll('.font-mono.text-red-600')).map(el => el.innerText.trim()).filter(c => c.startsWith('TMS-'));
+            if (codes.length > 0) {
+                const text = "Daftar Kode Antrian Registrasi PKL PT. TMS:\n" + codes.map((c, i) => `${i + 1}. ${c}`).join("\n");
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = document.getElementById('copy-all-btn-text');
+                    if (btn) {
+                        btn.innerText = 'Semua Tersalin!';
+                        setTimeout(() => { btn.innerText = 'Salin Semua Kode Tim'; }, 2000);
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // DYNAMIC TEAM REGISTRATION MANAGEMENT
+        // ==========================================
+        let memberCount = 1;
+        const MAX_MEMBERS = 10;
+
+        function updateTeamCount() {
+            const container = document.getElementById('team-members-container');
+            const cards = container.querySelectorAll('.member-card');
+            memberCount = cards.length;
+
+            // Update top counter display
+            const countDisplay = document.getElementById('team-count-display');
+            if (countDisplay) {
+                countDisplay.textContent = memberCount;
+            }
+
+            // Update submit button text
+            const submitText = document.getElementById('submit-btn-text');
+            if (submitText) {
+                submitText.textContent = `Kirim Pendaftaran PKL (${memberCount} Siswa)`;
+            }
+
+            // Disable / enable add button
+            const addBtn = document.getElementById('btn-add-member');
+            if (addBtn) {
+                if (memberCount >= MAX_MEMBERS) {
+                    addBtn.disabled = true;
+                    addBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    addBtn.disabled = false;
+                    addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            // Re-label member headers and numbers
+            cards.forEach((card, idx) => {
+                card.setAttribute('data-index', idx);
+                const badge = card.querySelector('.member-num-badge');
+                if (badge) badge.textContent = idx + 1;
+                
+                const title = card.querySelector('.member-title');
+                if (title) {
+                    title.textContent = idx === 0 
+                        ? 'Anggota #1 (Ketua / Perwakilan Tim)' 
+                        : `Anggota #${idx + 1} (Anggota Tim)`;
+                }
+
+                // Update input names for proper array binding
+                card.querySelectorAll('input, select').forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        const newName = name.replace(/students\[\d+\]/, `students[${idx}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function addTeamMember() {
+            if (memberCount >= MAX_MEMBERS) {
+                alert('Maksimal anggota dalam satu tim pendaftaran adalah ' + MAX_MEMBERS + ' siswa.');
+                return;
+            }
+
+            const container = document.getElementById('team-members-container');
+            const newIndex = memberCount;
+            const newNum = newIndex + 1;
+
+            // Ambil data sekolah & jurusan dari Anggota 1 untuk auto-fill
+            const school0 = document.getElementById('member-school-0') ? document.getElementById('member-school-0').value : 'SMKN 1 Ciamis';
+            const skill0 = document.getElementById('member-skill-0') ? document.getElementById('member-skill-0').value : 'PPLG (Pengembangan Perangkat Lunak & Gim)';
+
+            const card = document.createElement('div');
+            card.className = 'member-card rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-5 sm:p-6 space-y-4 transition-all relative shadow-2xs animate-in fade-in zoom-in-95 duration-200';
+            card.setAttribute('data-index', newIndex);
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-red-600 text-white font-mono font-black text-xs flex items-center justify-center shrink-0 member-num-badge">
+                            ${newNum}
+                        </div>
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-900 member-title">Anggota #${newNum} (Anggota Tim)</h3>
+                            <p class="text-[10px] text-slate-400">Data rekan satu tim</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="removeTeamMember(this)" 
+                            class="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Hapus Anggota #${newNum}">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Hapus</span>
+                    </button>
+                </div>
+
+                <!-- 1. Nama Lengkap -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Nama Lengkap <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="students[${newIndex}][full_name]" required
+                           placeholder="Contoh: Nama Teman Satu Tim"
+                           class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                </div>
+
+                <!-- 2. Jenis Kelamin & NIS (2 Kolom) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Jenis Kelamin <span class="text-red-500">*</span>
+                        </label>
+                        <select name="students[${newIndex}][gender]" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                            <option value="">-- Pilih Jenis Kelamin --</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Nomor Induk Siswa (NIS) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="students[${newIndex}][nis]" required
+                               placeholder="Contoh: 212210046"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono">
+                    </div>
+                </div>
+
+                <!-- 3. Tempat Lahir & Tanggal Lahir (2 Kolom) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Tempat Lahir
+                        </label>
+                        <input type="text" name="students[${newIndex}][birth_place]"
+                               placeholder="Contoh: Ciamis"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Tanggal Lahir
+                        </label>
+                        <input type="date" name="students[${newIndex}][birth_date]"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    </div>
+                </div>
+
+                <!-- 4. Agama & Asal Sekolah (2 Kolom) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Agama
+                        </label>
+                        <select name="students[${newIndex}][religion]" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                            <option value="">-- Pilih Agama --</option>
+                            <option value="Islam" selected>Islam</option>
+                            <option value="Kristen">Kristen Protestan</option>
+                            <option value="Katolik">Katolik</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddha">Buddha</option>
+                            <option value="Khonghucu">Khonghucu</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Asal Sekolah Mitra
+                        </label>
+                        <input type="text" name="students[${newIndex}][school_origin]" value="${school0}"
+                               placeholder="Contoh: SMKN 1 Ciamis"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-semibold">
+                    </div>
+                </div>
+
+                <!-- 5. Kompetensi Keahlian (Auto-filled dari ketua tim) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Kompetensi Keahlian / Jurusan <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="students[${newIndex}][skill_competency]" value="${skill0}" required
+                           placeholder="Ketik keahlian Anda, contoh: PPLG / Rekayasa Perangkat Lunak, TKJ, dll"
+                           class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                </div>
+
+                <!-- 6. Email Aktif & Nomor HP / WA (2 Kolom) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Email Aktif <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" name="students[${newIndex}][email]" required
+                               placeholder="teman${newNum}@gmail.com"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Nomor Aktif (WhatsApp / Telepon) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" name="students[${newIndex}][phone_number]" required
+                               placeholder="08xxxxxxxxxx"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+            updateTeamCount();
+
+            // Scroll halus ke kartu anggota baru
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function removeTeamMember(btn) {
+            const card = btn.closest('.member-card');
+            if (card) {
+                card.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    card.remove();
+                    updateTeamCount();
+                }, 150);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
