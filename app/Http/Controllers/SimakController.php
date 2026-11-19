@@ -1215,8 +1215,82 @@ class SimakController extends Controller
         }
 
         $students = $query->orderBy('name', 'asc')->get();
-        $filename = 'Data_Siswa_Magang_TMS_' . date('Y-m-d_His') . '.csv';
+        $format = strtolower($request->input('format', 'excel'));
 
+        if ($format === 'excel' || $format === 'xls') {
+            $filename = 'Data_Siswa_Magang_TMS_' . date('Y-m-d_His') . '.xls';
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            return response()->stream(function () use ($students) {
+                $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' . "\n";
+                $html .= '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+                $html .= '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Data Siswa</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' . "\n";
+                $html .= '<style>' . "\n";
+                $html .= 'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #000; }' . "\n";
+                $html .= 'table { border-collapse: collapse; width: 100%; margin-top: 10px; }' . "\n";
+                $html .= 'th { background-color: #059669; color: #ffffff; font-weight: bold; border: 1px solid #047857; padding: 8px 10px; text-align: center; }' . "\n";
+                $html .= 'td { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: middle; }' . "\n";
+                $html .= '.text-cell { mso-number-format: "\\@"; text-align: left; }' . "\n";
+                $html .= '.center-cell { text-align: center; }' . "\n";
+                $html .= '.num-cell { mso-number-format: "0\\.0"; text-align: center; }' . "\n";
+                $html .= '.title { font-size: 15pt; font-weight: bold; color: #0f172a; }' . "\n";
+                $html .= '.subtitle { font-size: 9.5pt; color: #475569; }' . "\n";
+                $html .= '</style></head><body>' . "\n";
+                $html .= '<div class="title">PT. TEKNOLOGI MULTI SISTEM (TMS)</div>' . "\n";
+                $html .= '<div class="subtitle">Rekapitulasi Master Data Siswa Magang &bull; Dicetak: ' . date('d F Y, H:i') . ' WIB</div>' . "\n";
+                $html .= '<table><thead><tr>' . "\n";
+                $html .= '<th>No</th><th>ID Akun</th><th>Nama Lengkap</th><th>Email</th><th>NIS / NIM</th><th>No. WhatsApp</th><th>Asal Sekolah</th><th>Jurusan</th><th>Angkatan</th><th>Mentor Pembimbing</th><th>Status Magang</th><th>Status Karir Alumni</th><th>Instansi / Kampus Alumni</th><th>Jml Logbook</th><th>Nilai Akhir</th><th>Predikat</th><th>No. E-Sertifikat</th>' . "\n";
+                $html .= '</tr></thead><tbody>' . "\n";
+                fwrite($out, $html);
+
+                $no = 1;
+                foreach ($students as $student) {
+                    $eval = $student->evaluation;
+                    $statusLabel = match($student->status) {
+                        'aktif' => 'Aktif Magang',
+                        'alumni' => 'Alumni (Lulus)',
+                        'pending' => 'Pending Review',
+                        default => ucfirst($student->status ?? 'Aktif')
+                    };
+
+                    $row = '<tr>';
+                    $row .= '<td class="center-cell">' . ($no++) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($student->account_id ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->name) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->email) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($student->nis_nim ?? '-') . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($student->phone_number ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->school_origin ?? 'SMKN 1 Ciamis') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->major ?? 'PPLG') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($student->batch->batch_name ?? 'Angkatan 2026') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->mentor ? $student->mentor->name : 'Belum di-assign') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($statusLabel) . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($student->alumni_status ? ucfirst($student->alumni_status) : '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->alumni_current_at ?? '-') . '</td>';
+                    $row .= '<td class="center-cell">' . $student->journals->count() . '</td>';
+                    $row .= '<td class="num-cell">' . ($eval ? number_format($eval->final_score, 1) : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->grade : '-') . '</td>';
+                    $row .= '<td class="text-cell">' . ($eval && $eval->certificate_number ? htmlspecialchars($eval->certificate_number) : '-') . '</td>';
+                    $row .= '</tr>' . "\n";
+                    fwrite($out, $row);
+                }
+
+                fwrite($out, '</tbody></table></body></html>');
+                fclose($out);
+            }, 200, $headers);
+        }
+
+        // CSV Export
+        $filename = 'Data_Siswa_Magang_TMS_' . date('Y-m-d_His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
@@ -1310,8 +1384,72 @@ class SimakController extends Controller
         }
 
         $alumni = $query->orderBy('name', 'asc')->get();
-        $filename = 'Direktori_Alumni_PKL_TMS_' . date('Y-m-d_His') . '.csv';
+        $format = strtolower($request->input('format', 'excel'));
 
+        if ($format === 'excel' || $format === 'xls') {
+            $filename = 'Direktori_Alumni_PKL_TMS_' . date('Y-m-d_His') . '.xls';
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            return response()->stream(function () use ($alumni) {
+                $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' . "\n";
+                $html .= '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+                $html .= '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Direktori Alumni</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' . "\n";
+                $html .= '<style>' . "\n";
+                $html .= 'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #000; }' . "\n";
+                $html .= 'table { border-collapse: collapse; width: 100%; margin-top: 10px; }' . "\n";
+                $html .= 'th { background-color: #059669; color: #ffffff; font-weight: bold; border: 1px solid #047857; padding: 8px 10px; text-align: center; }' . "\n";
+                $html .= 'td { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: middle; }' . "\n";
+                $html .= '.text-cell { mso-number-format: "\\@"; text-align: left; }' . "\n";
+                $html .= '.center-cell { text-align: center; }' . "\n";
+                $html .= '.num-cell { mso-number-format: "0\\.0"; text-align: center; }' . "\n";
+                $html .= '.title { font-size: 15pt; font-weight: bold; color: #0f172a; }' . "\n";
+                $html .= '.subtitle { font-size: 9.5pt; color: #475569; }' . "\n";
+                $html .= '</style></head><body>' . "\n";
+                $html .= '<div class="title">PT. TEKNOLOGI MULTI SISTEM (TMS)</div>' . "\n";
+                $html .= '<div class="subtitle">Direktori Rekam Jejak Alumni Magang &bull; Dicetak: ' . date('d F Y, H:i') . ' WIB</div>' . "\n";
+                $html .= '<table><thead><tr>' . "\n";
+                $html .= '<th>No</th><th>ID Akun</th><th>Nama Lengkap</th><th>Email</th><th>No. WhatsApp</th><th>Asal Sekolah</th><th>Jurusan</th><th>Angkatan</th><th>Status Karir Pasca-PKL</th><th>Tempat Bekerja / Kuliah</th><th>Keahlian (Tech Stack)</th><th>Nilai Akhir</th><th>Predikat</th><th>No. E-Sertifikat</th>' . "\n";
+                $html .= '</tr></thead><tbody>' . "\n";
+                fwrite($out, $html);
+
+                $no = 1;
+                foreach ($alumni as $item) {
+                    $eval = $item->evaluation;
+                    $row = '<tr>';
+                    $row .= '<td class="center-cell">' . ($no++) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($item->account_id ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->name) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->email) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($item->phone_number ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->school_origin ?? 'SMKN 1 Ciamis') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->major ?? 'PPLG') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($item->batch->batch_name ?? 'Angkatan 2026') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($item->alumni_status ? ucfirst($item->alumni_status) : 'Lulusan PKL') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->alumni_current_at ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($item->skills ?? '-') . '</td>';
+                    $row .= '<td class="num-cell">' . ($eval ? number_format($eval->final_score, 1) : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->grade : '-') . '</td>';
+                    $row .= '<td class="text-cell">' . ($eval && $eval->certificate_number ? htmlspecialchars($eval->certificate_number) : '-') . '</td>';
+                    $row .= '</tr>' . "\n";
+                    fwrite($out, $row);
+                }
+
+                fwrite($out, '</tbody></table></body></html>');
+                fclose($out);
+            }, 200, $headers);
+        }
+
+        // CSV Export
+        $filename = 'Direktori_Alumni_PKL_TMS_' . date('Y-m-d_His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
@@ -1386,8 +1524,83 @@ class SimakController extends Controller
         }
 
         $registrations = $query->latest()->get();
-        $filename = 'Pendaftaran_PKL_Online_TMS_' . date('Y-m-d_His') . '.csv';
+        $format = strtolower($request->input('format', 'excel'));
 
+        if ($format === 'excel' || $format === 'xls') {
+            $filename = 'Pendaftaran_PKL_Online_TMS_' . date('Y-m-d_His') . '.xls';
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            return response()->stream(function () use ($registrations) {
+                $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' . "\n";
+                $html .= '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+                $html .= '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Pendaftaran PKL</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' . "\n";
+                $html .= '<style>' . "\n";
+                $html .= 'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #000; }' . "\n";
+                $html .= 'table { border-collapse: collapse; width: 100%; margin-top: 10px; }' . "\n";
+                $html .= 'th { background-color: #059669; color: #ffffff; font-weight: bold; border: 1px solid #047857; padding: 8px 10px; text-align: center; }' . "\n";
+                $html .= 'td { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: middle; }' . "\n";
+                $html .= '.text-cell { mso-number-format: "\\@"; text-align: left; }' . "\n";
+                $html .= '.center-cell { text-align: center; }' . "\n";
+                $html .= '.title { font-size: 15pt; font-weight: bold; color: #0f172a; }' . "\n";
+                $html .= '.subtitle { font-size: 9.5pt; color: #475569; }' . "\n";
+                $html .= '</style></head><body>' . "\n";
+                $html .= '<div class="title">PT. TEKNOLOGI MULTI SISTEM (TMS)</div>' . "\n";
+                $html .= '<div class="subtitle">Rekapitulasi Formulir Antrian Pendaftaran PKL Online &bull; Dicetak: ' . date('d F Y, H:i') . ' WIB</div>' . "\n";
+                $html .= '<table><thead><tr>' . "\n";
+                $html .= '<th>No</th><th>Kode Antrian</th><th>Nama Lengkap</th><th>Jenis Kelamin</th><th>NIS / NISN</th><th>Tempat Lahir</th><th>Tanggal Lahir</th><th>Agama</th><th>Email</th><th>No. WhatsApp</th><th>Asal Sekolah</th><th>Kompetensi Keahlian</th><th>Status</th><th>Catatan</th><th>Waktu Mendaftar</th>' . "\n";
+                $html .= '</tr></thead><tbody>' . "\n";
+                fwrite($out, $html);
+
+                $no = 1;
+                foreach ($registrations as $reg) {
+                    $gender = match($reg->gender) {
+                        'L' => 'Laki-laki',
+                        'P' => 'Perempuan',
+                        default => $reg->gender ?? '-'
+                    };
+                    $statusLabel = match($reg->status) {
+                        'pending' => 'Pending Review',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        default => ucfirst($reg->status ?? '-')
+                    };
+
+                    $row = '<tr>';
+                    $row .= '<td class="center-cell">' . ($no++) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($reg->registration_code) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->full_name) . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($gender) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($reg->nis ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->birth_place ?? '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($reg->birth_date ? $reg->birth_date->format('d/m/Y') : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($reg->religion ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->email) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($reg->phone_number ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->school_origin) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->skill_competency) . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($statusLabel) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($reg->rejection_reason ?? '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($reg->created_at ? $reg->created_at->format('d/m/Y H:i') : '-') . '</td>';
+                    $row .= '</tr>' . "\n";
+                    fwrite($out, $row);
+                }
+
+                fwrite($out, '</tbody></table></body></html>');
+                fclose($out);
+            }, 200, $headers);
+        }
+
+        // CSV Export
+        $filename = 'Pendaftaran_PKL_Online_TMS_' . date('Y-m-d_His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
