@@ -2242,57 +2242,144 @@ class SimakController extends Controller
 
     public function registryStore(Request $request)
     {
-        $validated = $request->validate([
-            'full_name' => 'required|string|max:100',
-            'gender' => 'required|in:Laki-laki,Perempuan',
-            'nis' => 'required|string|max:40',
-            'birth_place' => 'nullable|string|max:100',
-            'birth_date' => 'nullable|date',
-            'religion' => 'nullable|string|max:50',
-            'skill_competency' => 'required|string|max:100',
-            'school_origin' => 'nullable|string|max:150',
-            'email' => 'required|email|max:150|unique:users,email',
-            'phone_number' => 'required|string|max:30',
-        ], [
-            'email.unique' => 'Email ini sudah terdaftar sebagai akun aktif di SIMAK-TMS. Silakan login atau gunakan email lain.',
-        ]);
-
-        // Cek pendaftaran pending duplikat dengan email yang sama
-        $existingPending = PklRegistration::where('email', $validated['email'])
-            ->where('status', 'pending')
-            ->first();
-
-        if ($existingPending) {
-            return redirect()->route('registry.index', [
-                'tab' => 'check',
-                'code' => $existingPending->registration_code,
-            ])->with('info', "Anda sudah memiliki pendaftaran antrian aktif dengan kode: {$existingPending->registration_code}. Silakan tunggu verifikasi admin.");
+        // 1. Ambil data siswa (bisa format kolektif tim students[...] atau format perorangan)
+        $rawStudents = $request->input('students');
+        if (is_array($rawStudents) && count($rawStudents) > 0) {
+            $studentsData = array_values($rawStudents);
+        } else {
+            // Format single / perorangan (kompatibilitas backward)
+            $studentsData = [[
+                'full_name' => $request->input('full_name'),
+                'gender' => $request->input('gender'),
+                'nis' => $request->input('nis'),
+                'birth_place' => $request->input('birth_place'),
+                'birth_date' => $request->input('birth_date'),
+                'religion' => $request->input('religion'),
+                'skill_competency' => $request->input('skill_competency'),
+                'school_origin' => $request->input('school_origin'),
+                'email' => $request->input('email'),
+                'phone_number' => $request->input('phone_number'),
+            ]];
         }
 
-        $regCode = $this->generateUniqueRegistrationCode();
+        // Batasi maksimal 10 siswa dalam satu kali pengiriman tim
+        if (count($studentsData) > 10) {
+            return back()->withInput()->withErrors(['students' => 'Maksimal pendaftaran dalam 1 tim adalah 10 siswa.']);
+        }
 
-        $registration = PklRegistration::create([
-            'registration_code' => $regCode,
-            'full_name' => $validated['full_name'],
-            'gender' => $validated['gender'],
-            'nis' => $validated['nis'],
-            'birth_place' => $validated['birth_place'] ?? null,
-            'birth_date' => $validated['birth_date'] ?? null,
-            'religion' => $validated['religion'] ?? null,
-            'skill_competency' => $validated['skill_competency'],
-            'school_origin' => $validated['school_origin'] ?? 'SMKN 1 Ciamis',
-            'email' => $validated['email'],
-            'phone_number' => $validated['phone_number'],
-            'status' => 'pending',
-        ]);
+        // Validasi setiap anggota tim
+        $validatedMembers = [];
+        $emailsSeen = [];
+        $nisSeen = [];
+
+        foreach ($studentsData as $idx => $s) {
+            $num = $idx + 1;
+            $fullName = trim($s['full_name'] ?? '');
+            $gender = trim($s['gender'] ?? '');
+            $nis = trim($s['nis'] ?? '');
+            $email = strtolower(trim($s['email'] ?? ''));
+            $phone = trim($s['phone_number'] ?? '');
+            $skill = trim($s['skill_competency'] ?? '');
+            $school = trim($s['school_origin'] ?? 'SMKN 1 Ciamis');
+
+            if (empty($fullName)) {
+                return back()->withInput()->withErrors(["students.{$idx}.full_name" => "Nama lengkap Anggota #{$num} wajib diisi."]);
+            }
+            if (!in_array($gender, ['Laki-laki', 'Perempuan'])) {
+                return back()->withInput()->withErrors(["students.{$idx}.gender" => "Jenis kelamin Anggota #{$num} wajib dipilih."]);
+            }
+            if (empty($nis)) {
+                return back()->withInput()->withErrors(["students.{$idx}.nis" => "NIS Anggota #{$num} ({$fullName}) wajib diisi."]);
+            }
+            if (empty($skill)) {
+                return back()->withInput()->withErrors(["students.{$idx}.skill_competency" => "Kompetensi keahlian/jurusan Anggota #{$num} ({$fullName}) wajib diisi."]);
+            }
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return back()->withInput()->withErrors(["students.{$idx}.email" => "Email Anggota #{$num} ({$fullName}) tidak valid."]);
+            }
+            if (empty($phone)) {
+                return back()->withInput()->withErrors(["students.{$idx}.phone_number" => "Nomor WhatsApp/HP Anggota #{$num} ({$fullName}) wajib diisi."]);
+            }
+
+            // Cek duplikasi email di dalam tim yang sama
+            if (in_array($email, $emailsSeen)) {
+                return back()->withInput()->withErrors(["students.{$idx}.email" => "Email {$email} dimasukkan ganda dalam formulir tim ini."]);
+            }
+            $emailsSeen[] = $email;
+
+            // Cek duplikasi NIS di dalam tim yang sama
+            if (in_array($nis, $nisSeen)) {
+                return back()->withInput()->withErrors(["students.{$idx}.nis" => "NIS {$nis} dimasukkan ganda dalam formulir tim ini."]);
+            }
+            $nisSeen[] = $nis;
+
+            // Cek jika akun sudah aktif di users
+            if (User::where('email', $email)->exists()) {
+                return back()->withInput()->withErrors(["students.{$idx}.email" => "Email {$email} atas nama {$fullName} sudah terdaftar sebagai akun aktif di SIMAK-TMS."]);
+            }
+
+            // Cek jika pendaftar sudah memiliki antrian pending aktif
+            $existingPending = PklRegistration::where('email', $email)->where('status', 'pending')->first();
+            if ($existingPending) {
+                return back()->withInput()->withErrors(["students.{$idx}.email" => "Siswa {$fullName} ({$email}) sudah memiliki antrian pendaftaran aktif: {$existingPending->registration_code}."]);
+            }
+
+            $validatedMembers[] = [
+                'full_name' => $fullName,
+                'gender' => $gender,
+                'nis' => $nis,
+                'birth_place' => !empty($s['birth_place']) ? trim($s['birth_place']) : null,
+                'birth_date' => !empty($s['birth_date']) ? $s['birth_date'] : null,
+                'religion' => !empty($s['religion']) ? trim($s['religion']) : null,
+                'skill_competency' => $skill,
+                'school_origin' => !empty($school) ? $school : 'SMKN 1 Ciamis',
+                'email' => $email,
+                'phone_number' => $phone,
+            ];
+        }
+
+        // Simpan pendaftaran ke database secara transaksional
+        $createdList = [];
+        \DB::transaction(function () use ($validatedMembers, &$createdList) {
+            foreach ($validatedMembers as $m) {
+                $regCode = $this->generateUniqueRegistrationCode();
+                $reg = PklRegistration::create([
+                    'registration_code' => $regCode,
+                    'full_name' => $m['full_name'],
+                    'gender' => $m['gender'],
+                    'nis' => $m['nis'],
+                    'birth_place' => $m['birth_place'],
+                    'birth_date' => $m['birth_date'],
+                    'religion' => $m['religion'],
+                    'skill_competency' => $m['skill_competency'],
+                    'school_origin' => $m['school_origin'],
+                    'email' => $m['email'],
+                    'phone_number' => $m['phone_number'],
+                    'status' => 'pending',
+                ]);
+
+                $createdList[] = [
+                    'code' => $regCode,
+                    'name' => $reg->full_name,
+                    'nis' => $reg->nis,
+                    'school' => $reg->school_origin,
+                    'major' => $reg->skill_competency,
+                ];
+            }
+        });
+
+        $primary = $createdList[0];
 
         return redirect()->route('registry.index', [
             'tab' => 'check',
-            'code' => $regCode,
+            'code' => $primary['code'],
+        ])->with('team_registration_success', [
+            'total' => count($createdList),
+            'members' => $createdList,
         ])->with('registration_success', [
-            'code' => $regCode,
-            'name' => $validated['full_name'],
-            'nis' => $validated['nis'],
+            'code' => $primary['code'],
+            'name' => $primary['name'],
+            'nis' => $primary['nis'],
         ]);
     }
 
