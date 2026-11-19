@@ -84,7 +84,7 @@
             <div class="relative z-10 space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/30 text-red-400 border border-red-500/30 text-[10px] font-bold uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                    <span>Tahun Ajaran {{ $activeBatch->period_year ?? '2026' }} • {{ $activeBatch->batch_name ?? 'Gelombang 1' }}</span>
+                    <span>Tahun Ajaran {{ $activeBatch->period_year ?? '2026' }} • {{ $activeBatch->batch_name ?? 'Angkatan 2026' }}</span>
                 </div>
                 <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight">
                     Pendaftaran Praktik Kerja Lapangan (PKL)

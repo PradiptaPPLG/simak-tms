@@ -343,7 +343,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Nama Angkatan (Batch) *</label>
-                <input type="text" id="batch-name" name="batch_name" required placeholder="Contoh: Angkatan 2026 - Gelombang 2" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                <input type="text" id="batch-name" name="batch_name" required placeholder="Contoh: Angkatan 2027" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
             </div>
 
             <div>
