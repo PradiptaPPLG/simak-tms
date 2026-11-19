@@ -20,11 +20,11 @@
                 <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
             </button>
 
-            <!-- Daftarkan Siswa Baru Button -->
-            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center shrink-0">
+            <!-- Tambah Siswa Manual Button -->
+            <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Input Siswa Manual (Bypass Antrian Formulir Online)">
                 <i data-lucide="user-plus" class="w-4 h-4 shrink-0"></i>
-                <span class="hidden sm:inline">Daftarkan Siswa Baru</span>
-                <span class="sm:hidden">Daftar Siswa</span>
+                <span class="hidden sm:inline">Tambah Siswa Manual</span>
+                <span class="sm:hidden">Tambah Manual</span>
             </button>
 
             <!-- Cetak Rekap Button -->
@@ -340,16 +340,22 @@
         </div>
     </div>
 
-    <!-- 4. Form Registrasi Akun Siswa Baru -->
+    <!-- 4. Form Registrasi Akun Siswa Secara Manual -->
     <div id="form-register-student" class="mas-card p-6 bg-gradient-to-br from-white to-slate-50 border-2 border-slate-200 no-print">
-        <div class="flex items-start sm:items-center gap-3 mb-4 pb-3 border-b border-slate-200">
-            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-600/30 shrink-0 aspect-square mt-0.5 sm:mt-0">
-                <i data-lucide="user-plus" class="w-5 h-5"></i>
+        <div class="flex items-start sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200">
+            <div class="flex items-start sm:items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-md shadow-red-600/30 shrink-0 aspect-square mt-0.5 sm:mt-0">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 tracking-tight">Input & Daftarkan Siswa Secara Manual</h3>
+                    <p class="text-xs text-slate-500">Khusus pendaftaran langsung oleh Admin (bypass formulir online) dan langsung menghubungkan siswa ke Mentor.</p>
+                </div>
             </div>
-            <div>
-                <h3 class="text-base font-black text-slate-900 tracking-tight">Form Pendaftaran Akun Siswa Magang Baru</h3>
-                <p class="text-xs text-slate-500">Admin mendaftarkan akun siswa baru dan langsung menghubungkannya ke Staff Mentor pembimbing.</p>
-            </div>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold shrink-0">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-red-600"></i>
+                Khusus Admin TMS
+            </span>
         </div>
 
         <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-4">
