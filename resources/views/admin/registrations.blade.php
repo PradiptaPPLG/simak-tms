@@ -12,7 +12,12 @@
             <p class="text-xs text-slate-500 mt-0.5">Tinjau biodata pendaftar, seleksi administrasi, verifikasi kuota, dan pembuatan data siswa magang.</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 no-print">
+            <!-- Green Export Button (Excel/CSV) -->
+            <a href="{{ route('admin.registrations.export', request()->query()) }}" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5" title="Unduh Spreadsheet Data Pendaftaran (.CSV)">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
+                <span>Ekspor Excel / CSV</span>
+            </a>
             <a href="{{ route('registry.index') }}" target="_blank" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5">
                 <i data-lucide="external-link" class="w-4 h-4 text-red-400 shrink-0"></i>
                 <span>Buka Form Pendaftaran</span>
@@ -20,7 +25,7 @@
             <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
                 <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
                 <span class="hidden sm:inline">Cetak Rekap</span>
-            </a>
+            </button>
         </div>
     </div>
 
@@ -83,7 +88,7 @@
     </div>
 
     <!-- 2. Filter Navigation Tabs & Search -->
-    <div class="mas-card p-4">
+    <div class="mas-card p-4 no-print">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <!-- Tabs -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none text-xs">
@@ -138,7 +143,7 @@
                         <th class="py-3 px-4">Kontak Siswa</th>
                         <th class="py-3 px-4">Tanggal Masuk</th>
                         <th class="py-3 px-4 text-center">Status</th>
-                        <th class="py-3 px-4 text-right">Aksi</th>
+                        <th class="py-3 px-4 text-right action-col no-print">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100" id="reg-tbody">
@@ -214,7 +219,7 @@
                                 @endif
                             </td>
 
-                            <td class="py-3.5 px-4 text-right">
+                            <td class="py-3.5 px-4 text-right action-col no-print">
                                 <!-- Menu Aksi Titik 3 (More Action Dropdown) -->
                                 <div class="relative inline-block text-left dropdown-container">
                                     <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-2xs flex items-center justify-center cursor-pointer ml-auto" title="Opsi Aksi Pendaftaran">
