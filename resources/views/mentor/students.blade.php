@@ -110,10 +110,22 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="text-sm font-black text-slate-900">{{ $student->name }} <span class="font-mono text-red-600 font-bold text-xs">({{ $student->account_id ?? 'belum terdaftar' }})</span></h3>
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                                    Check-in 07:54 WIB
-                                </span>
+                                @php
+                                    $todayJournal = $student->journals->first(function($j) {
+                                        return \Carbon\Carbon::parse($j->journal_date)->isToday();
+                                    });
+                                @endphp
+                                @if($todayJournal)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                        Check-in {{ $todayJournal->created_at->format('H:i') }} WIB
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold border border-slate-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        Belum Check-in Hari Ini
+                                    </span>
+                                @endif
                             </div>
                             <div class="text-[11px] text-slate-400 font-mono mt-0.5">
                                 <span>ID: {{ $student->account_id ?? 'Menunggu Mentor' }}</span>
@@ -156,11 +168,18 @@
                     <!-- A. Stats Performa 4 Metrik Box -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/60">
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Logbook Terselesaikan</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Validasi Logbook Harian</div>
                             <div class="text-lg font-black text-slate-900 font-mono mt-0.5">
-                                {{ $student->journals->where('status', 'approved')->count() }} <span class="text-xs font-normal text-slate-400">/ {{ $student->journals->count() }} Jurnal</span>
+                                {{ $student->journals->where('status', 'approved')->count() }} <span class="text-xs font-normal text-slate-400">Disetujui</span>
                             </div>
-                            <div class="text-[10px] text-emerald-600 font-semibold mt-1">✓ Berbasis Counting</div>
+                            <div class="text-[10px] text-slate-500 font-medium mt-1">
+                                Dari total <strong class="text-slate-800">{{ $student->journals->count() }}</strong> diajukan
+                                @if($student->journals->where('status', 'pending')->count() > 0)
+                                    <span class="text-amber-600 font-bold">({{ $student->journals->where('status', 'pending')->count() }} review)</span>
+                                @elseif($student->journals->count() > 0)
+                                    <span class="text-emerald-600 font-bold">(100% ACC)</span>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/60">
@@ -173,10 +192,19 @@
 
                         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/60">
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kehadiran Lab Hari Ini</div>
-                            <div class="text-lg font-black text-slate-900 font-mono mt-0.5">
-                                07.54 <span class="text-xs font-normal text-slate-400">WIB</span>
-                            </div>
-                            <div class="text-[10px] text-slate-500 font-semibold mt-1">Tepat Waktu (Hari Kerja)</div>
+                            @if($todayJournal)
+                                <div class="text-lg font-black text-slate-900 font-mono mt-0.5">
+                                    {{ $todayJournal->created_at->format('H.i') }} <span class="text-xs font-normal text-slate-400">WIB</span>
+                                </div>
+                                <div class="text-[10px] {{ $todayJournal->created_at->format('H:i') <= '08:00' ? 'text-emerald-600' : 'text-amber-600' }} font-semibold mt-1">
+                                    {{ $todayJournal->created_at->format('H:i') <= '08:00' ? '✓ Tepat Waktu (Hari Kerja)' : 'Terlambat (> 08:00 WIB)' }}
+                                </div>
+                            @else
+                                <div class="text-base font-bold text-slate-400 font-mono mt-0.5">
+                                    --.-- <span class="text-xs font-normal text-slate-400">WIB</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 font-medium mt-1">Belum Isi Jurnal Hari Ini</div>
+                            @endif
                         </div>
 
                         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/60">

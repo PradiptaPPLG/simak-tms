@@ -176,7 +176,7 @@
                             <span class="text-slate-400">•</span>
                             <span class="text-slate-500 font-medium">{{ $journal->user->school_origin }}</span>
                             <span class="text-slate-400">•</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Masuk: 07.54 WIB</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Masuk: {{ $journal->created_at->format('H:i') }} WIB</span>
                         </div>
                         <div class="text-xs font-bold text-slate-800">{{ $journal->activity_title }}</div>
                         <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
@@ -238,10 +238,22 @@
                             </div>
                         </div>
 
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                            Check-in 07:54 WIB
-                        </span>
+                        @php
+                            $todayInternJournal = $intern->journals->first(function($j) {
+                                return \Carbon\Carbon::parse($j->journal_date)->isToday();
+                            });
+                        @endphp
+                        @if($todayInternJournal)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                Check-in {{ $todayInternJournal->created_at->format('H:i') }} WIB
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                Belum Check-in
+                            </span>
+                        @endif
                     </div>
 
                     <div class="text-xs text-slate-600 space-y-1 border-t border-slate-200/60 pt-2.5">

@@ -223,8 +223,8 @@
                                 <i data-lucide="clock" class="w-4 h-4"></i>
                             </div>
                             <div>
-                                <div class="text-[11px] font-bold text-slate-900 leading-tight">Hadir Tepat</div>
-                                <div class="text-[9px] text-slate-500">07:54 WIB Checkin</div>
+                                <div class="text-[11px] font-bold text-slate-900 leading-tight">Disiplin Kerja</div>
+                                <div class="text-[9px] text-slate-500">Presensi Terverifikasi</div>
                             </div>
                         </div>
                     </div>
