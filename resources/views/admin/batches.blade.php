@@ -792,9 +792,10 @@
         
         const avatarEl = document.getElementById('grade-student-avatar');
         if (student && student.avatar) {
-            avatarEl.innerHTML = `<img src="/${student.avatar}" class="w-full h-full object-cover">`;
+            let avatarSrc = student.avatar.startsWith('/') ? student.avatar : '/' + student.avatar;
+            avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${studentName}" class="w-full h-full object-cover">`;
         } else {
-            avatarEl.innerText = studentName.charAt(0).toUpperCase();
+            avatarEl.innerHTML = `<span>${studentName.charAt(0).toUpperCase()}</span>`;
         }
 
         document.getElementById('grade-tech').value = bs.technical_skill ?? 85;
