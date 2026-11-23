@@ -2333,9 +2333,9 @@ class SimakController extends Controller
                 'teamwork' => $teamwork,
                 'initiative' => $initiative,
                 'final_score' => $finalScore,
-                'grade' => $grade,
                 'certificate_number' => $certNum,
                 'issue_date' => $issueDate,
+                'is_published' => $isPublished,
                 'general_notes' => $request->mentor_notes,
                 'updated_at' => now(),
             ]
