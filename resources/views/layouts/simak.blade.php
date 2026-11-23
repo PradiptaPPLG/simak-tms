@@ -344,12 +344,6 @@
                         </div>
                         <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono shrink-0">Semua</span>
                     </a>
-
-                    <!-- Rekapitulasi Nilai & Laporan -->
-                    <a href="{{ route('admin.students') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 shrink-0 {{ request()->routeIs('admin.students*') ? 'text-red-600' : 'text-slate-400' }}"></i>
-                        <span class="truncate">Rekap Nilai & Laporan DUDI</span>
-                    </a>
                 @endif
 
                 <!-- Layanan: Panduan & Verifikasi In-Page (Semua Role) -->
@@ -471,10 +465,6 @@
                     <a href="{{ route('showcase.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('showcase.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="archive" class="w-4 h-4"></i>
                         <span>Master Arsip Portofolio</span>
-                    </a>
-                    <a href="{{ route('admin.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('admin.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                        <span>Rekap Nilai & Laporan DUDI</span>
                     </a>
                 @endif
                 <a href="{{ route('guide.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">

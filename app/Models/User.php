@@ -69,9 +69,43 @@ class User extends Authenticatable
         return url('/profile/' . $this->profile_hash);
     }
 
+    public function getHashedIdentifier(): string
+    {
+        return $this->profile_hash;
+    }
+
     public function batch()
     {
         return $this->belongsTo(Batch::class);
+    }
+
+    public function batchEnrollments()
+    {
+        return $this->hasMany(BatchStudent::class, 'user_id');
+    }
+
+    public function enrolledBatches()
+    {
+        return $this->belongsToMany(Batch::class, 'batch_students', 'user_id', 'batch_id')
+            ->withPivot([
+                'id',
+                'mentor_id',
+                'institution_name',
+                'major',
+                'role_title',
+                'status',
+                'technical_skill',
+                'discipline',
+                'teamwork',
+                'initiative',
+                'final_score',
+                'grade',
+                'mentor_notes',
+                'certificate_number',
+                'issue_date',
+                'is_published',
+            ])
+            ->withTimestamps();
     }
 
     public function mentor()

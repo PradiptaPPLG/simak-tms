@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Batch;
+use App\Models\BatchStudent;
 use App\Models\DailyJournal;
 use App\Models\Evaluation;
 use App\Models\PartnerInstitution;
@@ -388,18 +389,189 @@ class SimakController extends Controller
     }
 
     // ==========================================
-    // REVIEW & SISIPKAN CATATAN KHUSUS MENTOR
+    // REVIEW & SISIPKAN CATATAN KHUSUS MENTOR (KALENDER MONITORING & LOGBOOK)
     // ==========================================
-    public function mentorReview()
+    public function mentorReview(Request $request)
     {
-        $this->authorizeMentorOrAdmin();
+        $user = $this->authorizeMentorOrAdmin();
 
-        $journals = DailyJournal::with(['user', 'mentor'])->latest('journal_date')->get();
-        $pendingJournalsCount = DailyJournal::whereNull('mentor_feedback')->orWhere('mentor_feedback', '')->count();
-        $reviewedJournalsCount = DailyJournal::whereNotNull('mentor_feedback')->where('mentor_feedback', '!=', '')->count();
+        // 1. Daftar siswa bimbingan mentor (atau semua siswa jika admin / mentor bersama)
+        if ($user->role === 'mentor') {
+            $students = User::where('role', 'siswa')
+                ->where(function($q) use ($user) {
+                    $q->where('mentor_id', $user->id)->orWhereNull('mentor_id');
+                })
+                ->orderBy('name')
+                ->get();
+            if ($students->isEmpty()) {
+                $students = User::where('role', 'siswa')->orderBy('name')->get();
+            }
+        } else {
+            $students = User::where('role', 'siswa')->orderBy('name')->get();
+        }
+
+        // 2. Filter Siswa Terpilih ('all' atau ID Siswa tertentu)
+        $selectedStudentId = $request->get('student_id', 'all');
+        $selectedStudent = null;
+        if ($selectedStudentId !== 'all') {
+            $selectedStudent = $students->firstWhere('id', (int)$selectedStudentId) ?? User::find($selectedStudentId);
+        }
+
+        // 3. Bulan & Tahun Kalender (Default ke bulan aktif November 2026)
+        $month = (int) $request->get('month', 11);
+        $year = (int) $request->get('year', 2026);
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+        // Hari pertama bulan dalam seminggu (1 = Senin, 7 = Minggu)
+        $firstDayOfWeek = \Carbon\Carbon::createFromDate($year, $month, 1)->dayOfWeekIso;
+        $leadingEmptyDays = $firstDayOfWeek - 1; // 1 Nov 2026 adalah Minggu (7) -> 6 kotak kosong
+
+        // Tanggal yang sedang aktif dilihat (default hari ini, jika dalam bulan ini; atau tanggal 23)
+        $defaultDate = (now()->year == $year && now()->month == $month) ? now()->toDateString() : sprintf('%04d-%02d-23', $year, $month);
+        $selectedDate = $request->get('date', $defaultDate);
+
+        // Ambil semua jurnal pada bulan ini
+        $journalsQuery = DailyJournal::with(['user', 'mentor'])
+            ->whereYear('journal_date', $year)
+            ->whereMonth('journal_date', $month);
+
+        if ($selectedStudentId !== 'all') {
+            $journalsQuery->where('user_id', $selectedStudentId);
+        } else {
+            $studentIds = $students->pluck('id')->toArray();
+            $journalsQuery->whereIn('user_id', $studentIds);
+        }
+
+        $allMonthJournals = $journalsQuery->get();
+
+        // 4. Hitung status dan rekap per tanggal untuk kalender
+        $calendarData = [];
+        $totalWorkdaysPassed = 0;
+        $totalMissedEntries = 0;
+
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $dateStr = sprintf('%04d-%02d-%02d', $year, $month, $d);
+            $carbonDate = \Carbon\Carbon::parse($dateStr);
+            $isWeekend = $carbonDate->isWeekend();
+            $isToday = ($dateStr === now()->toDateString());
+            $isPast = ($dateStr < now()->toDateString());
+            $isFuture = ($dateStr > now()->toDateString());
+
+            // Jurnal pada tanggal ini
+            $dayJournals = $allMonthJournals->filter(function($j) use ($dateStr) {
+                return \Carbon\Carbon::parse($j->journal_date)->toDateString() === $dateStr;
+            });
+
+            $submittedStudentIds = $dayJournals->pluck('user_id')->unique()->values()->toArray();
+            $submittedCount = count($submittedStudentIds);
+            $targetCount = ($selectedStudentId !== 'all') ? 1 : $students->count();
+
+            // Status bolong untuk hari kerja lampau
+            $isWorkday = !$isWeekend;
+            if ($isWorkday && $isPast) {
+                $totalWorkdaysPassed++;
+                if ($selectedStudentId !== 'all') {
+                    if ($submittedCount === 0) {
+                        $totalMissedEntries++;
+                    }
+                } else {
+                    $missedOnDay = max(0, $targetCount - $submittedCount);
+                    $totalMissedEntries += $missedOnDay;
+                }
+            }
+
+            // Klasifikasi Tampilan Kotak Tanggal
+            $status = 'future';
+            if ($isWeekend) {
+                $status = 'weekend';
+            } elseif ($selectedStudentId !== 'all') {
+                if ($submittedCount > 0) {
+                    $status = 'filled'; // Hijau
+                } elseif ($isToday) {
+                    $status = 'today_pending'; // Oranye
+                } elseif ($isPast) {
+                    $status = 'missed'; // Merah (Bolong)
+                } else {
+                    $status = 'future';
+                }
+            } else {
+                // Mode Semua Siswa
+                if ($submittedCount >= $targetCount && $targetCount > 0) {
+                    $status = 'all_filled'; // Hijau (Semua mengisi)
+                } elseif ($submittedCount > 0) {
+                    $status = 'partial'; // Kuning / Oranye (Ada yang mengisi, ada yang bolong)
+                } elseif ($isToday) {
+                    $status = 'today_pending'; // Oranye
+                } elseif ($isPast) {
+                    $status = 'missed'; // Merah (Semua bolong di hari kerja lampau)
+                } else {
+                    $status = 'future';
+                }
+            }
+
+            $calendarData[$d] = [
+                'date' => $dateStr,
+                'day' => $d,
+                'day_name' => $carbonDate->translatedFormat('D'),
+                'is_weekend' => $isWeekend,
+                'is_today' => $isToday,
+                'is_past' => $isPast,
+                'is_future' => $isFuture,
+                'status' => $status,
+                'journals_count' => $submittedCount,
+                'target_count' => $targetCount,
+                'journals' => $dayJournals,
+            ];
+        }
+
+        // 5. Jurnal pada tanggal terpilih ($selectedDate)
+        $selectedDateJournals = $allMonthJournals->filter(function($j) use ($selectedDate) {
+            return \Carbon\Carbon::parse($j->journal_date)->toDateString() === $selectedDate;
+        })->values();
+
+        // 6. Siswa yang BOLONG pada tanggal terpilih (jika hari kerja lampau)
+        $selectedDateCarbon = \Carbon\Carbon::parse($selectedDate);
+        $selectedDateIsPastOrToday = ($selectedDate <= now()->toDateString());
+        $selectedDateIsWorkday = !$selectedDateCarbon->isWeekend();
+
+        $submittedInSelectedDate = $selectedDateJournals->pluck('user_id')->unique()->toArray();
+        $relevantStudents = ($selectedStudentId !== 'all' && $selectedStudent) ? collect([$selectedStudent]) : $students;
+
+        $bolongStudents = collect();
+        if ($selectedDateIsWorkday && $selectedDateIsPastOrToday) {
+            $bolongStudents = $relevantStudents->whereNotIn('id', $submittedInSelectedDate)->values();
+        }
+
+        // 7. Statistik Ringkas
+        $totalJournalsMonth = $allMonthJournals->count();
+        $pendingFeedbackCount = $allMonthJournals->where(function($j) {
+            return empty($j->mentor_feedback);
+        })->count();
+        $reviewedCount = $allMonthJournals->where(function($j) {
+            return !empty($j->mentor_feedback);
+        })->count();
+
+        // Submissions tugas siswa
         $pendingSubmissions = TaskSubmission::with(['task', 'user'])->where('status', 'submitted')->latest()->get();
 
-        return view('mentor.review', compact('journals', 'pendingJournalsCount', 'reviewedJournalsCount', 'pendingSubmissions'));
+        return view('mentor.review', compact(
+            'students',
+            'selectedStudentId',
+            'selectedStudent',
+            'month',
+            'year',
+            'daysInMonth',
+            'leadingEmptyDays',
+            'selectedDate',
+            'calendarData',
+            'selectedDateJournals',
+            'bolongStudents',
+            'totalJournalsMonth',
+            'totalMissedEntries',
+            'pendingFeedbackCount',
+            'reviewedCount',
+            'pendingSubmissions'
+        ));
     }
 
     public function mentorAddNote(Request $request, $id)
@@ -1969,15 +2141,30 @@ class SimakController extends Controller
         $batches = Batch::withCount(['users', 'showcaseProjects'])->get();
         $selectedBatchId = $request->get('batch_id', $batches->first()->id ?? 1);
         $selectedBatch = Batch::find($selectedBatchId) ?? $batches->first();
+        $activeTab = $request->get('tab', 'students');
 
         $projects = ShowcaseProject::with(['batch', 'creator'])
             ->where('batch_id', $selectedBatchId)
             ->latest()
             ->get();
 
-        $students = User::where('role', 'siswa')->get();
+        $batchStudents = BatchStudent::with(['student.mentor', 'mentor', 'batch'])
+            ->where('batch_id', $selectedBatchId)
+            ->get();
 
-        return view('admin.batches', compact('batches', 'selectedBatchId', 'selectedBatch', 'projects', 'students'));
+        $allStudents = User::where('role', 'siswa')->orderBy('name')->get();
+        $mentors = User::where('role', 'mentor')->orderBy('name')->get();
+
+        return view('admin.batches', compact(
+            'batches',
+            'selectedBatchId',
+            'selectedBatch',
+            'activeTab',
+            'projects',
+            'batchStudents',
+            'allStudents',
+            'mentors'
+        ));
     }
 
     public function adminStoreBatch(Request $request)
@@ -2083,6 +2270,135 @@ class SimakController extends Controller
         $project->delete();
 
         return back()->with('success', "Project \"{$title}\" berhasil dihapus.");
+    }
+
+    // ==========================================
+    // PENILAIAN RAPOR DUDI & ENROLLMENT BATCH SISWA
+    // ==========================================
+    public function updateBatchStudentGrade(Request $request, $id)
+    {
+        $user = $this->authorizeMentorOrAdmin();
+
+        $batchStudent = BatchStudent::with(['student', 'batch'])->findOrFail($id);
+
+        // Jika mentor, pastikan siswa adalah bimbingannya
+        if ($user->role === 'mentor' && $batchStudent->mentor_id && $batchStudent->mentor_id !== $user->id && $batchStudent->student && $batchStudent->student->mentor_id !== $user->id) {
+            abort(403, 'Akses Ditolak: Anda bukan mentor pembimbing untuk siswa ini.');
+        }
+
+        $request->validate([
+            'technical_skill' => 'required|numeric|min:0|max:100',
+            'discipline' => 'required|numeric|min:0|max:100',
+            'teamwork' => 'required|numeric|min:0|max:100',
+            'initiative' => 'required|numeric|min:0|max:100',
+            'mentor_notes' => 'nullable|string|max:1000',
+            'certificate_number' => 'nullable|string|max:100',
+            'issue_date' => 'nullable|date',
+            'is_published' => 'nullable|boolean',
+        ]);
+
+        $technical = (float)$request->technical_skill;
+        $discipline = (float)$request->discipline;
+        $teamwork = (float)$request->teamwork;
+        $initiative = (float)$request->initiative;
+
+        $finalScore = round(($technical + $discipline + $teamwork + $initiative) / 4, 2);
+        $grade = BatchStudent::calculateGrade($finalScore);
+
+        $certNum = $request->certificate_number ?: ($batchStudent->certificate_number ?? ('TMS/PKL/' . ($batchStudent->batch->period_year ?? date('Y')) . '/' . ($batchStudent->student->account_id ?? $batchStudent->user_id)));
+        $issueDate = $request->issue_date ?: ($batchStudent->issue_date ?? now()->toDateString());
+        $isPublished = $request->has('is_published') ? (bool)$request->is_published : true;
+
+        $batchStudent->update([
+            'technical_skill' => $technical,
+            'discipline' => $discipline,
+            'teamwork' => $teamwork,
+            'initiative' => $initiative,
+            'final_score' => $finalScore,
+            'grade' => $grade,
+            'mentor_notes' => $request->mentor_notes,
+            'certificate_number' => $certNum,
+            'issue_date' => $issueDate,
+            'is_published' => $isPublished,
+            'mentor_id' => $user->role === 'mentor' ? $user->id : ($batchStudent->mentor_id ?? $user->id),
+        ]);
+
+        // Sinkronkan ke tabel evaluations agar verifikasi sertifikat & profil developer publik otomatis konsisten
+        Evaluation::updateOrInsert(
+            ['user_id' => $batchStudent->user_id],
+            [
+                'mentor_id' => $batchStudent->mentor_id ?? $user->id,
+                'technical_skill' => $technical,
+                'discipline' => $discipline,
+                'teamwork' => $teamwork,
+                'initiative' => $initiative,
+                'final_score' => $finalScore,
+                'grade' => $grade,
+                'certificate_number' => $certNum,
+                'issue_date' => $issueDate,
+                'general_notes' => $request->mentor_notes,
+                'updated_at' => now(),
+            ]
+        );
+
+        return back()->with('success', "Nilai rapor DUDI untuk {$batchStudent->student->name} berhasil diperbarui! (Skor Akhir: {$finalScore} / Grade: {$grade})");
+    }
+
+    public function enrollStudentToBatch(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'batch_id' => 'required|exists:batches,id',
+            'user_id' => 'required|exists:users,id',
+            'mentor_id' => 'nullable|exists:users,id',
+            'role_title' => 'nullable|string|max:100',
+            'institution_name' => 'nullable|string|max:150',
+            'major' => 'nullable|string|max:100',
+        ]);
+
+        $exists = BatchStudent::where('batch_id', $request->batch_id)->where('user_id', $request->user_id)->exists();
+        if ($exists) {
+            return back()->with('error', 'Siswa tersebut sudah terdaftar pada angkatan ini.');
+        }
+
+        $student = User::findOrFail($request->user_id);
+        $batch = Batch::findOrFail($request->batch_id);
+
+        BatchStudent::create([
+            'batch_id' => $request->batch_id,
+            'user_id' => $request->user_id,
+            'mentor_id' => $request->mentor_id ?: $student->mentor_id,
+            'role_title' => $request->role_title ?: 'Software Engineer Intern',
+            'institution_name' => $request->institution_name ?: ($student->school_origin ?: 'SMKN 1 Ciamis'),
+            'major' => $request->major ?: ($student->major ?: 'PPLG'),
+            'status' => 'aktif',
+            'technical_skill' => 85,
+            'discipline' => 85,
+            'teamwork' => 85,
+            'initiative' => 85,
+            'final_score' => 85.00,
+            'grade' => 'A-',
+            'mentor_notes' => 'Siswa aktif terdaftar pada ' . $batch->batch_name,
+            'certificate_number' => 'TMS/PKL/' . $batch->period_year . '/' . ($student->account_id ?? $student->id),
+            'issue_date' => now()->toDateString(),
+            'is_published' => true,
+        ]);
+
+        return back()->with('success', "Siswa {$student->name} berhasil didaftarkan ke {$batch->batch_name}!");
+    }
+
+    public function removeStudentFromBatch($id)
+    {
+        $this->authorizeAdmin();
+
+        $batchStudent = BatchStudent::with(['student', 'batch'])->findOrFail($id);
+        $studentName = $batchStudent->student->name ?? 'Siswa';
+        $batchName = $batchStudent->batch->batch_name ?? 'Angkatan';
+
+        $batchStudent->delete();
+
+        return back()->with('success', "Siswa {$studentName} berhasil dikeluarkan dari {$batchName}.");
     }
 
     // ==========================================

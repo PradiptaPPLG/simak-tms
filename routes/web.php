@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
         Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
         Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
+        Route::post('/batch-students/{id}/grade', [SimakController::class, 'updateBatchStudentGrade'])->name('batch_students.grade');
     });
 
     // Admin TMS Management Hub (Khusus Administrator TMS)
@@ -128,6 +129,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/angkatan', [SimakController::class, 'adminBatches'])->name('admin.batches');
         Route::post('/admin/angkatan', [SimakController::class, 'adminStoreBatch'])->name('admin.batches.store');
         Route::put('/admin/angkatan/{id}', [SimakController::class, 'adminUpdateBatch'])->name('admin.batches.update');
+        Route::post('/admin/batch-students/enroll', [SimakController::class, 'enrollStudentToBatch'])->name('admin.batch_students.enroll');
+        Route::delete('/admin/batch-students/{id}', [SimakController::class, 'removeStudentFromBatch'])->name('admin.batch_students.destroy');
         Route::post('/admin/projects', [SimakController::class, 'adminStoreProject'])->name('admin.projects.store');
         Route::put('/admin/projects/{id}', [SimakController::class, 'adminUpdateProject'])->name('admin.projects.update');
         Route::delete('/admin/projects/{id}', [SimakController::class, 'adminDeleteProject'])->name('admin.projects.destroy');
