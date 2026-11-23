@@ -1367,8 +1367,8 @@
     @auth
     @php
         $authUser = auth()->user();
-        $authPublicUrl = route('profile.public', $authUser->account_id ?? $authUser->username ?? $authUser->id);
-        $authQrUrl = route('qr.generate', $authUser->account_id ?? $authUser->username ?? $authUser->id);
+        $authPublicUrl = $authUser->profile_url;
+        $authQrUrl = route('qr.generate', $authUser->profile_hash);
     @endphp
     <!-- ============================================================== -->
     <!-- MODAL SHARE PROFIL & QR CODE AUTOGENERATE (SIMAK-TMS)          -->
@@ -1442,6 +1442,47 @@
         function closeProfileShareModal() {
             const modal = document.getElementById('profileShareModal');
             if (modal) modal.classList.add('hidden');
+        }
+
+        function copyIdBadge(idValue, btnEl) {
+            if (!idValue || idValue === '-') return;
+            const origHtml = btnEl.innerHTML;
+            const origClass = btnEl.className;
+
+            const doFeedback = () => {
+                btnEl.innerHTML = `
+                    <span class="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                        <svg class="w-3 h-3 stroke-emerald-600 stroke-2 fill-none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Tersalin!
+                    </span>
+                `;
+                btnEl.className = 'inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold transition-all shadow-xs';
+                setTimeout(() => {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.className = origClass;
+                }, 1500);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(idValue).then(doFeedback).catch(() => fallbackCopyId(idValue, doFeedback));
+            } else {
+                fallbackCopyId(idValue, doFeedback);
+            }
+        }
+
+        function fallbackCopyId(text, cb) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                if (cb) cb();
+            } catch (e) {}
+            document.body.removeChild(ta);
         }
 
         function copyLayoutPublicLink() {

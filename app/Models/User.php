@@ -26,6 +26,49 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->profile_hash)) {
+                $user->profile_hash = static::generateUniqueProfileHash();
+            }
+        });
+    }
+
+    /**
+     * Generate 16-character secure, non-sequential profile hash
+     */
+    public static function generateUniqueProfileHash(): string
+    {
+        $appKey = config('app.key') ?: 'simak_tms_secret_key';
+        do {
+            $hash = substr(hash_hmac('sha256', 'simak_usr_' . uniqid((string)mt_rand(), true), $appKey), 0, 16);
+        } while (static::where('profile_hash', $hash)->exists());
+
+        return $hash;
+    }
+
+    /**
+     * Accessor for profile_hash with deterministic fallback
+     */
+    public function getProfileHashAttribute($value)
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        $appKey = config('app.key') ?: 'simak_tms_secret_key';
+        return substr(hash_hmac('sha256', 'simak_user_' . $this->id . '_' . ($this->account_id ?? 'acc'), $appKey), 0, 16);
+    }
+
+    /**
+     * Accessor for canonical public profile URL
+     */
+    public function getProfileUrlAttribute(): string
+    {
+        return url('/profile/' . $this->profile_hash);
+    }
+
     public function batch()
     {
         return $this->belongsTo(Batch::class);

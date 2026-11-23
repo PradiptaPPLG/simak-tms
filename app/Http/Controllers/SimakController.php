@@ -503,8 +503,8 @@ class SimakController extends Controller
         $totalSubmissions = TaskSubmission::where('user_id', $user->id)->count();
         $totalContributions = $totalCommits + $totalJournals + $totalSubmissions;
 
-        $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
-        $qrCodeUrl = route('qr.generate', $user->account_id ?? $user->username ?? $user->id);
+        $publicUrl = $user->profile_url;
+        $qrCodeUrl = route('qr.generate', $user->profile_hash);
 
         return view('profile.index', compact(
             'user',
@@ -699,12 +699,20 @@ class SimakController extends Controller
      */
     public function publicProfile($identifier)
     {
-        $user = User::where('account_id', $identifier)
-            ->orWhere('username', $identifier)
-            ->orWhere('id', $identifier)
-            ->first();
+        // 1. Prioritas keamanan: cari berdasarkan hashed URI unik
+        $user = User::where('profile_hash', $identifier)->first();
 
+        // 2. Fallback kompatibilitas: jika diakses via ID numerik/account_id lama, redirect 301 ke URI ber-hash
         if (!$user) {
+            $legacyUser = User::where('account_id', $identifier)
+                ->orWhere('id', $identifier)
+                ->orWhere('username', $identifier)
+                ->first();
+
+            if ($legacyUser) {
+                return redirect()->to($legacyUser->profile_url, 301);
+            }
+
             abort(404, 'Profil pengguna SIMAK-TMS tidak ditemukan.');
         }
 
@@ -725,8 +733,8 @@ class SimakController extends Controller
         $totalContributions = $totalCommits + $totalJournals + $totalProjects;
 
         $isOwner = Auth::check() && Auth::id() === $user->id;
-        $publicUrl = route('profile.public', $user->account_id ?? $user->username ?? $user->id);
-        $qrCodeUrl = route('qr.generate', $user->account_id ?? $user->username ?? $user->id);
+        $publicUrl = $user->profile_url;
+        $qrCodeUrl = route('qr.generate', $user->profile_hash);
 
         return view('profile.public', compact(
             'user',
@@ -746,12 +754,13 @@ class SimakController extends Controller
      */
     public function generateQr($identifier)
     {
-        $user = User::where('account_id', $identifier)
+        $user = User::where('profile_hash', $identifier)
+            ->orWhere('account_id', $identifier)
             ->orWhere('username', $identifier)
             ->orWhere('id', $identifier)
             ->first();
 
-        $targetUrl = route('profile.public', $user ? ($user->account_id ?? $user->username ?? $user->id) : $identifier);
+        $targetUrl = $user ? $user->profile_url : url('/profile/' . $identifier);
         $remoteQrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($targetUrl);
 
         try {

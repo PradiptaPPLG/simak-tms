@@ -238,7 +238,7 @@
                                             @endphp
 
                                             @if(!empty($intern->account_id))
-                                                <a href="{{ url('/profile/' . $intern->account_id) }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                                                <a href="{{ $intern->profile_url }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                                                     <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
                                                     <span>Lihat Profil</span>
                                                 </a>

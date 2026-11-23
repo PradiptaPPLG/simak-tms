@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Developer • {{ $user->name }} • SIMAK-TMS</title>
     
+    <!-- Favicon (SIMAK Icon) -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo/simak-icon-64.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo/simak-icon-128.png') }}">
+
     <!-- Google Fonts: Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,9 +64,7 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <!-- Brand Logo -->
             <a href="{{ route('login') }}" class="flex items-center gap-2.5 group">
-                <div class="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-sm tracking-tighter shadow-sm group-hover:bg-red-600 transition-colors">
-                    TMS
-                </div>
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-xl shadow-xs shrink-0 object-contain hover:scale-105 transition-transform">
                 <div class="leading-none">
                     <div class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-1.5">
                         <span>SIMAK-TMS</span>
@@ -136,9 +138,23 @@
                         </div>
 
                         <div class="text-xs font-mono font-semibold text-slate-500 flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                            <span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? '-' }}</span>
+                            <button type="button" 
+                                    onclick="copyIdBadge('{{ $user->account_id }}', this)" 
+                                    title="Klik untuk menyalin ID ({{ $user->account_id }})" 
+                                    class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200 text-xs font-mono font-bold transition-all cursor-pointer group shadow-2xs">
+                                <span>ID: {{ $user->account_id ?? '-' }}</span>
+                                <svg class="w-3 h-3 text-slate-400 group-hover:text-slate-700 transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                            @php
+                                $displayHandle = (!empty($user->username) && !is_numeric($user->username) && $user->username !== $user->account_id)
+                                    ? $user->username
+                                    : strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode(' ', trim($user->name))[0] ?? 'dev'));
+                            @endphp
                             <span>•</span>
-                            <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
+                            <span class="text-slate-600 font-semibold">&#64;{{ $displayHandle }}</span>
                             <span>•</span>
                             @if($user->status === 'alumni')
                                 <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 uppercase text-[10px] inline-flex items-center gap-1">
@@ -218,7 +234,7 @@
 
                 @if($user->instagram_url)
                     <a href="{{ $user->instagram_url }}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 text-xs font-semibold flex items-center gap-2 transition-all">
-                        <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-600"></i>
+                        <svg class="w-3.5 h-3.5 fill-[#E4405F] shrink-0" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         <span>Instagram</span>
                     </a>
                 @endif
@@ -326,7 +342,7 @@
                             <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
                                 @if($p->repo_url)
                                     <a href="{{ $p->repo_url }}" target="_blank" rel="noopener noreferrer" class="text-slate-700 hover:text-black flex items-center gap-1.5">
-                                        <i data-lucide="github" class="w-3.5 h-3.5"></i>
+                                        <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
                                         <span>Repository</span>
                                     </a>
                                 @else
@@ -459,6 +475,47 @@
         function closeProfileShareModal() {
             const modal = document.getElementById('profileShareModal');
             if (modal) modal.classList.add('hidden');
+        }
+
+        function copyIdBadge(idValue, btnEl) {
+            if (!idValue || idValue === '-') return;
+            const origHtml = btnEl.innerHTML;
+            const origClass = btnEl.className;
+
+            const doFeedback = () => {
+                btnEl.innerHTML = `
+                    <span class="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                        <svg class="w-3 h-3 stroke-emerald-600 stroke-2 fill-none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Tersalin!
+                    </span>
+                `;
+                btnEl.className = 'inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold transition-all shadow-xs';
+                setTimeout(() => {
+                    btnEl.innerHTML = origHtml;
+                    btnEl.className = origClass;
+                }, 1500);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(idValue).then(doFeedback).catch(() => fallbackCopyId(idValue, doFeedback));
+            } else {
+                fallbackCopyId(idValue, doFeedback);
+            }
+        }
+
+        function fallbackCopyId(text, cb) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                if (cb) cb();
+            } catch (e) {}
+            document.body.removeChild(ta);
         }
 
         function copyPublicLink() {

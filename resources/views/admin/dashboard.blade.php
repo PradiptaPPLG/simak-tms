@@ -365,7 +365,7 @@
                                     <div class="action-dropdown hidden absolute right-0 mt-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-40 divide-y divide-slate-100 text-left animate-in fade-in zoom-in-95 duration-100">
                                         <div class="py-1">
                                             @if(!empty($intern->account_id))
-                                                <a href="{{ url('/profile/' . $intern->account_id) }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                                                <a href="{{ $intern->profile_url }}" target="_blank" class="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                                                     <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
                                                     <span>Lihat Profil</span>
                                                 </a>

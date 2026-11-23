@@ -57,9 +57,24 @@
                         {{ $user->name }}
                     </h1>
                     <div class="text-xs font-mono font-semibold text-slate-500 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-slate-900 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {{ $user->account_id ?? '-' }}</span>
+                        <button type="button" 
+                                onclick="copyIdBadge('{{ $user->account_id }}', this)" 
+                                title="Klik untuk menyalin ID ({{ $user->account_id }})" 
+                                class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-900 font-bold px-2.5 py-0.5 rounded-lg border border-slate-200 text-xs font-mono transition-all cursor-pointer group shadow-2xs">
+                            <span>ID: {{ $user->account_id ?? '-' }}</span>
+                            <svg class="w-3 h-3 text-slate-400 group-hover:text-slate-700 transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                        @php
+                            $displayHandle = (!empty($user->username) && !is_numeric($user->username) && $user->username !== $user->account_id)
+                                ? $user->username
+                                : strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode(' ', trim($user->name))[0] ?? 'dev'));
+                        @endphp
                         <span>•</span>
-                        <span>&#64;{{ $user->username ?? strtolower(str_replace(' ', '', $user->name)) }}</span>
+                        <span class="text-slate-600 font-semibold">&#64;{{ $displayHandle }}</span>
+                        <span>•</span>
                         @if($user->status === 'alumni')
                             <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 inline-flex items-center gap-1">
                                 <i data-lucide="graduation-cap" class="w-3 h-3 text-indigo-600"></i> Alumni PKL

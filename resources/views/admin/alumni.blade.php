@@ -172,7 +172,7 @@
             @foreach($alumni as $item)
                 @php
                     $initials = collect(explode(' ', $item->name))->map(fn($w) => strtoupper(substr($w, 0, 1)))->take(2)->join('');
-                    $profileUrl = route('profile.public', $item->account_id ?? $item->username ?? $item->id);
+                    $profileUrl = $item->profile_url;
                 @endphp
                 <div class="mas-card p-5 flex flex-col items-center text-center relative group hover:border-red-500/40 hover:shadow-lg transition-all duration-300">
                     
@@ -213,7 +213,12 @@
                             {{ $item->name }}
                         </a>
                         <p class="text-[11px] font-mono text-slate-400">
-                            ID: <span class="text-slate-600 font-bold">{{ $item->account_id ?? $item->id }}</span> • {{ '@' . ($item->username ?? $item->account_id ?? $item->id) }}
+                            @php
+                                $itemHandle = (!empty($item->username) && !is_numeric($item->username) && $item->username !== $item->account_id)
+                                    ? $item->username
+                                    : strtolower(preg_replace('/[^a-zA-Z0-9]/', '', explode(' ', trim($item->name))[0] ?? 'alumni'));
+                            @endphp
+                            ID: <span class="text-slate-600 font-bold">{{ $item->account_id ?? $item->id }}</span> • {{ '@' . $itemHandle }}
                         </p>
                         <p class="text-[11px] text-slate-500 truncate" title="{{ $item->school_origin ?? 'SMKN 1 Ciamis' }}">
                             {{ $item->school_origin ?? 'SMKN 1 Ciamis' }}

@@ -277,7 +277,7 @@
                             <span>Inspect</span>
                         </a>
                         @if(!empty($intern->account_id))
-                            <a href="{{ url('/profile/' . $intern->account_id) }}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1">
+                            <a href="{{ $intern->profile_url }}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1">
                                 <i data-lucide="user" class="w-3.5 h-3.5 text-red-600"></i>
                                 <span>Profil</span>
                             </a>
