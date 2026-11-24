@@ -12,12 +12,28 @@
             <p class="text-xs text-slate-500 mt-0.5">Pantau performa koding, rekapitulasi logbook jurnal harian, dan karya portofolio siswa bimbingan Anda.</p>
         </div>
 
-        <div class="flex items-center gap-2.5">
-            <div class="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-2 shadow-xs">
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto no-print">
+            <!-- Green Export Button (Opens Format Choice Modal) -->
+            <button type="button" onclick="openExportModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Unduh Berkas Spreadsheet Data Siswa Bimbingan (Excel / CSV)">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
+                <span>Ekspor Excel / CSV</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
+            </button>
+
+            <!-- Cetak Rekap Button -->
+            <button type="button" onclick="window.print()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Cetak Rekap / Simpan PDF">
+                <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span>Cetak Rekap</span>
+            </button>
+
+            <!-- Date Pill -->
+            <div class="bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hidden md:flex items-center gap-2 shadow-xs shrink-0">
                 <i data-lucide="calendar" class="w-4 h-4 text-red-600"></i>
                 <span>{{ now()->translatedFormat('l, d F Y') }}</span>
             </div>
-            <a href="{{ route('mentor.review') }}" class="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-2">
+
+            <!-- Validasi Jurnal Button -->
+            <a href="{{ route('mentor.review') }}" class="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 shrink-0">
                 <i data-lucide="check-check" class="w-4 h-4 text-emerald-400"></i>
                 <span>Validasi Jurnal</span>
             </a>
@@ -346,10 +362,152 @@
         @endforelse
     </div>
 
+    <!-- TABLE KHUSUS CETAK DOKUMEN / PRINT REKAP RESMI PT. TMS -->
+    <div class="print-header mt-4">
+        <div style="margin-bottom: 12px;">
+            <h2 style="font-size: 13pt; font-weight: 900; margin: 0; color: #0f172a; text-transform: uppercase;">Laporan Monitoring & Rekapitulasi Siswa Bimbingan</h2>
+            <div style="font-size: 8.5pt; color: #64748b; margin-top: 2px;">
+                <span>Pembimbing Industri: <b>{{ $mentor->name }}</b></span> &bull; 
+                <span>Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB</span>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; font-size: 8pt; margin-top: 8px;">
+            <thead>
+                <tr style="background: #f1f5f9;">
+                    <th style="border: 1px solid #cbd5e1; padding: 6px 4px; text-align: center; width: 28px;">No</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: left;">ID Akun</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: left;">Nama Siswa</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: left;">Sekolah Asal & Jurusan</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Status</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Logbook</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Proyek</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Teknis</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Disiplin</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Tim</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Inisiatif</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Nilai</th>
+                    <th style="border: 1px solid #cbd5e1; padding: 6px; text-align: center;">Predikat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($students as $idx => $s)
+                    @php $e = $s->evaluation; @endphp
+                    <tr>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px 4px; text-align: center;">{{ $idx + 1 }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; font-family: monospace;">{{ $s->account_id ?? '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; font-weight: bold;">{{ $s->name }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px;">{{ $s->school_origin ?? 'SMKN 1 Ciamis' }} ({{ $s->major ?? 'PPLG' }})</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ ucfirst($s->status ?? 'Aktif') }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $s->journals->count() }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $s->showcaseProjects ? $s->showcaseProjects->count() : 0 }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $e ? $e->technical_skill : '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $e ? $e->discipline : '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $e ? $e->teamwork : '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center;">{{ $e ? $e->initiative : '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center; font-weight: bold;">{{ $e ? number_format($e->final_score, 1) : '-' }}</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 5px; text-align: center; font-weight: bold;">{{ $e ? ($e->grade ?? ($e->final_score >= 85 ? 'A' : 'B')) : '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="13" style="border: 1px solid #cbd5e1; padding: 12px; text-align: center;">Belum ada siswa bimbingan.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MODAL PILIH FORMAT EKSPOR MENTOR (EXCEL / CSV) -->
+    <div id="modal-export-student" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="p-6 pb-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-black text-slate-900">Ekspor Data Siswa Bimbingan</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Unduh berkas rekapitulasi progres & rapor bimbingan:</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeExportModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body: Choices -->
+            <div class="p-6 space-y-3">
+                <!-- Option 1: Microsoft Excel (.xls) -->
+                <a href="{{ route('mentor.students.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
+                   onclick="closeExportModal()"
+                   class="group p-4 rounded-2xl border-2 border-emerald-100 hover:border-emerald-500 bg-emerald-50/40 hover:bg-emerald-50 transition-all flex items-start gap-3.5 block text-left">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
+                        XLS
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">Microsoft Excel (.xls)</h4>
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Rekomendasi</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                            Format spreadsheet resmi lengkap dengan warna header TMS, border rapi, kolom 4 pilar nilai, dan jumlah logbook. Siap dibuka di MS Excel & WPS.
+                        </p>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-emerald-600 shrink-0 mt-1 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all"></i>
+                </a>
+
+                <!-- Option 2: CSV Universal (.csv) -->
+                <a href="{{ route('mentor.students.export', array_merge(request()->query(), ['format' => 'csv'])) }}" 
+                   onclick="closeExportModal()"
+                   class="group p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-800 bg-slate-50/50 hover:bg-slate-100 transition-all flex items-start gap-3.5 block text-left">
+                    <div class="w-11 h-11 rounded-xl bg-slate-800 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-md shadow-slate-800/20 group-hover:scale-105 transition-transform">
+                        CSV
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-900 group-hover:text-black transition-colors">Comma Separated Values (.csv)</h4>
+                            <span class="text-[10px] font-bold text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">Universal</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                            Format data teks terpisah koma dengan UTF-8 BOM. Sangat cocok untuk backup arsip, Google Sheets, atau integrasi data.
+                        </p>
+                    </div>
+                    <i data-lucide="download" class="w-4 h-4 text-slate-600 shrink-0 mt-1 opacity-60 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all"></i>
+                </a>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                <span>Klik opsi untuk langsung mengunduh</span>
+                <button type="button" onclick="closeExportModal()" class="px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Vanilla JS Toggle for Accordion Inspect Dropdowns -->
 <script>
+    function openExportModal() {
+        const m = document.getElementById('modal-export-student');
+        if (m) {
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+
+    function closeExportModal() {
+        const m = document.getElementById('modal-export-student');
+        if (m) {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+    }
+
     function toggleInspect(detailId, chevronId) {
         const detailEl = document.getElementById(detailId);
         const chevronEl = document.getElementById(chevronId);

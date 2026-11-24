@@ -1,0 +1,2639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo">
+
+    <title>Dashboard - MAS-PKL SMKN 1 Ciamis</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="shortcut icon" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="apple-touch-icon" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- PWA iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MAS-PKL">
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/lucide@latest/lucide.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.confirmDoubleDeletion = function(options) {
+            const { items, entityName = 'data', onConfirm } = options;
+            if (!items || items.length === 0) return;
+
+            const count = items.length;
+            let label = '';
+            if (count === 1) {
+                label = `"${items[0]}"`;
+            } else if (count <= 3) {
+                label = items.map(n => `"${n}"`).join(', ');
+            } else {
+                label = `kumpulan ${count} data ${entityName} ini`;
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const swalConfig = {
+                background: isDark ? '#0f172a' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                customClass: {
+                    confirmButton: 'px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-500/25 text-sm focus:outline-none cursor-pointer mr-3',
+                    cancelButton: 'px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                    popup: 'rounded-2xl border border-slate-200/80 dark:border-slate-800/80 font-sans shadow-2xl',
+                    htmlContainer: 'text-sm font-medium leading-relaxed'
+                },
+                buttonsStyling: false,
+            };
+
+            // Peringatan 1: Validasi Pertama
+            Swal.fire({
+                ...swalConfig,
+                title: 'Konfirmasi Hapus Data',
+                html: `Apakah Anda yakin ingin menghapus <b>${label}</b>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+            }).then((res1) => {
+                if (!res1.isConfirmed) return;
+
+                // Peringatan 2: Validasi Kedua / Peringatan Terakhir
+                Swal.fire({
+                    ...swalConfig,
+                    title: 'Peringatan Terakhir!',
+                    html: `Tindakan ini <b>permanen</b> dan <b>tidak dapat dibatalkan</b>!<br>Seluruh data terkait dari <b>${label}</b> akan dihapus secara permanen dari sistem.<br><br>Apakah Anda benar-benar yakin?`,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus Permanen Sekarang!',
+                    cancelButtonText: 'Batalkan',
+                }).then((res2) => {
+                    if (res2.isConfirmed && typeof onConfirm === 'function') {
+                        onConfirm();
+                    }
+                });
+            });
+        };
+
+        // Otomatis tangani form single-delete yang memiliki atribut data-confirm-delete
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form && form.hasAttribute('data-confirm-delete')) {
+                e.preventDefault();
+                const name = form.getAttribute('data-confirm-delete') || 'data ini';
+                const entity = form.getAttribute('data-entity') || 'data';
+                window.confirmDoubleDeletion({
+                    items: [name],
+                    entityName: entity,
+                    onConfirm: () => {
+                        form.removeAttribute('data-confirm-delete');
+                        form.submit();
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <style>
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            height: 100vh !important; /* Fallback for older browsers */
+            height: 100dvh !important;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        [x-cloak] { display: none !important; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <link rel="preload" as="style" href="https://pkl.smkn1ciamis.id/build/assets/app-DpSPhG3b.css" /><link rel="modulepreload" as="script" href="https://pkl.smkn1ciamis.id/build/assets/app-BPlLuuM8.js" /><link rel="stylesheet" href="https://pkl.smkn1ciamis.id/build/assets/app-DpSPhG3b.css" /><script type="module" src="https://pkl.smkn1ciamis.id/build/assets/app-BPlLuuM8.js"></script>    
+    <!-- Theme Switcher Script (prevent FOUC) -->
+    <script>
+        if (localStorage.theme === 'dark' || (localStorage.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased h-dvh overflow-hidden" x-data>
+    <div class="flex h-full w-full overflow-hidden">
+
+    <!-- Sidebar (Desktop Only) -->
+
+    <aside class="hidden lg:flex w-72 shrink-0 glass static inset-0 border-r border-slate-200/50 dark:border-slate-700/50 flex-col z-50">
+        
+        <div class="flex items-center justify-center p-6 border-b border-slate-200/50 dark:border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-xl">
+                <h1 class="text-2xl font-black tracking-tighter text-blue-600 dark:text-blue-400 drop-shadow-sm transition-all duration-300 hover:scale-[1.02] hover:drop-shadow-md cursor-default">MAS-PKL</h1>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-2">
+            <nav class="space-y-2">
+                                    <a href="https://pkl.smkn1ciamis.id/dashboard" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Dashboard</span>
+                </div>
+                <span id="sidebar-pesan-badge-dashboard" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/jurnal" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="book-open" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Jurnal Kegiatan</span>
+                </div>
+                <span id="sidebar-pesan-badge-jurnal-kegiatan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/absensi" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Daftar Hadir</span>
+                </div>
+                <span id="sidebar-pesan-badge-daftar-hadir" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/laporan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="file-text" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Laporan PKL</span>
+                </div>
+                <span id="sidebar-pesan-badge-laporan-pkl" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/panduan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="library" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Buku Panduan</span>
+                </div>
+                <span id="sidebar-pesan-badge-buku-panduan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/pesan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="message-circle" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Pesan</span>
+                </div>
+                <span id="sidebar-pesan-badge-pesan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/bantuan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="help-circle" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Pusat Bantuan</span>
+                </div>
+                <span id="sidebar-pesan-badge-pusat-bantuan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/panduan-interaktif" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Panduan Interaktif</span>
+                </div>
+                <span id="sidebar-pesan-badge-panduan-interaktif" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Top Navbar -->
+        <header class="glass sticky top-0 z-30 h-16 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <!-- Mobile Logo (Hidden on Desktop) -->
+            <div class="flex lg:hidden items-center gap-2.5">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-8 h-8 object-contain rounded-lg">
+                <h1 class="text-xl font-black tracking-tighter text-blue-600 dark:text-blue-400 drop-shadow-sm">MAS-PKL</h1>
+            </div>
+            
+            <div class="ml-auto flex items-center gap-4">
+                <!-- Theme Toggle -->
+                <div x-data="{
+                    theme: localStorage.theme || 'light',
+                    open: false,
+                    setTheme(val) {
+                        this.theme = val;
+                        localStorage.theme = val;
+                        if (val === 'dark' || (val === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                        this.open = false;
+                    }
+                }" class="relative hidden lg:block">
+                    <button @click="open = !open" @click.away="open = false" 
+                            class="text-slate-700 hover:text-slate-900 dark:text-white relative p-2 rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors block">
+                        <i x-show="theme === 'light'" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                        <i x-show="theme === 'dark'" data-lucide="moon" class="w-5 h-5" x-cloak></i>
+                        <i x-show="theme === 'system'" data-lucide="monitor" class="w-5 h-5" x-cloak></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div x-show="open"
+                         x-transition.opacity.duration.200ms
+                         class="absolute right-0 mt-2 w-36 glass-card border border-slate-200/50 dark:border-slate-700/50 py-2 rounded-xl text-sm font-medium z-50 text-slate-700 dark:text-slate-200" x-cloak>
+                        <button @click="setTheme('light')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="sun" class="w-4 h-4"></i> Light
+                        </button>
+                        <button @click="setTheme('dark')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="moon" class="w-4 h-4"></i> Dark
+                        </button>
+                        <button @click="setTheme('system')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="monitor" class="w-4 h-4"></i> System
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                                <div class="relative">
+                    <a href="https://pkl.smkn1ciamis.id/notifikasi" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white relative p-2 rounded-full hover:bg-white/50 dark:bg-slate-800/50 transition-colors block">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="topbar-notif-badge" class=" absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-red-500 text-[9px] font-bold text-white flex items-center justify-center rounded-full border border-slate-900">
+                            9+
+                        </span>
+                    </a>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative hidden lg:block" x-data="{ profileMenuOpen: false }">
+                    <button @click="profileMenuOpen = !profileMenuOpen" @click.away="profileMenuOpen = false" 
+                            class="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors duration-200 focus:outline-none group border border-transparent hover:border-slate-200/50 dark:hover:border-slate-700/50">
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=PRADIPTA+ENDRA+MAULANA&amp;background=3b82f6&amp;color=fff" 
+                                 alt="Avatar" 
+                                 class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform duration-200">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        </div>
+                        
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-tight truncate max-w-[150px]">PRADIPTA ENDRA MAULANA</span>
+                            <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">
+                                                                    siswa
+                                                            </span>
+                        </div>
+                        
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-hover:text-slate-600 dark:group-hover:text-slate-300" :class="profileMenuOpen ? 'rotate-180' : ''"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="profileMenuOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                         class="absolute right-0 mt-2 w-52 glass-card border border-slate-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden z-50 shadow-xl shadow-slate-100/50 dark:shadow-none" 
+                         x-cloak>
+                        
+                        <div class="px-4 py-3 bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-200/50 dark:border-slate-700/50">
+                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">PRADIPTA ENDRA MAULANA</p>
+                             <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">
+                                                                      siswa
+                                                              </p>
+                        </div>
+
+                        <div class="p-1.5 space-y-1">
+                                                            <a href="https://pkl.smkn1ciamis.id/siswa/profile" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors group/item">
+                                    <i data-lucide="user-circle" class="w-4 h-4 text-slate-400 group-hover/item:text-slate-600 dark:group-hover/item:text-slate-300"></i>
+                                    Lihat Profil
+                                </a>
+                                                        
+                            <button type="button" onclick="document.getElementById('aboutModal').showModal()" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors focus:outline-none group/item">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-400 group-hover/item:text-blue-500"></i>
+                                Tentang Aplikasi
+                            </button>
+                            
+                            <form method="POST" action="https://pkl.smkn1ciamis.id/logout" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem?')">
+                                <input type="hidden" name="_token" value="FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo" autocomplete="off">                                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors focus:outline-none group/item">
+                                    <i data-lucide="log-out" class="w-4 h-4 text-red-400 group-hover/item:text-red-500"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-36 sm:p-6 sm:pb-36 lg:p-8 lg:pb-8 relative">
+            <div class="mx-auto max-w-7xl animate-fade-in-up">
+                <!-- Page Header -->
+                                    <header class="mb-8">
+                        <h2 class="text-3xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
+                            Edit Jurnal Harian
+                        </h2>
+                    </header>
+                                
+                <div class="mb-6">
+        <a href="https://pkl.smkn1ciamis.id/siswa/jurnal" class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Kembali ke Daftar
+        </a>
+    </div>
+
+    <div class="max-w-4xl text-slate-700 dark:text-slate-300">
+        <div class="glass-card p-8">
+            <form action="https://pkl.smkn1ciamis.id/siswa/jurnal/3553" method="POST" id="jurnal-form" class="space-y-6">
+                <input type="hidden" name="_token" value="FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo" autocomplete="off">                <input type="hidden" name="_method" value="PUT">                                <div id="jurnal-metadata" class="hidden"
+                     data-kompetensis='[{"id":364,"konsentrasi_keahlian_id":8,"nama":"Peningkatan dan Pengembangan Hard Skills","kategori":"pengembangan","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknis yang belum tuntas dipelajari sesuai konsentrasi keahlian.","tp":"1. Melaksanakan Konfigurasi Perangkat Lunak Sesuai Environment Development, Staging, Production","sort_order":1,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknis yang belum tuntas dipelajari sesuai konsentrasi keahlian."},{"id":366,"konsentrasi_keahlian_id":8,"nama":"Penyiapan Kemandirian Berwirausaha","kategori":"wirausaha","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri.","tp":"1. Memahami alur bisnis pada lingkungan kerja","sort_order":1,"deskripsi":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri."},{"id":123,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan Penerapan Soft Skills","kategori":"soft-skill","created_at":"2026-06-21T13:18:40.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"1. Memahami soft skills pada lingkungan kerja","sort_order":1,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":128,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"1. Menerapkan kolaborasi dalam tim untuk pengembangan perangkat lunak","sort_order":1,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":365,"konsentrasi_keahlian_id":8,"nama":"Peningkatan dan Pengembangan Hard Skills","kategori":"pengembangan","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknis yang belum tuntas dipelajari sesuai konsentrasi keahlian.","tp":"2. Melakukan Logging Aplikasi","sort_order":2,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknis yang belum tuntas dipelajari sesuai konsentrasi keahlian."},{"id":124,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan Penerapan Soft Skills","kategori":"soft-skill","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"2. Menerapkan soft skills pada lingkungan kerja","sort_order":2,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":129,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"2. Mengimplementasikan User Interface","sort_order":2,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":134,"konsentrasi_keahlian_id":8,"nama":"Penyiapan Kemandirian Berwirausaha","kategori":"wirausaha","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri.","tp":"2. Menganalisis peluang wirausaha pada lingkungan kerja","sort_order":2,"deskripsi":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri."},{"id":360,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan Penerapan Soft Skills","kategori":"soft-skill","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"3. Memahami norma, POS dan K3LH yang ada pada lingkungan kerja","sort_order":3,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":363,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"3. Menerapkan basis data dalam pengembangan perangkat lunak","sort_order":3,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":135,"konsentrasi_keahlian_id":8,"nama":"Penyiapan Kemandirian Berwirausaha","kategori":"wirausaha","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri.","tp":"3. Menetapkan jenis usaha pada lingkungan kerja","sort_order":3,"deskripsi":"Pada akhir fase F, peserta didik mampu melakukan analisis usaha secara mandiri."},{"id":361,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan Penerapan Soft Skills","kategori":"soft-skill","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"4. Menerapkan norma, POS dan K3LH yang ada pada lingkungan kerja","sort_order":4,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":131,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"4. Menerapkan perintah eksekusi pemrograman berbasis teks, grafik, dan multimedia","sort_order":4,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":362,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan Penerapan Soft Skills","kategori":"soft-skill","created_at":"2026-11-20T04:24:10.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"5. Mengidentifikasi aspek kode etik dan HAKI di bidang TIK","sort_order":5,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secara lisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":132,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"5. Menerapkan perintah eksekusi pemrograman berbasis web dan mobile","sort_order":5,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":133,"konsentrasi_keahlian_id":8,"nama":"Penerapan Hard Skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-11-20T04:24:10.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"6. Melakukan pengujian perangkat lunak yang dikembangkan","sort_order":6,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":125,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"3. Memahami norma, POS dan K3LH yangada pada lingkungan kerja","sort_order":191,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":126,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"4. Menerapkan norma, POS dan K3LHyang ada pada lingkungan kerja","sort_order":192,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":127,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"5. Mengidentifikasi aspek kode etik dan HAKI dibidang TIK","sort_order":193,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":247,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"1. Memahami soft skills pada lingkungan kerja","sort_order":194,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":248,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"2. Menerapkan soft skills pada lingkungan kerja","sort_order":195,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":249,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"3. Memahami norma, POS dan K3LH yangada pada lingkungan kerja","sort_order":196,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":250,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"4. Menerapkan norma, POS dan K3LHyang ada pada lingkungan kerja","sort_order":197,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":251,"konsentrasi_keahlian_id":8,"nama":"Internalisasi dan penerapan soft skills","kategori":"soft-skill","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja.","tp":"5. Mengidentifikasi aspek kode etik dan HAKI dibidang TIK","sort_order":198,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan etika berkomunikasi secaralisan dan tulisan, integritas (antara lain jujur, disiplin, komitmen, dan tanggung jawab), etos kerja, bekerja secara mandiri dan\/atau bekerja di dalam tim, kepedulian sosial dan lingkungan, serta ketaatan terhadap norma, K3LH, dan POS yang berlaku di dunia kerja."},{"id":256,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:44.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"10. Menerapkan perintah eksekusi pemrograman berbasis web dan mobile","sort_order":199,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":257,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:44.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"11. Melakukan pengujian perangkat lunak yang dikembangkan","sort_order":200,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":130,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:18:41.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"8. Menerapkan basis data dalam pengembangan perangakat lunak","sort_order":203,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":252,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"6. Menerapkan kolaborasi dalam tim untuk pengembangan perangkat lunak","sort_order":207,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":253,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"7. Mengimplementasikan User Interface","sort_order":208,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":254,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:43.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"8. Menerapkan basis data dalam pengembangan perangakat lunak","sort_order":209,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":255,"konsentrasi_keahlian_id":8,"nama":"Penerapan hard skills","kategori":"teknis","created_at":"2026-06-21T13:19:44.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.","tp":"9. Menerapkan perintah eksekusi pemrograman berbasis teks, grafik, dan multimedia","sort_order":210,"deskripsi":"Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."},{"id":258,"konsentrasi_keahlian_id":8,"nama":"Penyiapan Kemandirian Berwirausaha","kategori":"wirausaha","created_at":"2026-06-21T13:19:44.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknisyang belum tuntas dipelajari sesuai konsentrasi keahlian. Pada akhir fase F, pesertadidik mampu melakukan analisis usaha secara mandiri.","tp":"15. Menganalisis peluang wirausaha pada lingkungan kerja","sort_order":211,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknisyang belum tuntas dipelajari sesuai konsentrasi keahlian. Pada akhir fase F, pesertadidik mampu melakukan analisis usaha secara mandiri."},{"id":259,"konsentrasi_keahlian_id":8,"nama":"Penyiapan Kemandirian Berwirausaha","kategori":"wirausaha","created_at":"2026-06-21T13:19:44.000000Z","updated_at":"2026-06-24T10:51:33.000000Z","cp":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknisyang belum tuntas dipelajari sesuai konsentrasi keahlian. Pada akhir fase F, pesertadidik mampu melakukan analisis usaha secara mandiri.","tp":"16. Menetapkan jenis usaha pada lingkungan kerja","sort_order":212,"deskripsi":"Pada akhir fase F, peserta didik mampu menerapkan kompetensi teknis baru dan\/atau kompetensi teknisyang belum tuntas dipelajari sesuai konsentrasi keahlian. Pada akhir fase F, pesertadidik mampu melakukan analisis usaha secara mandiri."}]'
+                     data-old-elemen="Penerapan hard skills"
+                     data-old-cp="Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja."
+                     data-old-tpid="256"></div>
+                <input type="hidden" name="foto_cropped" id="foto-cropped-input">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="tanggal" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tanggal Kegiatan</label>
+                        <div class="relative">
+                            <input type="date" name="tanggal" id="tanggal" 
+                                   value="2026-11-23"
+                                   min="2026-11-17"
+                                   max="2026-11-24"
+                                   required
+                                   class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200 transition-all">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Anda dapat mengisi jurnal untuk maksimal 7 hari sebelumnya
+                            </p>
+                        </div>
+                    </div>
+
+                    
+                    <input type="hidden" name="kompetensi_id" id="kompetensi_id" value="256">
+                    <input type="hidden" name="cp" id="hidden_cp" value="Pada akhir fase F, pesertadidik mampu menerapkankompetensi teknis pada pekerjaan sesuai POS yang berlaku di dunia kerja.">
+                    <input type="hidden" name="cp_id" id="cp_id" value="256">
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Elemen Kompetensi</label>
+                        <div class="relative" id="elemen_wrapper">
+                            <button type="button" id="elemen_btn" 
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl text-sm text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-left">
+                                <span id="elemen_btn_label" class="truncate">Pilih Elemen Kompetensi</span>
+                                <span id="elemen_icon_container" class="shrink-0 ml-2">
+                                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                                </span>
+                            </button>
+                            <div id="elemen_dropdown" class="hidden custom-dropdown absolute left-0 right-0 mt-2 max-h-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                                <div id="elemen_search_container" class="p-2 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                                    <div class="relative">
+                                        <input type="text" id="elemen_search" placeholder="Cari elemen..." autocomplete="off" class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-slate-700 dark:text-slate-300">
+                                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="elemen_options" class="divide-y divide-slate-100 dark:divide-slate-800/50 overflow-y-auto max-h-56">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Capaian Pembelajaran (CP)</label>
+                        <div class="relative" id="cp_wrapper">
+                            <button type="button" id="cp_btn" disabled
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl text-sm text-slate-800 dark:text-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-200/50 dark:disabled:bg-slate-950/30 disabled:text-slate-400 dark:disabled:text-slate-500 text-left relative">
+                                <span id="cp_btn_label" class="truncate text-slate-400 dark:text-slate-500">Pilih Elemen Kompetensi Terlebih Dahulu</span>
+                                <span id="cp_icon_container" class="shrink-0 ml-2">
+                                    <i data-lucide="lock" class="w-4 h-4 text-slate-400/80 dark:text-slate-500/80"></i>
+                                </span>
+                            </button>
+                            <div id="cp_dropdown" class="hidden custom-dropdown absolute left-0 right-0 mt-2 max-h-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                                <div id="cp_search_container" class="p-2 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                                    <div class="relative">
+                                        <input type="text" id="cp_search" placeholder="Cari CP..." autocomplete="off" class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-slate-700 dark:text-slate-300">
+                                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="cp_options" class="divide-y divide-slate-100 dark:divide-slate-800/50 overflow-y-auto max-h-56">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">* CP disaring berdasarkan Elemen Kompetensi yang Anda pilih.</p>
+                        
+                        <!-- Full CP Card -->
+                        <div id="cp_full_text_container" class="hidden mt-3 p-3.5 bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/10 dark:border-blue-500/20 text-xs text-slate-700 dark:text-slate-300 rounded-xl leading-relaxed">
+                            <span class="font-bold text-blue-600 dark:text-blue-400 block mb-1 text-[10px] uppercase tracking-wider">Capaian Pembelajaran (CP) Lengkap:</span>
+                            <p id="cp_full_text" class="whitespace-pre-line"></p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tujuan Pembelajaran (TP)</label>
+                        <div class="relative" id="tp_wrapper">
+                            <button type="button" id="tp_btn" disabled
+                                    class="w-full flex items-center justify-between px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl text-sm text-slate-800 dark:text-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-200/50 dark:disabled:bg-slate-950/30 disabled:text-slate-400 dark:disabled:text-slate-500 text-left relative">
+                                <span id="tp_btn_label" class="truncate text-slate-400 dark:text-slate-500">Pilih Capaian Pembelajaran (CP) Terlebih Dahulu</span>
+                                <span id="tp_icon_container" class="shrink-0 ml-2">
+                                    <i data-lucide="lock" class="w-4 h-4 text-slate-400/80 dark:text-slate-500/80"></i>
+                                </span>
+                            </button>
+                            <div id="tp_dropdown" class="hidden custom-dropdown absolute left-0 right-0 mt-2 max-h-72 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden">
+                                <div id="tp_search_container" class="p-2 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-10">
+                                    <div class="relative">
+                                        <input type="text" id="tp_search" placeholder="Cari TP..." autocomplete="off" class="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-slate-700 dark:text-slate-300">
+                                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tp_options" class="divide-y divide-slate-100 dark:divide-slate-800/50 overflow-y-auto max-h-56">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">* TP disaring berdasarkan Capaian Pembelajaran yang Anda pilih.</p>
+                        
+                        <!-- Full TP Card -->
+                        <div id="tp_full_text_container" class="hidden mt-3 p-3.5 bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 dark:border-emerald-500/20 text-xs text-slate-700 dark:text-slate-300 rounded-xl leading-relaxed">
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400 block mb-1 text-[10px] uppercase tracking-wider">Tujuan Pembelajaran (TP) Lengkap:</span>
+                            <p id="tp_full_text" class="whitespace-pre-line"></p>
+                        </div>
+                    </div>
+
+                    <!-- Status Absensi dan Alasan Alpha -->
+                    <div class="md:col-span-2">
+                        <div id="attendance-status-box" class="hidden p-4 rounded-xl text-sm items-center gap-3">
+                            <span id="attendance-status-text" class="font-medium"></span>
+                        </div>
+                        
+                        <div id="alasan-alpha-container" class="hidden mt-4">
+                            <label for="alasan_alpha" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Alasan Tidak Melakukan Absensi (Status: Alpha)</label>
+                            <textarea name="alasan_alpha" id="alasan_alpha" rows="3"
+                                      class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200 transition-all resize-none"
+                                      placeholder="Tulis alasan mengapa Anda tidak melakukan absensi pada tanggal ini..."></textarea>
+                            <p class="text-xs text-rose-500 dark:text-rose-400 mt-1 font-medium">
+                                *Catatan: Anda tidak melakukan absensi pada tanggal ini. Status absensi Anda akan tetap tercatat sebagai Alpha, namun Anda wajib memberikan alasan untuk dapat menyimpan jurnal.
+                            </p>
+                        </div>
+                    </div>
+
+                    
+                    <div class="md:col-span-2">
+                        <label for="kegiatan" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Pekerjaan</label>
+                        <input type="text" name="kegiatan" id="kegiatan" required
+                               value="Implementasi Modul Penilaian Manual DUDI &amp;amp; Kalender Monitoring Jurnal SIMAK-TMS"
+                               class="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200 transition-all font-mono"
+                               placeholder="Sebutkan apa yang Anda kerjakan hari ini...">
+                    </div>
+
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Foto Bukti Kegiatan</label>
+                        
+                        
+                        <div id="foto-upload-area" class="hidden">
+                            <label for="foto-raw" class="flex flex-col items-center justify-center w-full aspect-square border-2 border-slate-200 dark:border-slate-700 border-dashed rounded-xl cursor-pointer bg-slate-100 dark:bg-slate-900/20 hover:bg-slate-200 dark:hover:bg-slate-900/40 transition-all group">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center mb-3 group-hover:bg-blue-500/20 transition-colors">
+                                        <i data-lucide="camera" class="w-7 h-7 text-blue-500"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-600 dark:text-slate-400">Klik untuk ubah foto</p>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1">JPG, PNG — max 2MB</p>
+                                </div>
+                                <input id="foto-raw" type="file" class="hidden" accept="image/*" />
+                            </label>
+                        </div>
+
+                        
+                        <div id="foto-preview-area" class="">
+                            <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 border-blue-500/30 shadow-lg shadow-blue-500/10">
+                                <img id="foto-preview-img" src="/storage/jurnal/71_1795424834.jpg" alt="Preview" class="w-full h-full object-cover">
+                                <button type="button" onclick="removeCroppedPhoto()" 
+                                        class="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center shadow-lg transition-all transform hover:scale-110">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                                <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/60 to-transparent p-3">
+                                    <p class="text-xs text-white font-medium flex items-center gap-1.5">
+                                        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                        Foto siap diunggah
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="catatan" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Catatan Detail / Kendala</label>
+                        <textarea name="catatan" id="catatan" rows="4"
+                                  class="w-full h-[calc(100%-2rem)] min-h-[200px] px-4 py-2.5 bg-slate-100 dark:bg-slate-900/50 border border-slate-200/50 dark:border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200 transition-all resize-none"
+                                  placeholder="Ceritakan proses pengerjaan atau kendala yang dihadapi...">Hari ini saya melanjutkan pengerjaan proyek SIMAK-TMS di PT. Teknologi Multi Sistem. Fokus pekerjaan meliputi:
+1. Merancang tabel pivot relasi siswa-angkatan (batch_students) agar penilaian kompetensi 4 pilar industri (Kemampuan Teknis, Disiplin, Kerjasama Tim, dan Inisiatif) dapat diinput dan dievaluasi secara mandiri per angkatan/cohort magang.
+2. Mengembangkan antarmuka kalender monitoring logbook bimbingan untuk mentor dengan tata letak grid 7-kolom, filter pemilihan siswa, serta indikator visual deteksi hari kerja yang bolong secara otomatis.
+3. Melakukan sinkronisasi otomatis antara nilai rapor DUDI batch dengan modul e-sertifikat dan profil developer publik siswa, serta merapikan struktur navigasi sidebar agar lebih efisien.
+
+Kendala yang dihadapi: Penyesuaian query relasi many-to-many agar data nilai per angkatan tetap sinkron dengan sertifikat siswa tanpa menimbulkan duplikasi data.
+Solusi: Menggunakan eager loading pada Eloquent Laravel serta menerapkan method updateOrInsert yang aman pada controller backend.</textarea>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all transform hover:-translate-y-1 flex items-center gap-2">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    <div id="crop-modal" class="fixed inset-0 z-100 hidden items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+        <div class="glass-card max-w-lg w-full p-0 relative rounded-2xl overflow-hidden shadow-2xl animate-in" onclick="event.stopPropagation()">
+            
+            <div class="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <i data-lucide="crop" class="w-5 h-5 text-blue-500"></i>
+                    Potong Foto (1:1)
+                </h3>
+                <button type="button" onclick="closeCropModal()" class="w-8 h-8 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 text-slate-600 dark:text-slate-400"></i>
+                </button>
+            </div>
+            
+            
+            <div class="p-4 bg-slate-950">
+                <div class="max-h-[60vh] overflow-hidden flex items-center justify-center">
+                    <img id="crop-source" src="" alt="Source" class="max-w-full">
+                </div>
+            </div>
+            
+            
+            <div class="px-6 py-4 border-t border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="rotateImage()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-sm font-medium flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                        Putar
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="closeCropModal()" class="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm font-medium transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="saveCrop()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-500/25 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+            </div>
+        </main>
+    </div>
+    </div>
+
+    <!-- About App Modal -->
+    <dialog id="aboutModal" class="backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm bg-transparent border-0 outline-none p-4 w-full max-w-2xl m-auto rounded-2xl shadow-2xl">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col max-h-[85vh]">
+            <div class="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 leading-tight">Tentang Aplikasi</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">MAS-PKL (Manajemen Administrasi Siswa - Praktek Kerja Lapangan)</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('aboutModal').close()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <div class="mb-8 text-center">
+                    <h4 class="text-xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-2">
+                        Tim Pengembang
+                    </h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">MAS-PKL ini dikembangkan dengan dedikasi tinggi oleh <br/><span class="font-bold text-slate-800 dark:text-slate-200">Tim RPL Sentinel - SMKN 1 Ciamis</span>.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    
+                    <!-- Rasya -->
+                    <a href="https://github.com/rasyakt" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/rasyakt.png" alt="Rasya Syahreza" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Rasya Syahreza M. Z.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                    
+                    <!-- Pradipta -->
+                    <a href="https://github.com/PradiptaPPLG" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/PradiptaPPLG.png" alt="Pradipta Endra Maulana" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Pradipta Endra M.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+
+                    <!-- Rafli -->
+                    <a href="https://github.com/rafliaditya0125" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/rafliaditya0125.png" alt="Rafli Aditya" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Rafli Aditya</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                    
+                    <!-- Zidny -->
+                    <a href="https://github.com/ZidnyAl-HikamMawarist" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/ZidnyAl-HikamMawarist.png" alt="Zidny Al-Hikam" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Zidny Al-Hikam M.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-slate-200/50 dark:border-slate-700/50 text-center">
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200">SMKN 1 Ciamis</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Vocational High School - Center of Excellence<br/>Jl. Jenderal Sudirman №269, Ciamis, Jawa Barat.</p>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-slate-200/50 dark:border-slate-700/50 pb-[env(safe-area-inset-bottom)] lg:hidden" id="bottom-nav">
+    <div class="flex justify-between items-center h-16 px-4 relative">
+        
+        <!-- Left Items -->
+        <div class="flex w-2/5 justify-around">
+                                                                <a href="https://pkl.smkn1ciamis.id/dashboard" 
+                       class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                        <div class="p-1 rounded-xl transition-all duration-300 ">
+                            <i data-lucide="layout-dashboard" class="w-6 h-6 stroke-2"></i>
+                        </div>
+                        <span class="text-[10px] tracking-wide truncate w-16 text-center font-medium">
+                            Dashboard
+                        </span>
+                    </a>
+                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/jurnal" 
+                       class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                        <div class="p-1 rounded-xl transition-all duration-300 ">
+                            <i data-lucide="book-open" class="w-6 h-6 stroke-2"></i>
+                        </div>
+                        <span class="text-[10px] tracking-wide truncate w-16 text-center font-medium">
+                            Jurnal Kegia
+                        </span>
+                    </a>
+                                    </div>
+
+        <!-- Center Floating Action Button -->
+                                <div class="absolute left-1/2 -translate-x-1/2 -top-6 flex flex-col items-center">
+                                    <a href="https://pkl.smkn1ciamis.id/siswa/absensi" 
+                       class="w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 border-4 border-slate-50 dark:border-slate-950 transition-transform transform active:scale-95 z-50">
+                        <i data-lucide="calendar-check" class="w-6 h-6 stroke-[2.5px]"></i>
+                    </a>
+                                <span class="mt-1 text-[10px] font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Daftar Hadir</span>
+            </div>
+        
+        <!-- Right Items -->
+        <div class="flex w-2/5 justify-around">
+            <!-- Pesan Item -->
+                                            <a href="https://pkl.smkn1ciamis.id/pesan" 
+                   class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                    <div class="p-1 rounded-xl transition-all duration-300 ">
+                        <i data-lucide="message-circle" class="w-6 h-6 stroke-2"></i>
+                    </div>
+                    <span class="text-[10px] tracking-wide truncate w-16 text-center font-medium">
+                        Pesan
+                    </span>
+                </a>
+            
+            <!-- Akun Button -->
+            <button @click="$dispatch('open-akun-menu')" class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none">
+                <div class="p-1 rounded-xl transition-all duration-300">
+                    <i data-lucide="user-circle" class="w-6 h-6 stroke-2"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-wide">Akun</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Akun Menu Sheet -->
+<div x-data="{ openMenu: false, theme: localStorage.theme || 'light' }" 
+     @open-akun-menu.window="openMenu = true"
+     class="relative z-60 lg:hidden"
+     x-cloak>
+    
+    <!-- Backdrop -->
+    <div x-show="openMenu"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+         @click="openMenu = false"></div>
+
+    <!-- Bottom Sheet -->
+    <div x-show="openMenu"
+         x-transition:enter="transform transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full"
+         x-transition:enter-end="translate-y-0"
+         x-transition:leave="transform transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0"
+         x-transition:leave-end="translate-y-full"
+         class="fixed inset-x-0 bottom-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+         @click.away="openMenu = false">
+        
+        <!-- Drag Handle -->
+        <div class="w-full flex justify-center pt-3 pb-2 cursor-pointer" @click="openMenu = false">
+            <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+        </div>
+
+        <div class="px-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Menu Akun</h3>
+            <button @click="openMenu = false" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Sheet Content -->
+        <div class="flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] space-y-6">
+            
+            <!-- User Info -->
+            <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                <img src="https://ui-avatars.com/api/?name=PRADIPTA+ENDRA+MAULANA&amp;background=3b82f6&amp;color=fff" 
+                     alt="Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-slate-700">
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">PRADIPTA ENDRA MAULANA</h4>
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase">siswa</span>
+                </div>
+            </div>
+
+            <!-- Other Navigation Menus -->
+                            <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-2">Menu Lainnya</h4>
+                    <div class="grid grid-cols-4 gap-y-4 gap-x-2">
+                                                                                    <a href="https://pkl.smkn1ciamis.id/siswa/laporan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="file-text" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Laporan PKL</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/panduan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="library" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Buku Panduan</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/bantuan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="help-circle" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Pusat Bantuan</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/panduan-interaktif" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="sparkles" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Panduan Interaktif</span>
+                                </a>
+                                                                        </div>
+                </div>
+            
+            <!-- Account Settings & Preferences -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-2">Pengaturan Akun</h4>
+                <div class="space-y-2">
+                    
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/profile" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                                <i data-lucide="user" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200">Lihat Profil</div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                        </a>
+                    
+                    <!-- Tentang Aplikasi Option -->
+                    <button @click="openMenu = false; setTimeout(() => document.getElementById('aboutModal').showModal(), 300)" 
+                        class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group">
+                        <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40">
+                            <i data-lucide="info" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200">Tentang Aplikasi</div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+
+                    <!-- Theme Toggle Option -->
+                    <button @click="
+                            theme = theme === 'light' ? 'dark' : 'light';
+                            localStorage.theme = theme;
+                            if (theme === 'dark') document.documentElement.classList.add('dark');
+                            else document.documentElement.classList.remove('dark');
+                        " 
+                        class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left">
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            <i x-show="theme === 'light'" data-lucide="moon" class="w-5 h-5"></i>
+                            <i x-show="theme === 'dark'" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                        </div>
+                        <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200" x-text="theme === 'light' ? 'Mode Gelap' : 'Mode Terang'"></div>
+                    </button>
+
+                    <!-- Logout -->
+                    <form method="POST" action="https://pkl.smkn1ciamis.id/logout" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem?')">
+                        <input type="hidden" name="_token" value="FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo" autocomplete="off">                        <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left group">
+                            <div class="p-2 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg group-hover:bg-red-100 dark:group-hover:bg-red-900/40">
+                                <i data-lucide="log-out" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 font-bold text-sm text-red-500">Keluar (Logout)</div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Submenu Sheets (Dynamic) -->
+            
+<style>
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 4px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .dark .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #334155;
+    }
+</style>
+
+    <!-- Scripts -->
+        <style>
+        .custom-dropdown {
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(-8px) scale(0.98);
+            transition: opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .custom-dropdown.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+    <script>
+        let cropper = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cascading Dropdown Master Data & Logic
+            const dataEl = document.getElementById('jurnal-metadata');
+            const masterKompetensi = JSON.parse(dataEl.getAttribute('data-kompetensis') || '[]');
+            const hiddenKompetensiId = document.getElementById('kompetensi_id');
+            const hiddenCp = document.getElementById('hidden_cp');
+            const hiddenTpId = document.getElementById('cp_id');
+
+            const elemenBtn = document.getElementById('elemen_btn');
+            const elemenBtnLabel = document.getElementById('elemen_btn_label');
+            const elemenDropdown = document.getElementById('elemen_dropdown');
+            const elemenOptions = document.getElementById('elemen_options');
+            const elemenSearch = document.getElementById('elemen_search');
+
+            const cpBtn = document.getElementById('cp_btn');
+            const cpBtnLabel = document.getElementById('cp_btn_label');
+            const cpDropdown = document.getElementById('cp_dropdown');
+            const cpOptions = document.getElementById('cp_options');
+            const cpSearch = document.getElementById('cp_search');
+
+            const tpBtn = document.getElementById('tp_btn');
+            const tpBtnLabel = document.getElementById('tp_btn_label');
+            const tpDropdown = document.getElementById('tp_dropdown');
+            const tpOptions = document.getElementById('tp_options');
+            const tpSearch = document.getElementById('tp_search');
+
+            const cpFullTextContainer = document.getElementById('cp_full_text_container');
+            const cpFullText = document.getElementById('cp_full_text');
+            const tpFullTextContainer = document.getElementById('tp_full_text_container');
+            const tpFullText = document.getElementById('tp_full_text');
+
+            // Old / Existing values for recovery (or current journal data)
+            const existingElemen = dataEl.getAttribute('data-old-elemen') || '';
+            const existingCP = dataEl.getAttribute('data-old-cp') || '';
+            const existingTPId = dataEl.getAttribute('data-old-tpid') || '';
+
+            const data = {};
+            masterKompetensi.forEach(item => {
+                const elemen = item.nama ? item.nama.trim() : '';
+                const cp = item.cp ? item.cp.trim() : 'Umum';
+                const tp = item.tp ? item.tp.trim() : (item.nama ? item.nama.trim() : '');
+
+                if (!elemen) return;
+
+                if (!data[elemen]) {
+                    data[elemen] = {};
+                }
+                if (!data[elemen][cp]) {
+                    data[elemen][cp] = [];
+                }
+                data[elemen][cp].push({
+                    id: item.id,
+                    tp: tp,
+                    deskripsi: item.deskripsi
+                });
+            });
+
+            let selectedElemenVal = '';
+            let selectedCPVal = '';
+
+            function truncateText(text, maxLength = 90) {
+                if (!text) return '';
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+
+            function openDropdown(dropdown, searchInput) {
+                closeAllDropdowns();
+                dropdown.classList.remove('hidden');
+                dropdown.offsetHeight; // Force reflow
+                dropdown.classList.add('active');
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    
+                    const parentContainer = searchInput.closest('.sticky');
+                    if (parentContainer && !parentContainer.classList.contains('hidden')) {
+                        setTimeout(() => searchInput.focus(), 50);
+                    }
+                }
+            }
+
+            function closeDropdown(dropdown) {
+                if (!dropdown.classList.contains('active')) return;
+                dropdown.classList.remove('active');
+                setTimeout(() => {
+                    if (!dropdown.classList.contains('active')) {
+                        dropdown.classList.add('hidden');
+                    }
+                }, 150);
+            }
+
+            function closeAllDropdowns() {
+                [elemenDropdown, cpDropdown, tpDropdown].forEach(closeDropdown);
+            }
+
+            // Click outside to close
+            document.addEventListener('click', closeAllDropdowns);
+
+            // Prevent closing when clicking inside the dropdowns
+            [elemenDropdown, cpDropdown, tpDropdown].forEach(dropdown => {
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            // Toggle handlers
+            elemenBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpened = elemenDropdown.classList.contains('active');
+                if (isOpened) {
+                    closeDropdown(elemenDropdown);
+                } else {
+                    openDropdown(elemenDropdown, elemenSearch);
+                }
+            });
+
+            cpBtn.addEventListener('click', function(e) {
+                if (cpBtn.disabled) return;
+                e.stopPropagation();
+                const isOpened = cpDropdown.classList.contains('active');
+                if (isOpened) {
+                    closeDropdown(cpDropdown);
+                } else {
+                    openDropdown(cpDropdown, cpSearch);
+                }
+            });
+
+            tpBtn.addEventListener('click', function(e) {
+                if (tpBtn.disabled) return;
+                e.stopPropagation();
+                const isOpened = tpDropdown.classList.contains('active');
+                if (isOpened) {
+                    closeDropdown(tpDropdown);
+                } else {
+                    openDropdown(tpDropdown, tpSearch);
+                }
+            });
+
+            // Setup search filtering
+            function setupSearch(searchInput, optionsContainer) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase().trim();
+                    const buttons = optionsContainer.querySelectorAll('button');
+                    let hasVisible = false;
+                    
+                    buttons.forEach(btn => {
+                        const text = btn.textContent.toLowerCase();
+                        if (text.includes(query)) {
+                            btn.style.display = '';
+                            hasVisible = true;
+                        } else {
+                            btn.style.display = 'none';
+                        }
+                    });
+
+                    let noResults = optionsContainer.querySelector('.no-results-msg');
+                    if (!hasVisible) {
+                        if (!noResults) {
+                            noResults = document.createElement('div');
+                            noResults.className = 'no-results-msg p-4 text-xs text-center text-slate-500 dark:text-slate-400 font-medium';
+                            noResults.textContent = 'Tidak ada hasil yang cocok';
+                            optionsContainer.appendChild(noResults);
+                        }
+                    } else {
+                        if (noResults) {
+                            noResults.remove();
+                        }
+                    }
+                });
+            }
+
+            setupSearch(elemenSearch, elemenOptions);
+            setupSearch(cpSearch, cpOptions);
+            setupSearch(tpSearch, tpOptions);
+
+            function populateElemen() {
+                elemenOptions.innerHTML = '';
+                const selectedElemen = selectedElemenVal;
+                const keys = Object.keys(data);
+                
+                const searchContainer = document.getElementById('elemen_search_container');
+                if (searchContainer) {
+                    if (keys.length < 10) {
+                        searchContainer.classList.add('hidden');
+                    } else {
+                        searchContainer.classList.remove('hidden');
+                    }
+                }
+
+                keys.forEach(elemen => {
+                    const isSelected = selectedElemen === elemen;
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = `w-full text-left px-4 py-3 text-xs md:text-sm transition-all leading-relaxed flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-b-0 ${
+                        isSelected 
+                        ? 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold' 
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                    }`;
+                    item.innerHTML = `
+                        <span class="flex-1 pr-4">${elemen}</span>
+                        ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0"></i>' : ''}
+                    `;
+                    item.addEventListener('click', () => {
+                        selectElemen(elemen);
+                        closeDropdown(elemenDropdown);
+                    });
+                    elemenOptions.appendChild(item);
+                });
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons({
+                        attrs: { class: 'lucide' },
+                        node: elemenOptions
+                    });
+                }
+            }
+
+            function resetCP() {
+                cpBtn.disabled = true;
+                cpBtnLabel.textContent = 'Pilih Elemen Kompetensi Terlebih Dahulu';
+                cpBtnLabel.classList.add('text-slate-400', 'dark:text-slate-500');
+                cpOptions.innerHTML = '';
+                hiddenCp.value = '';
+                selectedCPVal = '';
+                
+                const cpIconContainer = document.getElementById('cp_icon_container');
+                if (cpIconContainer) {
+                    cpIconContainer.innerHTML = '<i data-lucide="lock" class="w-4 h-4 text-slate-400/80 dark:text-slate-500/80"></i>';
+                }
+                
+                if (cpFullTextContainer) cpFullTextContainer.classList.add('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            function resetTP() {
+                tpBtn.disabled = true;
+                tpBtnLabel.textContent = 'Pilih Capaian Pembelajaran (CP) Terlebih Dahulu';
+                tpBtnLabel.classList.add('text-slate-400', 'dark:text-slate-500');
+                tpOptions.innerHTML = '';
+                hiddenKompetensiId.value = '';
+                hiddenTpId.value = '';
+                
+                const tpIconContainer = document.getElementById('tp_icon_container');
+                if (tpIconContainer) {
+                    tpIconContainer.innerHTML = '<i data-lucide="lock" class="w-4 h-4 text-slate-400/80 dark:text-slate-500/80"></i>';
+                }
+                
+                if (tpFullTextContainer) tpFullTextContainer.classList.add('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            function selectElemen(value) {
+                const trimmedValue = value ? value.trim() : '';
+                selectedElemenVal = trimmedValue;
+                elemenBtnLabel.textContent = value;
+                elemenBtnLabel.classList.remove('text-slate-400', 'dark:text-slate-500');
+
+                resetCP();
+                resetTP();
+
+                if (trimmedValue && data[trimmedValue]) {
+                    const cps = Object.keys(data[trimmedValue]);
+                    if (cps.length > 0) {
+                        cpBtn.disabled = false;
+                        cpBtnLabel.textContent = 'Pilih Capaian Pembelajaran (CP)';
+                        cpBtnLabel.classList.remove('text-slate-400', 'dark:text-slate-500');
+                        
+                        const cpIconContainer = document.getElementById('cp_icon_container');
+                        if (cpIconContainer) {
+                            cpIconContainer.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>';
+                        }
+                        
+                        populateCP(cps);
+                    }
+                }
+                
+                populateElemen();
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            function populateCP(cps) {
+                cpOptions.innerHTML = '';
+                const selectedCP = selectedCPVal;
+                
+                const searchContainer = document.getElementById('cp_search_container');
+                if (searchContainer) {
+                    if (cps.length < 10) {
+                        searchContainer.classList.add('hidden');
+                    } else {
+                        searchContainer.classList.remove('hidden');
+                    }
+                }
+
+                cps.forEach(cp => {
+                    const isSelected = selectedCP === cp;
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = `w-full text-left px-4 py-3 text-xs md:text-sm transition-all leading-relaxed flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-b-0 ${
+                        isSelected 
+                        ? 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold' 
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                    }`;
+                    item.innerHTML = `
+                        <span class="flex-1 pr-4">${cp}</span>
+                        ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0"></i>' : ''}
+                    `;
+                    item.addEventListener('click', () => {
+                        selectCP(cp);
+                        closeDropdown(cpDropdown);
+                    });
+                    cpOptions.appendChild(item);
+                });
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons({
+                        attrs: { class: 'lucide' },
+                        node: cpOptions
+                    });
+                }
+            }
+
+            function selectCP(value) {
+                const trimmedValue = value ? value.trim() : '';
+                cpBtnLabel.textContent = truncateText(trimmedValue, 60);
+                hiddenCp.value = trimmedValue;
+                selectedCPVal = trimmedValue;
+
+                cpFullText.textContent = trimmedValue;
+                if (cpFullTextContainer) cpFullTextContainer.classList.remove('hidden');
+
+                resetTP();
+
+                const selectedElemen = selectedElemenVal;
+                if (selectedElemen && trimmedValue && data[selectedElemen] && data[selectedElemen][trimmedValue]) {
+                    const tps = data[selectedElemen][trimmedValue];
+                    if (tps.length > 0) {
+                        tpBtn.disabled = false;
+                        tpBtnLabel.textContent = 'Pilih Tujuan Pembelajaran (TP)';
+                        tpBtnLabel.classList.remove('text-slate-400', 'dark:text-slate-500');
+                        
+                        const tpIconContainer = document.getElementById('tp_icon_container');
+                        if (tpIconContainer) {
+                            tpIconContainer.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>';
+                        }
+                        
+                        populateTP(tps);
+                    }
+                }
+                
+                if (selectedElemen && data[selectedElemen]) {
+                    populateCP(Object.keys(data[selectedElemen]));
+                }
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            function populateTP(tps) {
+                tpOptions.innerHTML = '';
+                const selectedTPId = hiddenTpId.value;
+                
+                const searchContainer = document.getElementById('tp_search_container');
+                if (searchContainer) {
+                    if (tps.length < 10) {
+                        searchContainer.classList.add('hidden');
+                    } else {
+                        searchContainer.classList.remove('hidden');
+                    }
+                }
+
+                tps.forEach(tpItem => {
+                    const isSelected = selectedTPId == tpItem.id;
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = `w-full text-left px-4 py-3 text-xs md:text-sm transition-all leading-relaxed flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-b-0 ${
+                        isSelected 
+                        ? 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold' 
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40'
+                    }`;
+                    item.innerHTML = `
+                        <span class="flex-1 pr-4">${tpItem.tp}</span>
+                        ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0"></i>' : ''}
+                    `;
+                    item.addEventListener('click', () => {
+                        selectTP(tpItem.id, tpItem.tp);
+                        closeDropdown(tpDropdown);
+                    });
+                    tpOptions.appendChild(item);
+                });
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons({
+                        attrs: { class: 'lucide' },
+                        node: tpOptions
+                    });
+                }
+            }
+
+            function selectTP(id, text) {
+                tpBtnLabel.textContent = truncateText(text, 60);
+                hiddenKompetensiId.value = id;
+                hiddenTpId.value = id;
+
+                tpFullText.textContent = text;
+                if (tpFullTextContainer) tpFullTextContainer.classList.remove('hidden');
+                
+                const selectedElemen = selectedElemenVal;
+                const selectedCP = selectedCPVal;
+                if (selectedElemen && selectedCP && data[selectedElemen] && data[selectedElemen][selectedCP]) {
+                    populateTP(data[selectedElemen][selectedCP]);
+                }
+                
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            // Add form submit validation for hidden input
+            const form = document.getElementById('jurnal-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!hiddenTpId.value) {
+                        e.preventDefault();
+                        alert('Silakan pilih Tujuan Pembelajaran (TP) terlebih dahulu.');
+                    }
+                });
+            }
+
+            // Initialize dropdowns
+            populateElemen();
+
+            // Pre-select if there are existing / old values
+            if (existingElemen) {
+                selectElemen(existingElemen);
+                
+                if (existingCP) {
+                    selectCP(existingCP);
+                    
+                    if (existingTPId) {
+                        const selectedElemen = selectedElemenVal;
+                        const selectedCP = selectedCPVal;
+                        if (data[selectedElemen] && data[selectedElemen][selectedCP]) {
+                            const found = data[selectedElemen][selectedCP].find(x => x.id == existingTPId);
+                            if (found) {
+                                selectTP(found.id, found.tp);
+                            }
+                        }
+                    }
+                }
+            }
+
+            const fileInput = document.getElementById('foto-raw');
+            
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate file
+                if (!file.type.match('image.*')) {
+                    alert('File harus berupa gambar (JPG, PNG).');
+                    fileInput.value = '';
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 2MB.');
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Read file and open crop modal
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    openCropModal(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Attendance check logic
+            const tanggalInput = document.getElementById('tanggal');
+            const statusBox = document.getElementById('attendance-status-box');
+            const statusText = document.getElementById('attendance-status-text');
+            const alphaContainer = document.getElementById('alasan-alpha-container');
+            const alphaTextarea = document.getElementById('alasan_alpha');
+
+            function checkAttendance(dateStr) {
+                if (!dateStr) return;
+                
+                fetch("https://pkl.smkn1ciamis.id/siswa/jurnal/check-attendance?tanggal=" + dateStr)
+                    .then(response => response.json())
+                    .then(data => {
+                        statusBox.classList.remove('hidden', 'flex', 'bg-emerald-500/10', 'border-emerald-500/20', 'text-emerald-500', 'dark:text-emerald-400', 'bg-amber-500/10', 'border-amber-500/20', 'text-amber-500', 'dark:text-amber-400', 'bg-rose-500/10', 'border-rose-500/20', 'text-rose-500', 'dark:text-rose-400');
+                        
+                        if (data.exists) {
+                            alphaContainer.classList.add('hidden');
+                            alphaTextarea.removeAttribute('required');
+                            statusBox.classList.add('flex');
+                            
+                            if (data.status === 'hadir') {
+                                statusBox.classList.add('bg-emerald-500/10', 'border', 'border-emerald-500/20', 'text-emerald-600', 'dark:text-emerald-400');
+                                statusText.innerHTML = `<span class="flex items-center gap-2"><svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><b>Absensi Terdeteksi: Hadir</b> (Masuk: ${data.waktu_datang || '-'} | Pulang: ${data.waktu_pulang || '-'})</span>`;
+                            } else if (data.status === 'sakit' || data.status === 'izin' || data.status === 'libur') {
+                                statusBox.classList.add('bg-amber-500/10', 'border', 'border-amber-500/20', 'text-amber-600', 'dark:text-amber-400');
+                                let details = [];
+                                if (data.keterangan) details.push(`Ket: ${data.keterangan}`);
+                                if (data.alasan) details.push(`Alasan: ${data.alasan}`);
+                                let detailStr = details.length > 0 ? ` (${details.join(', ')})` : '';
+                                statusText.innerHTML = `<span class="flex items-center gap-2"><svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><b>Absensi Terdeteksi: ${data.status.toUpperCase()}</b>${detailStr}</span>`;
+                            } else if (data.status === 'alpha') {
+                                statusBox.classList.add('bg-rose-500/10', 'border', 'border-rose-500/20', 'text-rose-600', 'dark:text-rose-400');
+                                statusText.innerHTML = `<span class="flex items-center gap-2"><svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><b>Absensi Terdeteksi: Alpha</b></span>`;
+                                
+                                alphaContainer.classList.remove('hidden');
+                                alphaTextarea.setAttribute('required', 'required');
+                                alphaTextarea.value = data.alasan || '';
+                            }
+                        } else {
+                            statusBox.classList.add('bg-rose-500/10', 'border', 'border-rose-500/20', 'text-rose-600', 'dark:text-rose-400', 'flex');
+                            statusText.innerHTML = `<span class="flex items-center gap-2"><svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg><b>Anda tidak melakukan absensi pada tanggal ini (Status: Alpha).</b></span>`;
+                            
+                            alphaContainer.classList.remove('hidden');
+                            alphaTextarea.setAttribute('required', 'required');
+                            alphaTextarea.value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error checking attendance:", error);
+                    });
+            }
+
+            if (tanggalInput) {
+                tanggalInput.addEventListener('change', function() {
+                    checkAttendance(this.value);
+                });
+                checkAttendance(tanggalInput.value);
+            }
+
+            // Re-initialize lucide icons for dynamically shown elements
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        function openCropModal(imageSrc) {
+            const modal = document.getElementById('crop-modal');
+            const cropSource = document.getElementById('crop-source');
+            
+            // Destroy previous cropper
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+
+            cropSource.src = imageSrc;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Initialize Cropper after image loads
+            cropSource.onload = function() {
+                cropper = new Cropper(cropSource, {
+                    aspectRatio: 1 / 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    background: true,
+                });
+            };
+        }
+
+        function closeCropModal() {
+            const modal = document.getElementById('crop-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+
+            // Reset file input
+            document.getElementById('foto-raw').value = '';
+        }
+
+        function rotateImage() {
+            if (cropper) {
+                cropper.rotate(90);
+            }
+        }
+
+        function saveCrop() {
+            if (!cropper) return;
+
+            const canvas = cropper.getCroppedCanvas({
+                width: 800,
+                height: 800,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            const croppedDataURL = canvas.toDataURL('image/jpeg', 0.85);
+
+            // Set hidden input value
+            document.getElementById('foto-cropped-input').value = croppedDataURL;
+
+            // Show preview
+            document.getElementById('foto-preview-img').src = croppedDataURL;
+            document.getElementById('foto-upload-area').classList.add('hidden');
+            document.getElementById('foto-preview-area').classList.remove('hidden');
+
+            // Re-initialize lucide icons for preview area
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            closeCropModal();
+        }
+
+        function removeCroppedPhoto() {
+            document.getElementById('foto-cropped-input').value = '';
+            document.getElementById('foto-preview-img').src = '';
+            document.getElementById('foto-preview-area').classList.add('hidden');
+            document.getElementById('foto-upload-area').classList.remove('hidden');
+            document.getElementById('foto-raw').value = '';
+        }
+    </script>
+        <script>
+        // Initialize Lucide icons after page load and after any pushed scripts
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // Dynamic Ellipsis Dropdown positioning (Drop-Up)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            
+            // Only apply to ellipsis dropdown buttons
+            if (!btn.querySelector('.lucide-more-vertical') && !btn.querySelector('[data-lucide="more-vertical"]')) return;
+            
+            const container = btn.closest('.relative');
+            if (!container) return;
+            
+            const dropdown = container.querySelector('.absolute:not(button)');
+            if (!dropdown) return;
+            
+            // Calculate synchronously based on the button's position to prevent split-second scrollbar flicker
+            const btnRect = btn.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // Find any scrollable parent container or table that might clip the dropdown
+            const scrollParent = container.closest('.overflow-x-auto') || container.closest('.overflow-y-auto') || container.closest('table');
+            let shouldDropUp = false;
+            const threshold = 160; // Safe estimate for dropdown menu height
+            
+            if (scrollParent) {
+                const parentRect = scrollParent.getBoundingClientRect();
+                const spaceBelowParent = parentRect.bottom - btnRect.bottom;
+                const spaceBelowViewport = viewportHeight - btnRect.bottom;
+                
+                if (spaceBelowParent < threshold || spaceBelowViewport < threshold) {
+                    shouldDropUp = true;
+                }
+            } else {
+                const spaceBelowViewport = viewportHeight - btnRect.bottom;
+                if (spaceBelowViewport < threshold) {
+                    shouldDropUp = true;
+                }
+            }
+            
+            if (shouldDropUp) {
+                dropdown.style.top = 'auto';
+                dropdown.style.bottom = '100%';
+                dropdown.style.marginTop = '0px';
+                dropdown.style.marginBottom = '8px';
+            } else {
+                dropdown.style.top = '';
+                dropdown.style.bottom = '';
+                dropdown.style.marginTop = '';
+                dropdown.style.marginBottom = '';
+            }
+        });
+        
+        // Unsaved changes warning
+        const dirtyForms = new Set();
+        
+        ['input', 'change'].forEach(eventType => {
+            document.addEventListener(eventType, (e) => {
+                const form = e.target.closest('form');
+                if (form && form.method.toUpperCase() === 'POST' && !form.classList.contains('ignore-dirty')) {
+                    dirtyForms.add(form);
+                }
+            });
+        });
+
+        document.addEventListener('submit', (e) => {
+            if (dirtyForms.has(e.target)) {
+                dirtyForms.delete(e.target);
+            }
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (dirtyForms.size > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        // Prevent browser caching on back button (BFCache)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Custom global override for standard window.alert
+        window.alert = function(message) {
+            const isDark = document.documentElement.classList.contains('dark');
+            Swal.fire({
+                title: 'Informasi',
+                text: message,
+                icon: 'info',
+                confirmButtonText: 'Mengerti',
+                buttonsStyling: false,
+                background: isDark ? '#0f172a' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                customClass: {
+                    confirmButton: 'px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer',
+                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                    title: 'text-lg font-bold text-slate-900 dark:text-slate-100',
+                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                }
+            });
+        };
+
+        // Professional toast wrapper function
+        window.showToast = function(message, type = 'success') {
+            const isDark = document.documentElement.classList.contains('dark');
+            const toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            toast.fire({
+                icon: type,
+                title: message,
+                customClass: {
+                    popup: 'rounded-2xl border-none shadow-xl font-sans text-sm font-medium'
+                }
+            });
+        };
+
+        // Automatically convert native confirm() attributes on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Forms with inline confirm in onsubmit
+            document.querySelectorAll('form').forEach(form => {
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                    const match = onsubmitAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match) {
+                        const message = match[1];
+                        form.removeAttribute('onsubmit');
+                        form.addEventListener('submit', function(e) {
+                            if (form.dataset.swalConfirmed === 'true') {
+                                return;
+                            }
+                            e.preventDefault();
+                            const isDark = document.documentElement.classList.contains('dark');
+                            Swal.fire({
+                                title: 'Apakah Anda yakin?',
+                                text: message,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Lanjutkan',
+                                cancelButtonText: 'Batal',
+                                buttonsStyling: false,
+                                background: isDark ? '#0f172a' : '#ffffff',
+                                color: isDark ? '#f1f5f9' : '#1e293b',
+                                customClass: {
+                                    confirmButton: 'px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer mr-3',
+                                    cancelButton: 'px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    form.dataset.swalConfirmed = 'true';
+                                    form.submit();
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            // Buttons/links with inline confirm in onclick
+            document.querySelectorAll('[onclick]').forEach(el => {
+                const onclickAttr = el.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes('confirm(')) {
+                    const match = onclickAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match) {
+                        const message = match[1];
+                        el.removeAttribute('onclick');
+                        el.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const isDark = document.documentElement.classList.contains('dark');
+                            Swal.fire({
+                                title: 'Apakah Anda yakin?',
+                                text: message,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Lanjutkan',
+                                cancelButtonText: 'Batal',
+                                buttonsStyling: false,
+                                background: isDark ? '#0f172a' : '#ffffff',
+                                color: isDark ? '#f1f5f9' : '#1e293b',
+                                customClass: {
+                                    confirmButton: 'px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer mr-3',
+                                    cancelButton: 'px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const form = el.closest('form');
+                                    if (form) {
+                                        form.dataset.swalConfirmed = 'true';
+                                        form.submit();
+                                    } else if (el.tagName === 'A') {
+                                        window.location.href = el.href;
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            // Dynamic Password Show/Hide Toggle
+            function initPasswordToggles() {
+                document.querySelectorAll('input[type="password"]').forEach(input => {
+                    if (input.dataset.passwordToggleInitialized) return;
+                    input.dataset.passwordToggleInitialized = 'true';
+
+                    // Check if parent already has a toggle button (e.g. custom layout)
+                    const parent = input.parentElement;
+                    if (parent && parent.querySelector('button')) {
+                        return;
+                    }
+
+                    // Add padding-right to prevent text overlap
+                    input.classList.add('pr-10');
+
+                    // If parent is not relative, wrap input in a relative wrapper
+                    let wrapper = parent;
+                    if (!parent.classList.contains('relative')) {
+                        wrapper = document.createElement('div');
+                        wrapper.className = 'relative w-full';
+                        input.parentNode.insertBefore(wrapper, input);
+                        wrapper.appendChild(input);
+                    }
+
+                    // Create toggle button
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-300 transition-colors focus:outline-none';
+                    button.innerHTML = '<i data-lucide="eye" class="h-5 w-5"></i>';
+                    wrapper.appendChild(button);
+
+                    // Click event to toggle type and icon
+                    let show = false;
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        show = !show;
+                        input.type = show ? 'text' : 'password';
+                        button.innerHTML = show 
+                            ? '<i data-lucide="eye-off" class="h-5 w-5"></i>' 
+                            : '<i data-lucide="eye" class="h-5 w-5"></i>';
+                        
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                });
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            initPasswordToggles();
+
+            // Handle dynamically added password fields (e.g., in modals)
+            const observer = new MutationObserver((mutations) => {
+                let hasPassword = false;
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.matches && node.matches('input[type="password"]')) {
+                                hasPassword = true;
+                            } else if (node.querySelector && node.querySelector('input[type="password"]')) {
+                                hasPassword = true;
+                            }
+                        }
+                    });
+                });
+                if (hasPassword) {
+                    initPasswordToggles();
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // Auto-submit GET forms (Search & Filters)
+            const filterForms = document.querySelectorAll('form[method="GET"]');
+            
+            // Restore focus if needed
+            const focusedInputName = sessionStorage.getItem('autoSubmitFocusedInput');
+            if (focusedInputName) {
+                const inputToFocus = document.querySelector(`[name="${focusedInputName}"]`);
+                if (inputToFocus && (inputToFocus.type === 'text' || inputToFocus.type === 'search')) {
+                    setTimeout(() => {
+                        inputToFocus.focus();
+                        const val = inputToFocus.value;
+                        inputToFocus.value = '';
+                        inputToFocus.value = val;
+                    }, 50);
+                }
+                sessionStorage.removeItem('autoSubmitFocusedInput');
+            }
+
+            filterForms.forEach(form => {
+                if (form.classList.contains('no-auto-submit') || (form.getAttribute('action') && form.getAttribute('action').includes('logout'))) return;
+
+                let timeout = null;
+                const submitForm = (activeElement) => {
+                    if (activeElement && activeElement.name) {
+                        sessionStorage.setItem('autoSubmitFocusedInput', activeElement.name);
+                    }
+                    form.submit();
+                };
+
+                const inputs = form.querySelectorAll('input, select, textarea');
+                let hasAutoSubmitInputs = false;
+
+                inputs.forEach(input => {
+                    if (input.type === 'hidden') return;
+                    hasAutoSubmitInputs = true;
+
+                    if (input.type === 'text' || input.type === 'search') {
+                        input.addEventListener('input', (e) => {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(() => {
+                                submitForm(e.target);
+                            }, 800); // 800ms debounce
+                        });
+                        
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                clearTimeout(timeout);
+                                submitForm(e.target);
+                            }
+                        });
+                    } else {
+                        input.addEventListener('change', (e) => {
+                            submitForm(e.target);
+                        });
+                    }
+                });
+
+                // Hide submit button if the form has auto-submittable inputs
+                if (hasAutoSubmitInputs) {
+                    const submitBtns = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                    submitBtns.forEach(btn => btn.style.display = 'none');
+                }
+            });
+        });
+    </script>
+
+    
+    
+        <!-- Device Native Notification & Real-time Live Poller -->
+    <script>
+        (function() {
+            // Audio Chime Generator using Web Audio API (gentle & crisp mobile notification tone)
+            function playNotificationSound() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    
+                    const now = ctx.currentTime;
+                    // Tone 1
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(587.33, now); // D5
+                    gain1.gain.setValueAtTime(0.15, now);
+                    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start(now);
+                    osc1.stop(now + 0.22);
+
+                    // Tone 2 (higher melodic note)
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(880.00, now + 0.10); // A5
+                    gain2.gain.setValueAtTime(0.2, now + 0.10);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.40);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(now + 0.10);
+                    osc2.stop(now + 0.40);
+                } catch (e) {
+                    console.warn('Audio chime skipped:', e);
+                }
+            }
+
+            const vapidPublicKey = "BJgdVuD73H1oZ_6lPLvipi688tyALsA3sVa5moyzFzQnSnOhYZ60gX5ohI2A_o9emi3bDdE4F8XCfjKWvsfYtJQ";
+            const pushSubscribeUrl = "https:\/\/pkl.smkn1ciamis.id\/push\/subscribe";
+            const currentAuthUserId = 114;
+
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
+
+            async function syncWebPushSubscription() {
+                if (!vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    return;
+                }
+                if (Notification.permission !== 'granted') {
+                    return;
+                }
+
+                try {
+                    const reg = await navigator.serviceWorker.ready;
+                    let subscription = await reg.pushManager.getSubscription();
+                    if (!subscription) {
+                        subscription = await reg.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                        });
+                    }
+
+                    const subJson = subscription.toJSON();
+                    if (!subJson || !subJson.endpoint || !subJson.keys) return;
+
+                    const syncKey = currentAuthUserId + ':' + subJson.endpoint;
+                    if (sessionStorage.getItem('webpush_synced') === syncKey) {
+                        return;
+                    }
+
+                    const encoding = (PushManager.supportedContentEncodings || ['aes128gcm'])[0];
+                    const res = await fetch(pushSubscribeUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({
+                            endpoint: subJson.endpoint,
+                            keys: subJson.keys,
+                            contentEncoding: encoding
+                        })
+                    });
+
+                    if (res.ok) {
+                        sessionStorage.setItem('webpush_synced', syncKey);
+                    }
+                } catch (err) {
+                    console.warn('WebPush subscription skipped:', err);
+                }
+            }
+
+            // Request Native Notification Permission
+            function requestNotificationPermission() {
+                if (!('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                    syncWebPushSubscription();
+                    return;
+                }
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(function(perm) {
+                        if (perm === 'granted') {
+                            console.log('Izin notifikasi perangkat diaktifkan.');
+                            syncWebPushSubscription();
+                        }
+                    });
+                }
+            }
+
+            // Trigger Native Mobile / Desktop Notification
+            function showNativeNotification(title, body, url, tag) {
+                playNotificationSound();
+
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const options = {
+                        body: body,
+                        icon: 'https://pkl.smkn1ciamis.id/logo.png',
+                        badge: 'https://pkl.smkn1ciamis.id/icons/badge-96x96.png',
+                        vibrate: [200, 100, 200],
+                        data: { url: url },
+                        tag: tag || 'mas-pkl-notif-' + Date.now(),
+                        renotify: true
+                    };
+
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                        navigator.serviceWorker.ready.then(function(reg) {
+                            reg.showNotification(title, options);
+                        }).catch(function() {
+                            try {
+                                const n = new Notification(title, options);
+                                n.onclick = function() {
+                                    window.focus();
+                                    if (url) window.location.href = url;
+                                };
+                            } catch(e) {}
+                        });
+                    } else {
+                        try {
+                            const n = new Notification(title, options);
+                            n.onclick = function() {
+                                window.focus();
+                                if (url) window.location.href = url;
+                            };
+                        } catch(e) {}
+                    }
+                }
+
+                // Also display in-app Toast if window is open
+                if (window.showToast) {
+                    window.showToast(`${title}: ${body}`, 'info');
+                }
+            }
+
+            // Live Update UI Badges
+            function updateBadges(unreadNotif, unreadPesan) {
+                // Topbar Bell Badge
+                const topbarBadge = document.getElementById('topbar-notif-badge');
+                if (topbarBadge) {
+                    if (unreadNotif > 0) {
+                        topbarBadge.textContent = unreadNotif > 9 ? '9+' : unreadNotif;
+                        topbarBadge.classList.remove('hidden');
+                    } else {
+                        topbarBadge.classList.add('hidden');
+                    }
+                }
+
+                // Sidebar Pesan Badge
+                const pesanBadge = document.getElementById('sidebar-pesan-badge-pesan');
+                if (pesanBadge) {
+                    if (unreadPesan > 0) {
+                        pesanBadge.textContent = unreadPesan;
+                        pesanBadge.classList.remove('hidden');
+                    } else {
+                        pesanBadge.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Polling State Management
+            let lastNotifId = parseInt(sessionStorage.getItem('last_notif_id') || '0', 10);
+            let lastPesanId = parseInt(sessionStorage.getItem('last_pesan_id') || '0', 10);
+            let isFirstPoll = (lastNotifId === 0 && lastPesanId === 0);
+
+            async function pollDeviceNotifications() {
+                try {
+                    const params = new URLSearchParams({
+                        last_notif_id: lastNotifId,
+                        last_pesan_id: lastPesanId
+                    });
+
+                    const res = await fetch(`https://pkl.smkn1ciamis.id/notifikasi/poll?${params.toString()}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    // Update UI Badges live
+                    updateBadges(data.unread_notif_count, data.unread_pesan_count);
+
+                    if (isFirstPoll) {
+                        // Inisialisasi ID awal session tanpa memunculkan alert beruntun
+                        lastNotifId = data.max_notif_id;
+                        lastPesanId = data.max_pesan_id;
+                        sessionStorage.setItem('last_notif_id', lastNotifId);
+                        sessionStorage.setItem('last_pesan_id', lastPesanId);
+                        isFirstPoll = false;
+                        return;
+                    }
+
+                    // Tampilkan notifikasi sistem baru
+                    if (data.notifications && data.notifications.length > 0) {
+                        data.notifications.forEach(n => {
+                            showNativeNotification(n.title, n.body, n.url, 'notif-' + n.id);
+                        });
+                        lastNotifId = Math.max(lastNotifId, data.max_notif_id);
+                        sessionStorage.setItem('last_notif_id', lastNotifId);
+                    }
+
+                    // Tampilkan pesan chat baru
+                    if (data.messages && data.messages.length > 0) {
+                        const currentPath = window.location.pathname;
+                        data.messages.forEach(m => {
+                            if (!currentPath.includes('/pesan/' + m.id)) {
+                                showNativeNotification(m.title, m.body, m.url, 'pesan-' + m.id);
+                            }
+                        });
+                        lastPesanId = Math.max(lastPesanId, data.max_pesan_id);
+                        sessionStorage.setItem('last_pesan_id', lastPesanId);
+                    }
+                } catch (err) {
+                    // Fail silently on offline/network errors
+                }
+            }
+
+            // Auto-ask permission on first click/gesture
+            document.addEventListener('click', function onFirstGesture() {
+                requestNotificationPermission();
+                document.removeEventListener('click', onFirstGesture);
+            }, { once: true });
+
+            // Initial poll & start recurring interval
+            document.addEventListener('DOMContentLoaded', () => {
+                requestNotificationPermission();
+                pollDeviceNotifications();
+                setInterval(pollDeviceNotifications, 12000); // 12 detik polling hemat baterai
+            });
+        })();
+    </script>
+    
+                        <div id="reminder-settings-modal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md transition-opacity duration-300"
+     data-configured="0">
+    
+    <div class="relative w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xl p-6 sm:p-8 animate-in overflow-hidden" onclick="event.stopPropagation()">
+        
+        <div class="flex items-start justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
+                    <i data-lucide="bell-ring" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        Atur Alarm Pengingat PKL
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Sesuaikan jam alarm dengan jadwal jam kerja tempat DUDI Anda.
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeReminderModal(true)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form id="reminder-settings-form" class="space-y-5" onsubmit="submitReminderSettings(event)">
+            <input type="hidden" name="_token" value="FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo" autocomplete="off">
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="sunrise" class="w-4 h-4 text-amber-500"></i>
+                        Alarm Absen Masuk
+                    </label>
+                    <input type="time" name="jam_notif_masuk" id="jam_notif_masuk" required value="07:00"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '07:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            07:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '07:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            07:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '08:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            08:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '08:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            08:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '09:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            09:00
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="sunset" class="w-4 h-4 text-orange-500"></i>
+                        Alarm Absen Pulang
+                    </label>
+                    <input type="time" name="jam_notif_pulang" id="jam_notif_pulang" required value="16:00"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '15:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            15:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '16:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            16:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '16:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            16:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '17:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            17:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '17:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            17:30
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="book-open" class="w-4 h-4 text-blue-500"></i>
+                        Alarm Isi Jurnal
+                    </label>
+                    <input type="time" name="jam_notif_jurnal" id="jam_notif_jurnal" required value="19:30"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '17:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            17:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '18:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            18:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '19:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            19:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '20:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            20:30
+                        </button>
+                                    </div>
+            </div>
+
+            <div id="reminder-msg" class="hidden text-xs font-medium text-center py-1"></div>
+
+            
+            <div class="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
+                <button type="submit" id="btn-save-reminder"
+                        class="w-full sm:flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    Simpan Alarm Pengingat
+                </button>
+                <button type="button" onclick="useDefaultReminder()"
+                        class="w-full sm:w-auto py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-all cursor-pointer">
+                    Gunakan Standar
+                </button>
+            </div>
+            <div class="text-center">
+                <button type="button" onclick="closeReminderModal(true)" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer">
+                    Nanti Saja
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function setPreset(inputId, time) {
+        const el = document.getElementById(inputId);
+        if (el) el.value = time;
+    }
+
+    function closeReminderModal(rememberSession = false) {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (rememberSession) {
+                sessionStorage.setItem('dismissed_reminder_modal', '1');
+            }
+        }
+    }
+
+    function openReminderModal() {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
+
+    function useDefaultReminder() {
+        setPreset('jam_notif_masuk', '07:00');
+        setPreset('jam_notif_pulang', '16:00');
+        setPreset('jam_notif_jurnal', '19:30');
+        document.getElementById('reminder-settings-form').requestSubmit();
+    }
+
+    async function submitReminderSettings(e) {
+        e.preventDefault();
+        const form = document.getElementById('reminder-settings-form');
+        const btn = document.getElementById('btn-save-reminder');
+        const msg = document.getElementById('reminder-msg');
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        if (btn) btn.disabled = true;
+        if (msg) {
+            msg.className = 'text-xs font-medium text-center text-amber-500 py-1 animate-pulse';
+            msg.textContent = 'Menyimpan jadwal alarm...';
+            msg.classList.remove('hidden');
+        }
+
+        try {
+            const res = await fetch("https://pkl.smkn1ciamis.id/siswa/profile/reminder-settings", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': 'FxDR6QVw149y9n11kduW1sQ0TRVx5D5fuqK5J8Yo',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || 'Gagal menyimpan pengaturan.');
+            }
+
+            if (msg) {
+                msg.className = 'text-xs font-medium text-center text-emerald-500 py-1';
+                msg.textContent = '✨ Jadwal alarm berhasil disimpan!';
+            }
+
+            const modal = document.getElementById('reminder-settings-modal');
+            if (modal) modal.setAttribute('data-configured', '1');
+
+            setTimeout(() => {
+                closeReminderModal(false);
+                if (window.location.pathname.includes('/siswa/profile')) {
+                    window.location.reload();
+                }
+            }, 800);
+        } catch (err) {
+            if (msg) {
+                msg.className = 'text-xs font-medium text-center text-rose-500 py-1';
+                msg.textContent = '⚠️ ' + err.message;
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            const isConfigured = modal.getAttribute('data-configured') === '1';
+            const isDismissed = sessionStorage.getItem('dismissed_reminder_modal') === '1';
+            if (isConfigured || isDismissed) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+    });
+</script>
+            
+    <script>
+    // Tangkap event sedini mungkin sebelum Alpine dimuat
+    window.deferredPwaPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPwaPrompt = e;
+        // Jika event ini muncul, berarti aplikasi pasti BELUM di-install (atau sudah di-uninstall)
+        localStorage.removeItem('pwa_installed_flag');
+        window.dispatchEvent(new Event('pwa-ready'));
+    });
+</script>
+
+<div x-data="pwaPrompt()" 
+     x-show="show" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 translate-y-10"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 translate-y-10"
+     class="fixed bottom-4 left-4 right-4 z-100 md:max-w-sm md:left-1/2 md:-translate-x-1/2 md:bottom-8"
+     style="display: none;">
+    
+    <div class="bg-[#1e293b] rounded-2xl shadow-2xl p-4 border border-slate-700/50 relative overflow-hidden">
+        <!-- Close button -->
+        <button @click="dismiss()" class="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors z-10 bg-[#1e293b] rounded-full p-1">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <div class="flex items-start gap-4 mb-4 mt-1">
+            <div class="w-14 h-14 flex items-center justify-center shrink-0">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-14 h-14 object-cover rounded-xl shadow-sm">
+            </div>
+            <div class="flex-1 pr-6">
+                <h3 class="text-white font-bold text-lg leading-tight mb-1">Install MAS-PKL</h3>
+                <p class="text-slate-400 text-xs leading-relaxed">Akses lebih cepat langsung dari layar utama HP kamu.</p>
+            </div>
+        </div>
+
+        <template x-if="!isIos">
+            <button @click="install()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-500/20 active:scale-[0.98]">
+                <i data-lucide="download" class="w-5 h-5"></i>
+                Install Sekarang
+            </button>
+        </template>
+        
+        <template x-if="isIos">
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-center">
+                <p class="text-xs text-blue-100 leading-relaxed">
+                    Untuk install di iOS:<br>
+                    Tap ikon <b class="text-white">Share</b> di bawah, lalu pilih<br>
+                    <b class="text-white">"Add to Home Screen"</b>
+                </p>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('pwaPrompt', () => ({
+            show: false,
+            deferredPrompt: null,
+            isIos: false,
+
+            init() {
+                const userAgent = window.navigator.userAgent.toLowerCase();
+                this.isIos = /iphone|ipad|ipod/.test(userAgent);
+                const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+                const isAlreadyInstalled = localStorage.getItem('pwa_installed_flag');
+                const isDismissed = localStorage.getItem('pwa_dismissed_flag');
+
+                // Jangan tampilkan jika dalam mode standalone, ATAU sedang dalam proses OS installing, ATAU sudah di-dismiss user
+                if (isInStandaloneMode || isAlreadyInstalled || isDismissed) {
+                    return;
+                }
+
+                if (window.deferredPwaPrompt) {
+                    this.deferredPrompt = window.deferredPwaPrompt;
+                } else {
+                    window.addEventListener('pwa-ready', () => {
+                        this.deferredPrompt = window.deferredPwaPrompt;
+                    });
+                }
+
+                // Selalu tampilkan setelah 1.5 detik jika belum di mode standalone
+                setTimeout(() => {
+                    // Pastikan tidak tampil jika flag sudah diset oleh tab lain
+                    if (!localStorage.getItem('pwa_installed_flag')) {
+                        this.show = true;
+                    }
+                }, 1500);
+
+                window.addEventListener('appinstalled', () => {
+                    localStorage.setItem('pwa_installed_flag', 'true');
+                    this.show = false;
+                    this.deferredPrompt = null;
+                });
+            },
+
+            async install() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        // Tandai di localStorage bahwa OS sedang memproses instalasi
+                        localStorage.setItem('pwa_installed_flag', 'true');
+                        
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sedang Menginstall...',
+                                text: 'Aplikasi sedang ditambahkan ke layar utama. Tergantung tipe HP Anda, proses ini memakan waktu 5-30 detik. Silakan cek layar utama HP Anda sebentar lagi.',
+                                showConfirmButton: true,
+                                confirmButtonColor: '#2563eb'
+                            });
+                        }
+                    }
+                    this.deferredPrompt = null;
+                    this.show = false;
+                } else {
+                    // Fallback jika browser tidak memicu event (misalnya sudah di-install, Firefox, Incognito, In-App Browser)
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Status Pemasangan',
+                            html: `
+                                <div class="text-sm text-left text-slate-600">
+                                    <p class="mb-3">Sepertinya <b>aplikasi sudah ter-install</b> di perangkat Anda. Silakan cek layar utama (Home Screen) HP Anda.</p>
+                                    <p class="mb-2">Jika belum ada, browser yang Anda gunakan saat ini mungkin tidak mendukung instalasi otomatis 1-klik. Anda bisa memasangnya secara manual:</p>
+                                    <ol class="list-decimal ml-4">
+                                        <li class="mb-1">Tap menu <b>Titik Tiga (⋮)</b> atau <b>Share</b> di pojok browser.</li>
+                                        <li>Pilih <b>"Add to Home screen"</b> atau <b>"Install app"</b>.</li>
+                                    </ol>
+                                </div>
+                            `,
+                            confirmButtonColor: '#2563eb',
+                            confirmButtonText: 'Baik, Mengerti'
+                        });
+                    } else {
+                        alert('Jika aplikasi sudah ter-install, silakan cek Home Screen Anda. Jika belum, tap menu "Titik Tiga" (⋮) di browser, lalu pilih "Add to Home screen".');
+                    }
+                }
+            },
+
+            dismiss() {
+                // Sembunyikan dan simpan di localStorage agar tidak muncul lagi
+                localStorage.setItem('pwa_dismissed_flag', 'true');
+                this.show = false;
+            }
+        }));
+    });
+</script>
+</body>
+</html>

@@ -793,9 +793,9 @@
         const avatarEl = document.getElementById('grade-student-avatar');
         if (student && student.avatar) {
             let avatarSrc = student.avatar.startsWith('/') ? student.avatar : '/' + student.avatar;
-            avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${studentName}" class="w-full h-full object-cover">`;
+            avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${studentName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'font-black text-red-700\\'>${studentName.charAt(0).toUpperCase()}</span>'">`;
         } else {
-            avatarEl.innerHTML = `<span>${studentName.charAt(0).toUpperCase()}</span>`;
+            avatarEl.innerHTML = `<span class="font-black text-red-700">${studentName.charAt(0).toUpperCase()}</span>`;
         }
 
         document.getElementById('grade-tech').value = bs.technical_skill ?? 85;

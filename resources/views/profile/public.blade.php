@@ -285,6 +285,72 @@
             @endif
         </div>
 
+        <!-- E-Sertifikat Kelulusan Resmi DUDI (Jika Sudah Diterbitkan) -->
+        @if($evaluation && $evaluation->is_published)
+            <div class="mas-card p-6 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden border-2 border-amber-400/30 shadow-xl">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-600 via-amber-400 to-red-500"></div>
+
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-3">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold uppercase tracking-wider">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            E-Sertifikat DUDI Resmi Terverifikasi Sistem
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-white">Sertifikat Praktik Kerja Lapangan (PKL)</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Diterbitkan oleh <b>PT. Teknologi Multi Sistem</b> • Periode Resmi Batch {{ $user->batch->name ?? '2026' }}</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
+                            <div class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                                <span class="text-slate-400 text-[10px] uppercase block">No. Sertifikat:</span>
+                                <span class="font-bold text-amber-400 font-mono">{{ $evaluation->certificate_number }}</span>
+                            </div>
+                            <div class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+                                <span class="text-slate-400 text-[10px] uppercase block">Tanggal Terbit:</span>
+                                <span class="font-bold text-slate-200">{{ \Carbon\Carbon::parse($evaluation->issue_date ?? now())->locale('id')->isoFormat('D MMMM Y') }}</span>
+                            </div>
+                        </div>
+
+                        <!-- 4 Pilar Mini Transcript -->
+                        <div class="grid grid-cols-4 gap-2 pt-1 max-w-md">
+                            <div class="bg-slate-800/50 p-2 rounded-xl border border-slate-700/60 text-center">
+                                <span class="text-[9px] uppercase text-slate-400 block font-semibold">Teknis</span>
+                                <span class="text-xs font-bold text-white font-mono">{{ $evaluation->technical_skill }}</span>
+                            </div>
+                            <div class="bg-slate-800/50 p-2 rounded-xl border border-slate-700/60 text-center">
+                                <span class="text-[9px] uppercase text-slate-400 block font-semibold">Disiplin</span>
+                                <span class="text-xs font-bold text-white font-mono">{{ $evaluation->discipline }}</span>
+                            </div>
+                            <div class="bg-slate-800/50 p-2 rounded-xl border border-slate-700/60 text-center">
+                                <span class="text-[9px] uppercase text-slate-400 block font-semibold">Kerjasama</span>
+                                <span class="text-xs font-bold text-white font-mono">{{ $evaluation->teamwork }}</span>
+                            </div>
+                            <div class="bg-slate-800/50 p-2 rounded-xl border border-slate-700/60 text-center">
+                                <span class="text-[9px] uppercase text-slate-400 block font-semibold">Inisiatif</span>
+                                <span class="text-xs font-bold text-white font-mono">{{ $evaluation->initiative }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center sm:items-end gap-3 shrink-0 w-full md:w-auto">
+                        <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center w-full sm:w-auto">
+                            <div class="text-[10px] uppercase font-bold text-slate-300">Skor Kelulusan Akhir</div>
+                            <div class="text-3xl font-black text-amber-400 font-mono">{{ $evaluation->final_score }}</div>
+                            <div class="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">
+                                Predikat {{ $evaluation->final_score >= 85 ? 'A (Sangat Memuaskan)' : ($evaluation->final_score >= 75 ? 'B (Memuaskan)' : 'C (Cukup)') }}
+                            </div>
+                        </div>
+
+                        <a href="{{ route('certificate.print', $evaluation->certificate_number) }}" target="_blank" class="w-full sm:w-auto py-2.5 px-5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 flex items-center justify-center gap-2">
+                            <i data-lucide="printer" class="w-4 h-4 text-amber-300"></i>
+                            <span>Buka & Cetak E-Sertifikat (PDF)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Skills & Tech Stacks -->
         @if($user->skills)
             <div class="mas-card p-6">

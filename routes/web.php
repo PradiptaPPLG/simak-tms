@@ -96,6 +96,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:mentor,admin_tms'])->group(function () {
         Route::get('/mentor/monitoring', [SimakController::class, 'mentorDashboard'])->name('mentor.dashboard');
         Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
+        Route::get('/mentor/siswa/export', [SimakController::class, 'mentorExportStudents'])->name('mentor.students.export');
         Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
         Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
         Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');

@@ -1214,6 +1214,182 @@ class SimakController extends Controller
         return view('mentor.students', compact('mentor', 'students', 'totalStudents', 'totalApprovedJournals'));
     }
 
+    /**
+     * Ekspor Data Siswa Bimbingan Mentor (Excel .xls / CSV)
+     */
+    public function mentorExportStudents(Request $request)
+    {
+        $mentor = $this->authorizeMentorOrAdmin();
+
+        $query = User::where('role', 'siswa')
+            ->with(['batch', 'mentor', 'evaluation', 'journals', 'showcaseProjects']);
+
+        if ($mentor->role === 'mentor') {
+            $hasOwn = User::where('role', 'siswa')->where('mentor_id', $mentor->id)->exists();
+            if ($hasOwn) {
+                $query->where('mentor_id', $mentor->id);
+            }
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($w) use ($search) {
+                $w->where('name', 'like', "%{$search}%")
+                  ->orWhere('account_id', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('school_origin', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->orderBy('name', 'asc')->get();
+        $format = strtolower($request->input('format', 'excel'));
+
+        if ($format === 'excel' || $format === 'xls') {
+            $filename = 'Rekap_Bimbingan_Mentor_TMS_' . date('Y-m-d_His') . '.xls';
+            $headers = [
+                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires' => '0',
+            ];
+
+            return response()->stream(function () use ($students, $mentor) {
+                $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
+
+                $html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">' . "\n";
+                $html .= '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+                $html .= '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Bimbingan Siswa</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->' . "\n";
+                $html .= '<style>' . "\n";
+                $html .= 'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #000; }' . "\n";
+                $html .= 'table { border-collapse: collapse; width: 100%; margin-top: 10px; }' . "\n";
+                $html .= 'th { background-color: #dc2626; color: #ffffff; font-weight: bold; border: 1px solid #b91c1c; padding: 8px 10px; text-align: center; }' . "\n";
+                $html .= 'td { border: 1px solid #cbd5e1; padding: 6px 8px; vertical-align: middle; }' . "\n";
+                $html .= '.text-cell { mso-number-format: "\\@"; text-align: left; }' . "\n";
+                $html .= '.center-cell { text-align: center; }' . "\n";
+                $html .= '.num-cell { mso-number-format: "0\\.0"; text-align: center; }' . "\n";
+                $html .= '.title { font-size: 15pt; font-weight: bold; color: #0f172a; }' . "\n";
+                $html .= '.subtitle { font-size: 9.5pt; color: #475569; }' . "\n";
+                $html .= '</style></head><body>' . "\n";
+                $html .= '<div class="title">PT. TEKNOLOGI MULTI SISTEM (TMS)</div>' . "\n";
+                $html .= '<div class="subtitle">Rekapitulasi Siswa Bimbingan & Monitoring Logbook Mentor (' . htmlspecialchars($mentor->name) . ') &bull; Dicetak: ' . date('d F Y, H:i') . ' WIB</div>' . "\n";
+                $html .= '<table><thead><tr>' . "\n";
+                $html .= '<th>No</th><th>ID Akun</th><th>Nama Lengkap Siswa</th><th>Email</th><th>No. WhatsApp</th><th>Asal Sekolah</th><th>Jurusan / Peminatan</th><th>Status Magang</th><th>Total Logbook</th><th>Total Proyek</th><th>Nilai Teknis</th><th>Nilai Disiplin</th><th>Nilai Kerjasama</th><th>Nilai Inisiatif</th><th>Skor Akhir</th><th>Predikat</th><th>No. Sertifikat</th>' . "\n";
+                $html .= '</tr></thead><tbody>' . "\n";
+                fwrite($out, $html);
+
+                $no = 1;
+                foreach ($students as $student) {
+                    $eval = $student->evaluation;
+                    $statusLabel = match($student->status) {
+                        'aktif' => 'Aktif Magang',
+                        'alumni' => 'Alumni (Lulus)',
+                        'pending' => 'Pending Review',
+                        default => ucfirst($student->status ?? 'Aktif')
+                    };
+
+                    $row = '<tr>';
+                    $row .= '<td class="center-cell">' . ($no++) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($student->account_id ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->name) . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->email) . '</td>';
+                    $row .= '<td class="text-cell">' . htmlspecialchars($student->phone_number ?? '-') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->school_origin ?? 'SMKN 1 Ciamis') . '</td>';
+                    $row .= '<td>' . htmlspecialchars($student->major ?? 'PPLG') . '</td>';
+                    $row .= '<td class="center-cell">' . htmlspecialchars($statusLabel) . '</td>';
+                    $row .= '<td class="center-cell">' . $student->journals->count() . '</td>';
+                    $row .= '<td class="center-cell">' . ($student->showcaseProjects ? $student->showcaseProjects->count() : 0) . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->technical_skill : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->discipline : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->teamwork : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? $eval->initiative : '-') . '</td>';
+                    $row .= '<td class="num-cell">' . ($eval ? number_format($eval->final_score, 1) : '-') . '</td>';
+                    $row .= '<td class="center-cell">' . ($eval ? ($eval->grade ?? ($eval->final_score >= 85 ? 'A' : 'B')) : '-') . '</td>';
+                    $row .= '<td class="text-cell">' . ($eval && $eval->certificate_number ? htmlspecialchars($eval->certificate_number) : '-') . '</td>';
+                    $row .= '</tr>' . "\n";
+                    fwrite($out, $row);
+                }
+
+                fwrite($out, '</tbody></table></body></html>');
+                fclose($out);
+            }, 200, $headers);
+        }
+
+        // CSV Export
+        $filename = 'Rekap_Bimbingan_Mentor_TMS_' . date('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($students, $mentor) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'No',
+                'ID Akun 5-Digit',
+                'Nama Lengkap Siswa',
+                'Email Siswa',
+                'No. WhatsApp',
+                'Asal Sekolah Mitra',
+                'Jurusan',
+                'Status Magang',
+                'Total Logbook Selesai',
+                'Total Portofolio Proyek',
+                'Nilai Teknis (Hard Skill)',
+                'Nilai Disiplin',
+                'Nilai Kerjasama Tim',
+                'Nilai Inisiatif',
+                'Skor Akhir Evaluasi',
+                'Predikat DUDI',
+                'Nomor Sertifikat',
+                'Nama Mentor Pembimbing',
+            ]);
+
+            $no = 1;
+            foreach ($students as $student) {
+                $eval = $student->evaluation;
+                $statusLabel = match($student->status) {
+                    'aktif' => 'Aktif Magang',
+                    'alumni' => 'Alumni (Lulus)',
+                    'pending' => 'Pending Review',
+                    default => ucfirst($student->status ?? 'Aktif')
+                };
+
+                fputcsv($handle, [
+                    $no++,
+                    $student->account_id ?? '-',
+                    $student->name,
+                    $student->email,
+                    $student->phone_number ?? '-',
+                    $student->school_origin ?? 'SMKN 1 Ciamis',
+                    $student->major ?? 'PPLG',
+                    $statusLabel,
+                    $student->journals->count(),
+                    $student->showcaseProjects ? $student->showcaseProjects->count() : 0,
+                    $eval ? $eval->technical_skill : '-',
+                    $eval ? $eval->discipline : '-',
+                    $eval ? $eval->teamwork : '-',
+                    $eval ? $eval->initiative : '-',
+                    $eval ? number_format($eval->final_score, 1) : '-',
+                    $eval ? ($eval->grade ?? ($eval->final_score >= 85 ? 'A' : 'B')) : '-',
+                    $eval && $eval->certificate_number ? $eval->certificate_number : '-',
+                    $mentor->name,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
     // ==========================================
     // ADMIN STUDENT MANAGEMENT (EDIT & DELETE)
     // ==========================================

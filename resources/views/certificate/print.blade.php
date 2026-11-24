@@ -269,17 +269,17 @@
         <!-- ============================================================== -->
         <div class="relative z-20 border-t border-slate-200/90 pt-3 px-8 grid grid-cols-12 items-end gap-3 pb-1">
             
-            <!-- Left: QR Code Verifikasi Online Otentik -->
+            <!-- Left: QR Code Verifikasi Online Otentik (Menuju Profil Publik Siswa) -->
             <div class="col-span-3 flex items-center gap-2.5">
                 <div class="w-[74px] h-[74px] bg-white p-1 rounded-xl border border-slate-300 shadow-sm flex items-center justify-center shrink-0">
                     <img 
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode(route('verify.show', $evaluation->certificate_number)) }}" 
-                        alt="QR Code Verifikasi" 
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($student->profile_url) }}" 
+                        alt="QR Code Profil & Sertifikat Siswa" 
                         class="w-full h-full object-contain">
                 </div>
                 <div class="text-[8.5px] text-slate-500 leading-tight">
-                    <div class="font-bold text-slate-800 uppercase tracking-wide">Validasi Digital:</div>
-                    <div class="text-[8px] font-mono text-slate-400 mt-0.5">Scan QR untuk verifikasi otentikasi data di server SIMAK-TMS.</div>
+                    <div class="font-bold text-slate-800 uppercase tracking-wide">Validasi Profil & DUDI:</div>
+                    <div class="text-[8px] font-mono text-slate-400 mt-0.5">Scan QR untuk melihat Profil, Portofolio & Keaslian Sertifikat Siswa.</div>
                     <div class="text-emerald-700 font-bold mt-1 flex items-center gap-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         <span>Otentik & Terdaftar</span>
