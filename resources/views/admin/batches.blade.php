@@ -791,9 +791,19 @@
         document.getElementById('grade-student-subtitle').innerText = 'Penilaian untuk ' + studentName + ' (' + (bs.role_title || 'Software Engineer Intern') + ')';
         
         const avatarEl = document.getElementById('grade-student-avatar');
-        if (student && student.avatar) {
-            let avatarSrc = student.avatar.startsWith('/') ? student.avatar : '/' + student.avatar;
-            avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${studentName}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'font-black text-red-700\\'>${studentName.charAt(0).toUpperCase()}</span>'">`;
+        const rawAvatar = student ? (student.avatar_url || student.avatar) : null;
+        if (rawAvatar) {
+            let avatarSrc = rawAvatar;
+            if (!avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && !avatarSrc.startsWith('/')) {
+                avatarSrc = '/' + avatarSrc;
+            }
+            avatarEl.innerHTML = `<img src="${avatarSrc}" alt="${studentName}" class="w-full h-full object-cover">`;
+            const img = avatarEl.querySelector('img');
+            if (img) {
+                img.onerror = function() {
+                    avatarEl.innerHTML = `<span class="font-black text-red-700">${studentName.charAt(0).toUpperCase()}</span>`;
+                };
+            }
         } else {
             avatarEl.innerHTML = `<span class="font-black text-red-700">${studentName.charAt(0).toUpperCase()}</span>`;
         }

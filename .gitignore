@@ -25,6 +25,7 @@
 !/public/uploads/avatars/.gitkeep
 /storage/*.key
 /storage/pail
+/scratch/
 /vendor
 _ide_helper.php
 Homestead.json
