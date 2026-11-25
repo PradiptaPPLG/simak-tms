@@ -664,20 +664,25 @@
 <!-- ============================================================== -->
 <!-- MODAL POPUP: KONFIRMASI HARI LIBUR & PEMBERSIHAN JURNAL        -->
 <!-- ============================================================== -->
-<div id="modal-confirm-conflict" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-60 hidden flex items-center justify-center p-4">
+<div id="modal-confirm-conflict" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-70 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-200">
         
-        <!-- Header: Alert Triangle Icon -->
-        <div class="flex items-start gap-3.5">
-            <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        <!-- Header: Alert Triangle Icon & Close X -->
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 leading-snug">Jadwal Libur Nabrak Jurnal!</h3>
+                    <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                        Hari libur yang Anda pilih bertabrakan dengan <b id="conflict-count-text" class="text-amber-700">0 jurnal</b> yang sudah terisi sebelumnya.
+                    </p>
+                </div>
             </div>
-            <div>
-                <h3 class="text-base font-black text-slate-900 leading-snug">Jadwal Libur Nabrak Jurnal!</h3>
-                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                    Hari libur yang Anda pilih bertabrakan dengan <b id="conflict-count-text" class="text-amber-700">0 jurnal</b> yang sudah terisi sebelumnya.
-                </p>
-            </div>
+            <button type="button" onclick="cancelConflictAndBackToOffDays()" class="w-8 h-8 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer shrink-0">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
 
         <!-- Daftar Jurnal yang Bertabrakan (Scrollable List) -->
@@ -703,7 +708,7 @@
         <!-- Tombol Aksi: Batal, Simpan Tanpa Hapus, Ya Hapus (dengan Countdown 5 Detik) -->
         <div class="space-y-2 pt-2 border-t border-slate-100">
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="closeConflictModal()" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all text-center cursor-pointer">
+                <button type="button" onclick="cancelConflictAndBackToOffDays()" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all text-center cursor-pointer">
                     Batal (Ubah Hari)
                 </button>
                 <button type="button" onclick="confirmSaveWithoutDelete()" class="w-full py-2.5 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-xs font-bold transition-all text-center cursor-pointer">
@@ -788,6 +793,12 @@
     }
 
     function openConflictModal(conflicts) {
+        // 1. Tutup modal jadwal libur terlebih dahulu agar tidak bertumpuk
+        const offDaysModal = document.getElementById('modal-jadwal-libur');
+        if (offDaysModal) {
+            offDaysModal.classList.add('hidden');
+        }
+
         const modal = document.getElementById('modal-confirm-conflict');
         const countEl = document.getElementById('conflict-count-text');
         const listEl = document.getElementById('conflict-journals-list');
@@ -843,6 +854,15 @@
         const modal = document.getElementById('modal-confirm-conflict');
         if (modal) {
             modal.classList.add('hidden');
+        }
+    }
+
+    function cancelConflictAndBackToOffDays() {
+        closeConflictModal();
+        // Buka kembali modal jadwal libur agar user dapat mengubah pilihan harinya
+        const offDaysModal = document.getElementById('modal-jadwal-libur');
+        if (offDaysModal) {
+            offDaysModal.classList.remove('hidden');
         }
     }
 
