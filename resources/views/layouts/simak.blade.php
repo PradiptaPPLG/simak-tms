@@ -350,6 +350,13 @@
                 <div class="pt-3 pb-1 px-3">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan</span>
                 </div>
+                <a href="{{ route('tools.pdf') }}" class="flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('tools.pdf') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
+                    <div class="flex items-center gap-2.5 truncate">
+                        <i data-lucide="files" class="w-4 h-4 shrink-0 {{ request()->routeIs('tools.pdf') ? 'text-red-600' : 'text-slate-400' }}"></i>
+                        <span class="truncate">Office & PDF Tools</span>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold uppercase tracking-wider shrink-0">Tools</span>
+                </a>
                 <a href="{{ route('guide.index') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] transition-all {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600 font-medium border-l-2 border-red-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium border-l-2 border-transparent' }}">
                     <i data-lucide="book-open-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('guide.*') ? 'text-red-600' : 'text-slate-400' }}"></i>
                     <span class="truncate">Panduan & Tutorial</span>
@@ -467,6 +474,13 @@
                         <span>Master Arsip Portofolio</span>
                     </a>
                 @endif
+                <a href="{{ route('tools.pdf') }}" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('tools.pdf') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="files" class="w-4 h-4"></i>
+                        <span>Office & PDF Tools</span>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-red-600 text-white text-[9px] font-extrabold uppercase">Tools</span>
+                </a>
                 <a href="{{ route('guide.index') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('guide.*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                     <i data-lucide="book-open-check" class="w-4 h-4"></i>
                     <span>Panduan & Tutorial</span>

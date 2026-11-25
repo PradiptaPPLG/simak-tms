@@ -62,6 +62,7 @@ Route::get('/qr/{identifier}', [SimakController::class, 'generateQr'])->name('qr
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [SimakController::class, 'dashboard'])->name('dashboard');
     Route::get('/panduan', [SimakController::class, 'guide'])->name('guide.index');
+    Route::get('/tools/pdf', [SimakController::class, 'pdfTools'])->name('tools.pdf');
 
     // LMS & Tasks (Deprecated - Redirected to Showcase Portofolio)
     Route::get('/tugas', function () {

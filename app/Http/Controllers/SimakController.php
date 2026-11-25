@@ -748,6 +748,12 @@ class SimakController extends Controller
         return view('guide.index', compact('role'));
     }
 
+    public function pdfTools()
+    {
+        $role = auth()->user()->role ?? 'siswa';
+        return view('tools.pdf', compact('role'));
+    }
+
     // ==========================================
     // DEVELOPER / INTERN PROFILE ALA GITHUB
     // ==========================================
