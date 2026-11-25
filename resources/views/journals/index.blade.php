@@ -558,8 +558,31 @@
 <!-- ============================================================== -->
 <!-- MODAL: ATUR HARI LIBUR RUTIN DUDI & SHIFT KERJA                -->
 <!-- ============================================================== -->
-<div id="modal-jadwal-libur" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 {{ !$hasConfiguredOffDays ? '' : 'hidden' }} flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+<style>
+    @keyframes modalBackdropFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes modalContentZoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.93) translateY(14px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    .modal-backdrop-animate {
+        animation: modalBackdropFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-card-animate {
+        animation: modalContentZoomIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+</style>
+
+<div id="modal-jadwal-libur" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs {{ !$hasConfiguredOffDays ? '' : 'hidden' }} items-center justify-center p-4 modal-backdrop-animate" style="position: fixed; inset: 0; z-index: 9999; display: {{ !$hasConfiguredOffDays ? 'flex' : 'none' }};">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 modal-card-animate" style="position: relative; z-index: 10000; margin: auto;">
         
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
@@ -664,8 +687,8 @@
 <!-- ============================================================== -->
 <!-- MODAL POPUP: KONFIRMASI HARI LIBUR & PEMBERSIHAN JURNAL        -->
 <!-- ============================================================== -->
-<div id="modal-confirm-conflict" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-70 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+<div id="modal-confirm-conflict" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs hidden items-center justify-center p-4 modal-backdrop-animate" style="position: fixed; inset: 0; z-index: 9999; display: none;">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 modal-card-animate" style="position: relative; z-index: 10000; margin: auto;">
         
         <!-- Header: Alert Triangle Icon & Close X -->
         <div class="flex items-start justify-between gap-3">
@@ -745,6 +768,7 @@
         const modal = document.getElementById('modal-jadwal-libur');
         if (modal) {
             modal.classList.remove('hidden');
+            modal.style.display = 'flex';
         }
     }
 
@@ -753,6 +777,7 @@
             const modal = document.getElementById('modal-jadwal-libur');
             if (modal) {
                 modal.classList.add('hidden');
+                modal.style.display = 'none';
             }
         @else
             alert('Silakan pilih dan simpan hari libur rutin Anda terlebih dahulu untuk membuka logbook.');
@@ -797,6 +822,7 @@
         const offDaysModal = document.getElementById('modal-jadwal-libur');
         if (offDaysModal) {
             offDaysModal.classList.add('hidden');
+            offDaysModal.style.display = 'none';
         }
 
         const modal = document.getElementById('modal-confirm-conflict');
@@ -843,6 +869,7 @@
         }, 1000);
 
         modal.classList.remove('hidden');
+        modal.style.display = 'flex';
         if (window.lucide) lucide.createIcons();
     }
 
@@ -854,6 +881,7 @@
         const modal = document.getElementById('modal-confirm-conflict');
         if (modal) {
             modal.classList.add('hidden');
+            modal.style.display = 'none';
         }
     }
 
@@ -863,6 +891,7 @@
         const offDaysModal = document.getElementById('modal-jadwal-libur');
         if (offDaysModal) {
             offDaysModal.classList.remove('hidden');
+            offDaysModal.style.display = 'flex';
         }
     }
 
