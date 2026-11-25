@@ -579,8 +579,9 @@
             @endif
         </div>
 
-        <form action="{{ route('journals.off_days.update') }}" method="POST" class="space-y-4">
+        <form id="form-jadwal-libur" action="{{ route('journals.off_days.update') }}" method="POST" class="space-y-4" onsubmit="return handleOffDaysFormSubmit(event)">
             @csrf
+            <input type="hidden" name="delete_conflicts" id="input-delete-conflicts" value="0">
             
             <div class="p-3.5 bg-sky-50/70 border border-sky-100 rounded-2xl text-xs text-sky-900 leading-relaxed">
                 Pilih hari-hari ketika Anda <b>tidak bertugas di kantor / DUDI</b>. Hari libur yang dipilih akan otomatis ditandai dengan ikon <span class="inline-flex items-center gap-1 font-bold text-sky-700"><i data-lucide="user-x" class="w-3.5 h-3.5 inline"></i> Off Shift</span> dan tidak akan dihitung sebagai alpa/terlewat.
@@ -643,17 +644,6 @@
                        class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium">
             </div>
 
-            <!-- Checkbox Pembersihan Otomatis Konflik Jurnal -->
-            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-                <label class="flex items-start gap-2.5 cursor-pointer">
-                    <input type="checkbox" name="delete_conflicts" value="1" checked class="mt-0.5 rounded text-red-600 focus:ring-red-500">
-                    <div class="text-xs">
-                        <span class="font-bold text-slate-800">Hapus jurnal lama yang bertabrakan dengan hari libur baru</span>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Otomatis membersihkan logbook di hari libur agar tampilan kalender seragam, rapi, dan tidak jomplang.</p>
-                    </div>
-                </label>
-            </div>
-
             <!-- Modal Footer Buttons -->
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 @if($hasConfiguredOffDays)
@@ -671,7 +661,81 @@
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- MODAL POPUP: KONFIRMASI HARI LIBUR & PEMBERSIHAN JURNAL        -->
+<!-- ============================================================== -->
+<div id="modal-confirm-conflict" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-60 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Header: Alert Triangle Icon -->
+        <div class="flex items-start gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-black text-slate-900 leading-snug">Jadwal Libur Nabrak Jurnal!</h3>
+                <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                    Hari libur yang Anda pilih bertabrakan dengan <b id="conflict-count-text" class="text-amber-700">0 jurnal</b> yang sudah terisi sebelumnya.
+                </p>
+            </div>
+        </div>
+
+        <!-- Daftar Jurnal yang Bertabrakan (Scrollable List) -->
+        <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl space-y-2">
+            <div class="text-[10px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Jurnal yang bertabrakan:</span>
+            </div>
+            <div id="conflict-journals-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs divide-y divide-amber-200/50">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
+
+        <!-- Penjelasan Opsi Tindakan -->
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-slate-600 text-[11px] leading-relaxed">
+            <span class="font-bold text-slate-800">Pilih tindakan yang Anda inginkan:</span>
+            <ul class="list-disc pl-4 mt-1 space-y-1 text-slate-500">
+                <li><b>Hapus Jurnal:</b> Jurnal di atas akan dihapus agar kalender seragam &amp; rapi menjadi hari libur (biru).</li>
+                <li><b>Simpan Saja:</b> Jadwal libur disimpan, jurnal tetap aman dan tidak hilang.</li>
+            </ul>
+        </div>
+
+        <!-- Tombol Aksi: Batal, Simpan Tanpa Hapus, Ya Hapus (dengan Countdown 5 Detik) -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="closeConflictModal()" class="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all text-center cursor-pointer">
+                    Batal (Ubah Hari)
+                </button>
+                <button type="button" onclick="confirmSaveWithoutDelete()" class="w-full py-2.5 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-xs font-bold transition-all text-center cursor-pointer">
+                    Simpan Saja (Aman)
+                </button>
+            </div>
+            
+            <button type="button" id="btn-confirm-delete-conflict" onclick="confirmSaveAndDelete()" disabled
+                    class="w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-60 bg-red-400 text-white shadow-xs">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span id="btn-confirm-delete-label">Ya, Hapus Jurnal Bertabrakan (5s)</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <script>
+    const userExistingJournals = {!! json_encode($journals->map(function($j) {
+        $c = \Carbon\Carbon::parse($j->journal_date);
+        return [
+            'id' => $j->id,
+            'date' => $c->toDateString(),
+            'dayOfWeek' => $c->dayOfWeekIso,
+            'formatted' => $c->translatedFormat('l, d F Y'),
+            'title' => $j->activity_title ?? $j->activity_summary ?? 'Catatan Logbook'
+        ];
+    })) !!};
+
+    let conflictCountdownInterval = null;
+    let conflictCountdownSeconds = 5;
+
     function openOffDaysModal() {
         const modal = document.getElementById('modal-jadwal-libur');
         if (modal) {
@@ -701,6 +765,117 @@
                 noteInput.value = defaultNote;
             }
         }
+    }
+
+    function handleOffDaysFormSubmit(event) {
+        // Cek hari apa saja yang dicentang
+        const checkedDays = Array.from(document.querySelectorAll('#routine-off-days-grid .off-day-checkbox:checked'))
+            .map(cb => parseInt(cb.value, 10));
+
+        // Deteksi apakah ada jurnal yang bertabrakan dengan hari libur baru
+        const conflicts = userExistingJournals.filter(j => checkedDays.includes(j.dayOfWeek));
+
+        if (conflicts.length > 0) {
+            event.preventDefault();
+            openConflictModal(conflicts);
+            return false;
+        }
+
+        // Jika tidak ada benturan jurnal, langsung submit dengan aman
+        const input = document.getElementById('input-delete-conflicts');
+        if (input) input.value = "0";
+        return true;
+    }
+
+    function openConflictModal(conflicts) {
+        const modal = document.getElementById('modal-confirm-conflict');
+        const countEl = document.getElementById('conflict-count-text');
+        const listEl = document.getElementById('conflict-journals-list');
+        const btn = document.getElementById('btn-confirm-delete-conflict');
+        const label = document.getElementById('btn-confirm-delete-label');
+
+        if (!modal) return;
+
+        countEl.innerText = `${conflicts.length} jurnal`;
+        
+        // Render daftar jurnal yang bertabrakan
+        listEl.innerHTML = conflicts.map(j => `
+            <div class="pt-1.5 first:pt-0">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-amber-950">${j.formatted}</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-mono">ID #${j.id}</span>
+                </div>
+                <p class="text-[11px] text-amber-800 truncate mt-0.5">${j.title}</p>
+            </div>
+        `).join('');
+
+        // Reset timer countdown 5 detik untuk tombol YA
+        if (conflictCountdownInterval) {
+            clearInterval(conflictCountdownInterval);
+        }
+        conflictCountdownSeconds = 5;
+        btn.disabled = true;
+        btn.className = "w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-60 bg-red-400 text-white shadow-xs";
+        label.innerText = `Ya, Hapus Jurnal Bertabrakan (${conflictCountdownSeconds}s)`;
+
+        conflictCountdownInterval = setInterval(() => {
+            conflictCountdownSeconds--;
+            if (conflictCountdownSeconds > 0) {
+                label.innerText = `Ya, Hapus Jurnal Bertabrakan (${conflictCountdownSeconds}s)`;
+            } else {
+                clearInterval(conflictCountdownInterval);
+                conflictCountdownInterval = null;
+                btn.disabled = false;
+                btn.className = "w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer bg-red-600 hover:bg-red-700 active:scale-98 text-white shadow-md shadow-red-600/25";
+                label.innerText = "Ya, Hapus Jurnal Bertabrakan";
+            }
+        }, 1000);
+
+        modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function closeConflictModal() {
+        if (conflictCountdownInterval) {
+            clearInterval(conflictCountdownInterval);
+            conflictCountdownInterval = null;
+        }
+        const modal = document.getElementById('modal-confirm-conflict');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function confirmSaveWithoutDelete() {
+        closeConflictModal();
+        const input = document.getElementById('input-delete-conflicts');
+        if (input) input.value = "0";
+        const form = document.getElementById('form-jadwal-libur');
+        if (form) form.submit();
+    }
+
+    function confirmSaveAndDelete() {
+        closeConflictModal();
+        const input = document.getElementById('input-delete-conflicts');
+        if (input) input.value = "1";
+        const form = document.getElementById('form-jadwal-libur');
+        if (form) form.submit();
+    }
+
+    function triggerConflictModalFromBanner() {
+        @if(isset($conflictingJournals) && $conflictingJournals->isNotEmpty())
+            const conflicts = {!! json_encode($conflictingJournals->map(function($j) {
+                $c = \Carbon\Carbon::parse($j->journal_date);
+                return [
+                    'id' => $j->id,
+                    'date' => $c->toDateString(),
+                    'dayOfWeek' => $c->dayOfWeekIso,
+                    'formatted' => $c->translatedFormat('l, d F Y'),
+                    'title' => $j->activity_title ?? $j->activity_summary ?? 'Catatan Logbook'
+                ];
+            })) !!};
+            openConflictModal(conflicts);
+        @endif
     }
 </script>
 @endsection
