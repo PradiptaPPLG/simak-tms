@@ -64,7 +64,7 @@
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <!-- Brand Logo -->
             <a href="{{ route('login') }}" class="flex items-center gap-2.5 group">
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-xl shadow-xs shrink-0 object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-xl shadow-xs shrink-0 object-contain">
                 <div class="leading-none">
                     <div class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-1.5">
                         <span>SIMAK-TMS</span>

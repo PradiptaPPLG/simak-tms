@@ -193,7 +193,7 @@
         <div>
             <!-- App Brand Header -->
             <div class="h-16 flex items-center px-6 border-b border-slate-100 gap-3">
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-10 h-10 rounded-xl shadow-md shadow-red-600/20 shrink-0 object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-10 h-10 rounded-xl shrink-0 object-contain">
                 <div>
                     <div class="font-black text-base tracking-tight text-slate-900 flex items-center gap-1.5">
                         <span>SIMAK-TMS</span>
