@@ -51,7 +51,7 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <a href="{{ route('registry.index') }}" class="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-full shadow-xs shrink-0 object-contain">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-xl shadow-xs shrink-0 object-contain">
                 <div>
                     <div class="font-extrabold text-slate-900 tracking-tight text-sm">PT. TEKNOLOGI MULTI SISTEM</div>
                     <div class="text-[10px] text-red-600 font-bold uppercase tracking-wider">Portal Registrasi PKL Online</div>

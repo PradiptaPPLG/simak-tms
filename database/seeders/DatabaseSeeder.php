@@ -227,6 +227,8 @@ class DatabaseSeeder extends Seeder
                 'website_url' => 'https://pradipta.dev',
                 'profile_hash' => 'ef6acc7a13b94831',
                 'avatar' => '/uploads/avatars/avatar_11_d116346da495ba1a64bf.jpg',
+                'routine_off_days' => json_encode([6, 7]),
+                'off_day_notes' => 'Libur Akhir Pekan (Sabtu & Minggu)',
                 'must_change_password' => 0,
                 'updated_at' => $now,
             ]

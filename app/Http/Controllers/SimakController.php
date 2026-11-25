@@ -245,7 +245,93 @@ class SimakController extends Controller
         $selectedJournal = $journalsByDate->get($selectedDate);
         $todayJournal = $journalsByDate->get(now()->toDateString());
 
-        return view('journals.index', compact('user', 'journals', 'journalsByDate', 'selectedDate', 'selectedJournal', 'todayJournal'));
+        $hasConfiguredOffDays = $user->hasConfiguredOffDays();
+        $routineOffDays = (array)($user->routine_off_days ?? []);
+        $isSelectedDateOff = $user->isOffDay($selectedDate);
+
+        // Cari jurnal yang bertabrakan dengan hari libur
+        $conflictingJournals = $journals->filter(function($j) use ($user) {
+            return $user->isOffDay($j->journal_date);
+        });
+
+        return view('journals.index', compact(
+            'user', 
+            'journals', 
+            'journalsByDate', 
+            'selectedDate', 
+            'selectedJournal', 
+            'todayJournal',
+            'hasConfiguredOffDays',
+            'routineOffDays',
+            'isSelectedDateOff',
+            'conflictingJournals'
+        ));
+    }
+
+    public function updateRoutineOffDays(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'siswa') {
+            return back()->with('error', 'Hanya siswa magang yang dapat mengatur hari libur rutin.');
+        }
+
+        $request->validate([
+            'routine_off_days' => 'nullable|array',
+            'routine_off_days.*' => 'integer|min:1|max:7',
+            'off_day_notes' => 'nullable|string|max:100',
+            'delete_conflicts' => 'nullable|boolean',
+        ]);
+
+        $rawDays = $request->input('routine_off_days', []);
+        $days = array_values(array_map('intval', (array)$rawDays));
+        sort($days);
+
+        $notes = $request->input('off_day_notes');
+        if (empty($notes)) {
+            if ($days === [6, 7]) {
+                $notes = 'Libur Akhir Pekan (Sabtu & Minggu)';
+            } elseif ($days === [7]) {
+                $notes = 'Libur Hari Minggu Saja';
+            } elseif (empty($days)) {
+                $notes = 'Shift Rolling / Fleksibel';
+            } else {
+                $dayNames = [1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'];
+                $selectedNames = array_map(fn($d) => $dayNames[$d] ?? $d, $days);
+                $notes = 'Hari Libur: ' . implode(', ', $selectedNames);
+            }
+        }
+
+        // Cek apakah ada jurnal yang bertabrakan dengan jadwal libur baru
+        $conflicting = DailyJournal::where('user_id', $user->id)
+            ->get()
+            ->filter(function($j) use ($days) {
+                $dayOfWeekIso = \Carbon\Carbon::parse($j->journal_date)->dayOfWeekIso;
+                return in_array($dayOfWeekIso, $days);
+            });
+
+        $deletedNotice = '';
+        if ($request->boolean('delete_conflicts') && $conflicting->isNotEmpty()) {
+            $countDeleted = $conflicting->count();
+            DailyJournal::whereIn('id', $conflicting->pluck('id'))->delete();
+            $deletedNotice = " Sebanyak {$countDeleted} catatan jurnal yang bertabrakan dengan hari libur telah dibersihkan secara otomatis.";
+        }
+
+        $user->routine_off_days = $days;
+        $user->off_day_notes = $notes;
+        $user->save();
+
+        return redirect()->route('journals.index')->with('success', 'Jadwal hari libur rutin DUDI (' . $notes . ') berhasil disimpan!' . $deletedNotice);
+    }
+
+    public function destroyJournal($id)
+    {
+        $user = Auth::user();
+        $journal = DailyJournal::where('user_id', $user->id)->findOrFail($id);
+        
+        $dateStr = \Carbon\Carbon::parse($journal->journal_date)->translatedFormat('l, d F Y');
+        $journal->delete();
+
+        return back()->with('success', "Catatan logbook pada hari libur {$dateStr} berhasil dihapus. Bilah kalender kini kembali rapi dan seragam.");
     }
 
     public function storeJournal(Request $request)
@@ -277,10 +363,13 @@ class SimakController extends Controller
             ->where('journal_date', $request->journal_date)
             ->first();
 
-        // Mencegah kecurangan siswa mengisi mundur tanggal yang terlewat dan belum diisi
-        if ($isPast && !$existing) {
+        $isDateOff = $user->isOffDay($request->journal_date);
+
+        // Mencegah kecurangan siswa mengisi mundur tanggal hari kerja yang terlewat dan belum diisi
+        // Namun jika tanggal tersebut adalah hari libur rutin (misal siswa baru mencatat kegiatan mandiri di akhir pekan), kita izinkan dengan ramah
+        if ($isPast && !$existing && !$isDateOff) {
             return redirect()->route('journals.index')->withErrors([
-                'activity_title' => 'Batas waktu pengisian logbook untuk tanggal tersebut telah ditutup.',
+                'activity_title' => 'Batas waktu pengisian logbook untuk hari kerja tersebut telah ditutup.',
             ]);
         }
 

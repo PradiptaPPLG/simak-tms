@@ -193,7 +193,7 @@
         <div>
             <!-- App Brand Header -->
             <div class="h-16 flex items-center px-6 border-b border-slate-100 gap-3">
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-10 h-10 rounded-full shadow-md shadow-red-500/20 shrink-0 object-contain hover:scale-105 transition-transform">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-10 h-10 rounded-xl shadow-md shadow-red-600/20 shrink-0 object-contain hover:scale-105 transition-transform">
                 <div>
                     <div class="font-black text-base tracking-tight text-slate-900 flex items-center gap-1.5">
                         <span>SIMAK-TMS</span>
@@ -371,7 +371,7 @@
             <!-- Drawer Brand & Close Button -->
             <div class="h-16 flex items-center justify-between px-5 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
-                    <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-full shadow-xs shrink-0 object-contain">
+                    <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-9 h-9 rounded-xl shadow-xs shrink-0 object-contain">
                     <div>
                         <div class="font-black text-sm text-slate-900">SIMAK-TMS</div>
                         <div class="text-[10px] text-slate-400 font-semibold">PT. Teknologi Multi Sistem</div>
@@ -523,7 +523,7 @@
                 <button type="button" onclick="openMobileDrawer()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-800 flex items-center justify-center transition-all shrink-0 cursor-pointer" title="Buka Menu Sidebar">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-8 h-8 rounded-full shadow-xs shrink-0 object-contain">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-8 h-8 rounded-xl shadow-xs shrink-0 object-contain">
                 <span class="font-black text-sm text-slate-900 tracking-tight">SIMAK-TMS</span>
             </div>
 

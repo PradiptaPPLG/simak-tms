@@ -35,7 +35,7 @@
 
         <!-- Logo & Header (Hitam - Putih - Merah TMS) -->
         <div class="text-center mb-6">
-            <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-20 h-20 mx-auto rounded-full shadow-xl shadow-red-600/25 mb-3 object-contain hover:scale-105 transition-transform">
+            <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK Logo" class="w-20 h-20 mx-auto rounded-2xl shadow-xl shadow-red-600/25 mb-3 object-contain hover:scale-105 transition-transform">
             <h1 class="text-2xl font-black tracking-tight text-slate-900">SIMAK-TMS</h1>
             <p class="text-xs text-slate-500 mt-1">Sistem Informasi Manajemen Aktivitas & Karya Siswa PKL</p>
             <p class="text-[11px] font-bold text-red-600 uppercase tracking-wider mt-0.5">PT. Teknologi Multi Sistem</p>

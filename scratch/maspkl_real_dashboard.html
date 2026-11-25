@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="frqClFZL0dvrTNG20xRuhkR22InzEn9nkLvVIrzk">
+
+    <title>Dashboard - MAS-PKL SMKN 1 Ciamis</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="shortcut icon" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="apple-touch-icon" href="https://pkl.smkn1ciamis.id/logo.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    
+    <!-- PWA iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MAS-PKL">
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/lucide@latest/lucide.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.confirmDoubleDeletion = function(options) {
+            const { items, entityName = 'data', onConfirm } = options;
+            if (!items || items.length === 0) return;
+
+            const count = items.length;
+            let label = '';
+            if (count === 1) {
+                label = `"${items[0]}"`;
+            } else if (count <= 3) {
+                label = items.map(n => `"${n}"`).join(', ');
+            } else {
+                label = `kumpulan ${count} data ${entityName} ini`;
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const swalConfig = {
+                background: isDark ? '#0f172a' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                customClass: {
+                    confirmButton: 'px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-500/25 text-sm focus:outline-none cursor-pointer mr-3',
+                    cancelButton: 'px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                    popup: 'rounded-2xl border border-slate-200/80 dark:border-slate-800/80 font-sans shadow-2xl',
+                    htmlContainer: 'text-sm font-medium leading-relaxed'
+                },
+                buttonsStyling: false,
+            };
+
+            // Peringatan 1: Validasi Pertama
+            Swal.fire({
+                ...swalConfig,
+                title: 'Konfirmasi Hapus Data',
+                html: `Apakah Anda yakin ingin menghapus <b>${label}</b>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+            }).then((res1) => {
+                if (!res1.isConfirmed) return;
+
+                // Peringatan 2: Validasi Kedua / Peringatan Terakhir
+                Swal.fire({
+                    ...swalConfig,
+                    title: 'Peringatan Terakhir!',
+                    html: `Tindakan ini <b>permanen</b> dan <b>tidak dapat dibatalkan</b>!<br>Seluruh data terkait dari <b>${label}</b> akan dihapus secara permanen dari sistem.<br><br>Apakah Anda benar-benar yakin?`,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus Permanen Sekarang!',
+                    cancelButtonText: 'Batalkan',
+                }).then((res2) => {
+                    if (res2.isConfirmed && typeof onConfirm === 'function') {
+                        onConfirm();
+                    }
+                });
+            });
+        };
+
+        // Otomatis tangani form single-delete yang memiliki atribut data-confirm-delete
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form && form.hasAttribute('data-confirm-delete')) {
+                e.preventDefault();
+                const name = form.getAttribute('data-confirm-delete') || 'data ini';
+                const entity = form.getAttribute('data-entity') || 'data';
+                window.confirmDoubleDeletion({
+                    items: [name],
+                    entityName: entity,
+                    onConfirm: () => {
+                        form.removeAttribute('data-confirm-delete');
+                        form.submit();
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <style>
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            height: 100vh !important; /* Fallback for older browsers */
+            height: 100dvh !important;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        [x-cloak] { display: none !important; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <link rel="preload" as="style" href="https://pkl.smkn1ciamis.id/build/assets/app-DpSPhG3b.css" /><link rel="modulepreload" as="script" href="https://pkl.smkn1ciamis.id/build/assets/app-BPlLuuM8.js" /><link rel="stylesheet" href="https://pkl.smkn1ciamis.id/build/assets/app-DpSPhG3b.css" /><script type="module" src="https://pkl.smkn1ciamis.id/build/assets/app-BPlLuuM8.js"></script>    
+    <!-- Theme Switcher Script (prevent FOUC) -->
+    <script>
+        if (localStorage.theme === 'dark' || (localStorage.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 antialiased h-dvh overflow-hidden" x-data>
+    <div class="flex h-full w-full overflow-hidden">
+
+    <!-- Sidebar (Desktop Only) -->
+
+    <aside class="hidden lg:flex w-72 shrink-0 glass static inset-0 border-r border-slate-200/50 dark:border-slate-700/50 flex-col z-50">
+        
+        <div class="flex items-center justify-center p-6 border-b border-slate-200/50 dark:border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-10 h-10 object-contain rounded-xl">
+                <h1 class="text-2xl font-black tracking-tighter text-blue-600 dark:text-blue-400 drop-shadow-sm transition-all duration-300 hover:scale-[1.02] hover:drop-shadow-md cursor-default">MAS-PKL</h1>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-2">
+            <nav class="space-y-2">
+                                    <a href="https://pkl.smkn1ciamis.id/dashboard" 
+               class="bg-blue-600/10 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-semibold flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                    <span>Dashboard</span>
+                </div>
+                <span id="sidebar-pesan-badge-dashboard" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/jurnal" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="book-open" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Jurnal Kegiatan</span>
+                </div>
+                <span id="sidebar-pesan-badge-jurnal-kegiatan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/absensi" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Daftar Hadir</span>
+                </div>
+                <span id="sidebar-pesan-badge-daftar-hadir" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/laporan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="file-text" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Laporan PKL</span>
+                </div>
+                <span id="sidebar-pesan-badge-laporan-pkl" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/panduan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="library" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Buku Panduan</span>
+                </div>
+                <span id="sidebar-pesan-badge-buku-panduan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/pesan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="message-circle" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Pesan</span>
+                </div>
+                <span id="sidebar-pesan-badge-pesan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/bantuan" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="help-circle" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Pusat Bantuan</span>
+                </div>
+                <span id="sidebar-pesan-badge-pusat-bantuan" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+                                            <a href="https://pkl.smkn1ciamis.id/panduan-interaktif" 
+               class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-transparent flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors"></i>
+                    <span>Panduan Interaktif</span>
+                </div>
+                <span id="sidebar-pesan-badge-panduan-interaktif" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-blue-600 text-white dark:bg-blue-500 animate-pulse">
+                    0
+                </span>
+            </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        <!-- Top Navbar -->
+        <header class="glass sticky top-0 z-30 h-16 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <!-- Mobile Logo (Hidden on Desktop) -->
+            <div class="flex lg:hidden items-center gap-2.5">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-8 h-8 object-contain rounded-lg">
+                <h1 class="text-xl font-black tracking-tighter text-blue-600 dark:text-blue-400 drop-shadow-sm">MAS-PKL</h1>
+            </div>
+            
+            <div class="ml-auto flex items-center gap-4">
+                <!-- Theme Toggle -->
+                <div x-data="{
+                    theme: localStorage.theme || 'light',
+                    open: false,
+                    setTheme(val) {
+                        this.theme = val;
+                        localStorage.theme = val;
+                        if (val === 'dark' || (val === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                        this.open = false;
+                    }
+                }" class="relative hidden lg:block">
+                    <button @click="open = !open" @click.away="open = false" 
+                            class="text-slate-700 hover:text-slate-900 dark:text-white relative p-2 rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors block">
+                        <i x-show="theme === 'light'" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                        <i x-show="theme === 'dark'" data-lucide="moon" class="w-5 h-5" x-cloak></i>
+                        <i x-show="theme === 'system'" data-lucide="monitor" class="w-5 h-5" x-cloak></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div x-show="open"
+                         x-transition.opacity.duration.200ms
+                         class="absolute right-0 mt-2 w-36 glass-card border border-slate-200/50 dark:border-slate-700/50 py-2 rounded-xl text-sm font-medium z-50 text-slate-700 dark:text-slate-200" x-cloak>
+                        <button @click="setTheme('light')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="sun" class="w-4 h-4"></i> Light
+                        </button>
+                        <button @click="setTheme('dark')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="moon" class="w-4 h-4"></i> Dark
+                        </button>
+                        <button @click="setTheme('system')" class="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors">
+                            <i data-lucide="monitor" class="w-4 h-4"></i> System
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                                <div class="relative">
+                    <a href="https://pkl.smkn1ciamis.id/notifikasi" class="text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white relative p-2 rounded-full hover:bg-white/50 dark:bg-slate-800/50 transition-colors block">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="topbar-notif-badge" class=" absolute top-1.5 right-1.5 min-w-4 h-4 px-1 bg-red-500 text-[9px] font-bold text-white flex items-center justify-center rounded-full border border-slate-900">
+                            9+
+                        </span>
+                    </a>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative hidden lg:block" x-data="{ profileMenuOpen: false }">
+                    <button @click="profileMenuOpen = !profileMenuOpen" @click.away="profileMenuOpen = false" 
+                            class="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors duration-200 focus:outline-none group border border-transparent hover:border-slate-200/50 dark:hover:border-slate-700/50">
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=PRADIPTA+ENDRA+MAULANA&amp;background=3b82f6&amp;color=fff" 
+                                 alt="Avatar" 
+                                 class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform duration-200">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        </div>
+                        
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-tight truncate max-w-[150px]">PRADIPTA ENDRA MAULANA</span>
+                            <span class="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">
+                                                                    siswa
+                                                            </span>
+                        </div>
+                        
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 group-hover:text-slate-600 dark:group-hover:text-slate-300" :class="profileMenuOpen ? 'rotate-180' : ''"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="profileMenuOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                         class="absolute right-0 mt-2 w-52 glass-card border border-slate-200/50 dark:border-slate-700/50 rounded-2xl overflow-hidden z-50 shadow-xl shadow-slate-100/50 dark:shadow-none" 
+                         x-cloak>
+                        
+                        <div class="px-4 py-3 bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-200/50 dark:border-slate-700/50">
+                            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">PRADIPTA ENDRA MAULANA</p>
+                             <p class="text-[10px] font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase mt-0.5">
+                                                                      siswa
+                                                              </p>
+                        </div>
+
+                        <div class="p-1.5 space-y-1">
+                                                            <a href="https://pkl.smkn1ciamis.id/siswa/profile" class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors group/item">
+                                    <i data-lucide="user-circle" class="w-4 h-4 text-slate-400 group-hover/item:text-slate-600 dark:group-hover/item:text-slate-300"></i>
+                                    Lihat Profil
+                                </a>
+                                                        
+                            <button type="button" onclick="document.getElementById('aboutModal').showModal()" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors focus:outline-none group/item">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-400 group-hover/item:text-blue-500"></i>
+                                Tentang Aplikasi
+                            </button>
+                            
+                            <form method="POST" action="https://pkl.smkn1ciamis.id/logout" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem?')">
+                                <input type="hidden" name="_token" value="frqClFZL0dvrTNG20xRuhkR22InzEn9nkLvVIrzk" autocomplete="off">                                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors focus:outline-none group/item">
+                                    <i data-lucide="log-out" class="w-4 h-4 text-red-400 group-hover/item:text-red-500"></i>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-36 sm:p-6 sm:pb-36 lg:p-8 lg:pb-8 relative">
+            <div class="mx-auto max-w-7xl animate-fade-in-up">
+                <!-- Page Header -->
+                                    <header class="mb-8">
+                        <h2 class="text-3xl font-bold text-blue-600 dark:text-blue-400 tracking-tight">
+                            Dashboard Siswa
+                        </h2>
+                    </header>
+                                
+                <!-- Force Change Password Modal -->
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card p-6 border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mb-1">Status Hari Ini</p>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tighter">libur</h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="activity" class="w-6 h-6 text-blue-500"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                <p class="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                    <i data-lucide="building-2" class="w-4 h-4 text-slate-500 dark:text-slate-400"></i>
+                    PT. Teknologi Multi Sistem
+                </p>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-emerald-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mb-1">Jurnal Terisi</p>
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">7 <span class="text-sm font-normal text-slate-600 dark:text-slate-400">Harian</span></h3>
+                </div>
+                <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="book-open" class="w-6 h-6 text-emerald-500"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                <div class="flex mb-2 items-center justify-between">
+                    <span class="text-xs font-semibold inline-block text-emerald-500">Valid: 4</span>
+                </div>
+                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-slate-200 dark:bg-slate-700">
+                    <div style="width: 57.142857142857%;" class="shadow-none flex flex-col text-center whitespace-nowrap text-slate-900 dark:text-white justify-center bg-emerald-500"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 border-l-4 border-purple-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm font-medium mb-1">Kehadiran</p>
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">10 <span class="text-sm font-normal text-slate-600 dark:text-slate-400">Hari</span></h3>
+                </div>
+                <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-purple-500"></i>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Absensi harian tercatat di sistem.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h3 class="text-lg font-medium text-slate-800 dark:text-slate-200 mb-4">Aksi Cepat</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <a href="https://pkl.smkn1ciamis.id/siswa/jurnal/create" class="glass p-4 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-blue-600/10 border hover:border-blue-500/30 transition-all group">
+            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                <i data-lucide="edit-3" class="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-blue-400"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Isi Jurnal</span>
+        </a>
+        <a href="https://pkl.smkn1ciamis.id/siswa/absensi" class="glass p-4 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-emerald-600/10 border hover:border-emerald-500/30 transition-all group">
+            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
+                <i data-lucide="clipboard-check" class="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-emerald-400"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Isi Absensi</span>
+        </a>
+        <a href="https://pkl.smkn1ciamis.id/siswa/laporan" class="glass p-4 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-pink-600/10 border hover:border-pink-500/30 transition-all group">
+            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
+                <i data-lucide="file-text" class="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-pink-400"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Laporan Akhir</span>
+        </a>
+        <a href="https://pkl.smkn1ciamis.id/siswa/panduan" class="glass p-4 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-purple-600/10 border hover:border-purple-500/30 transition-all group">
+            <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                <i data-lucide="download-cloud" class="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-purple-400"></i>
+            </div>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Buku Panduan</span>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        <!-- Chart 1: Progress PKL -->
+        <div class="glass-card p-6 border-t-2 border-slate-200/50 dark:border-slate-700/50">
+            <h3 class="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Persentase Pengisian Jurnal (Valid vs Pending)</h3>
+            <div class="relative h-64 flex items-center justify-center">
+                <canvas id="jurnalSiswaChart" data-valid="4" data-total="7"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Kehadiran Siswa -->
+        <div class="glass-card p-6 border-t-2 border-slate-200/50 dark:border-slate-700/50">
+            <h3 class="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Grafik Kehadiran Mingguan Anda</h3>
+            <div class="relative h-64 flex items-center justify-center">
+                <canvas id="kehadiranSiswaChart" data-week-attendance='[7.82,8.17,8.27,null,null]'></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Jurnal Siswa Chart (Pie)
+            const canvasJurnal = document.getElementById('jurnalSiswaChart');
+            const ctxJurnal = canvasJurnal.getContext('2d');
+            const validCount = parseInt(canvasJurnal.getAttribute('data-valid')) || 0;
+            const totalCount = parseInt(canvasJurnal.getAttribute('data-total')) || 0;
+            const pendingCount = totalCount - validCount;
+
+            new Chart(ctxJurnal, {
+                type: 'pie',
+                data: {
+                    labels: ['Jurnal Valid', 'Jurnal Pending'],
+                    datasets: [{
+                        data: [validCount, pendingCount],
+                        backgroundColor: ['#10b981', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Plus Jakarta Sans, sans-serif', weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+            // Kehadiran Siswa Chart (Line)
+            const canvasKehadiran = document.getElementById('kehadiranSiswaChart');
+            const weekAttendance = JSON.parse(canvasKehadiran.getAttribute('data-week-attendance') || '[null,null,null,null,null]');
+            const ctxKehadiran = canvasKehadiran.getContext('2d');
+            new Chart(ctxKehadiran, {
+                type: 'line',
+                data: {
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
+                    datasets: [{
+                        label: 'Kehadiran Anda (Jam Masuk)',
+                        data: weekAttendance,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Plus Jakarta Sans, sans-serif', weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    if (value === null || isNaN(value)) return 'Tidak Hadir / Belum Absen';
+                                    const hour = Math.floor(value);
+                                    const minutes = Math.round((value - hour) * 60);
+                                    return 'Jam Masuk: ' + (hour < 10 ? '0' : '') + hour + ':' + (minutes < 10 ? '0' : '') + minutes;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { 
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }, 
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    if (value === null || isNaN(value)) return '';
+                                    const hour = Math.floor(value);
+                                    const minutes = Math.round((value - hour) * 60);
+                                    return (hour < 10 ? '0' : '') + hour + ':' + (minutes < 10 ? '0' : '') + minutes;
+                                }
+                            } 
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+            </div>
+        </main>
+    </div>
+    </div>
+
+    <!-- About App Modal -->
+    <dialog id="aboutModal" class="backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm bg-transparent border-0 outline-none p-4 w-full max-w-2xl m-auto rounded-2xl shadow-2xl">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col max-h-[85vh]">
+            <div class="px-6 py-4 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 leading-tight">Tentang Aplikasi</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">MAS-PKL (Manajemen Administrasi Siswa - Praktek Kerja Lapangan)</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('aboutModal').close()" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <div class="mb-8 text-center">
+                    <h4 class="text-xl font-black text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-2">
+                        Tim Pengembang
+                    </h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">MAS-PKL ini dikembangkan dengan dedikasi tinggi oleh <br/><span class="font-bold text-slate-800 dark:text-slate-200">Tim RPL Sentinel - SMKN 1 Ciamis</span>.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    
+                    <!-- Rasya -->
+                    <a href="https://github.com/rasyakt" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/rasyakt.png" alt="Rasya Syahreza" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Rasya Syahreza M. Z.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                    
+                    <!-- Pradipta -->
+                    <a href="https://github.com/PradiptaPPLG" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/PradiptaPPLG.png" alt="Pradipta Endra Maulana" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Pradipta Endra M.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+
+                    <!-- Rafli -->
+                    <a href="https://github.com/rafliaditya0125" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/rafliaditya0125.png" alt="Rafli Aditya" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Rafli Aditya</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                    
+                    <!-- Zidny -->
+                    <a href="https://github.com/ZidnyAl-HikamMawarist" target="_blank" class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-500/30 group">
+                        <div class="relative w-16 h-16 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-colors">
+                            <img src="https://github.com/ZidnyAl-HikamMawarist.png" alt="Zidny Al-Hikam" class="w-full h-full object-cover">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Zidny Al-Hikam M.</p>
+                            <p class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Full Stack Dev</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-slate-200/50 dark:border-slate-700/50 text-center">
+                    <p class="text-sm font-bold text-slate-800 dark:text-slate-200">SMKN 1 Ciamis</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Vocational High School - Center of Excellence<br/>Jl. Jenderal Sudirman №269, Ciamis, Jawa Barat.</p>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-slate-200/50 dark:border-slate-700/50 pb-[env(safe-area-inset-bottom)] lg:hidden" id="bottom-nav">
+    <div class="flex justify-between items-center h-16 px-4 relative">
+        
+        <!-- Left Items -->
+        <div class="flex w-2/5 justify-around">
+                                                                <a href="https://pkl.smkn1ciamis.id/dashboard" 
+                       class="flex flex-col items-center justify-center space-y-1 relative group text-blue-600 dark:text-blue-400">
+                        <div class="p-1 rounded-xl transition-all duration-300 bg-blue-50 dark:bg-blue-500/10">
+                            <i data-lucide="layout-dashboard" class="w-6 h-6 stroke-[2.5px]"></i>
+                        </div>
+                        <span class="text-[10px] tracking-wide truncate w-16 text-center font-bold">
+                            Dashboard
+                        </span>
+                    </a>
+                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/jurnal" 
+                       class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                        <div class="p-1 rounded-xl transition-all duration-300 ">
+                            <i data-lucide="book-open" class="w-6 h-6 stroke-2"></i>
+                        </div>
+                        <span class="text-[10px] tracking-wide truncate w-16 text-center font-medium">
+                            Jurnal Kegia
+                        </span>
+                    </a>
+                                    </div>
+
+        <!-- Center Floating Action Button -->
+                                <div class="absolute left-1/2 -translate-x-1/2 -top-6 flex flex-col items-center">
+                                    <a href="https://pkl.smkn1ciamis.id/siswa/absensi" 
+                       class="w-14 h-14 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-blue-600/30 border-4 border-slate-50 dark:border-slate-950 transition-transform transform active:scale-95 z-50">
+                        <i data-lucide="calendar-check" class="w-6 h-6 stroke-[2.5px]"></i>
+                    </a>
+                                <span class="mt-1 text-[10px] font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">Daftar Hadir</span>
+            </div>
+        
+        <!-- Right Items -->
+        <div class="flex w-2/5 justify-around">
+            <!-- Pesan Item -->
+                                            <a href="https://pkl.smkn1ciamis.id/pesan" 
+                   class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200">
+                    <div class="p-1 rounded-xl transition-all duration-300 ">
+                        <i data-lucide="message-circle" class="w-6 h-6 stroke-2"></i>
+                    </div>
+                    <span class="text-[10px] tracking-wide truncate w-16 text-center font-medium">
+                        Pesan
+                    </span>
+                </a>
+            
+            <!-- Akun Button -->
+            <button @click="$dispatch('open-akun-menu')" class="flex flex-col items-center justify-center space-y-1 relative group text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none">
+                <div class="p-1 rounded-xl transition-all duration-300">
+                    <i data-lucide="user-circle" class="w-6 h-6 stroke-2"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-wide">Akun</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Akun Menu Sheet -->
+<div x-data="{ openMenu: false, theme: localStorage.theme || 'light' }" 
+     @open-akun-menu.window="openMenu = true"
+     class="relative z-60 lg:hidden"
+     x-cloak>
+    
+    <!-- Backdrop -->
+    <div x-show="openMenu"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+         @click="openMenu = false"></div>
+
+    <!-- Bottom Sheet -->
+    <div x-show="openMenu"
+         x-transition:enter="transform transition ease-out duration-300"
+         x-transition:enter-start="translate-y-full"
+         x-transition:enter-end="translate-y-0"
+         x-transition:leave="transform transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0"
+         x-transition:leave-end="translate-y-full"
+         class="fixed inset-x-0 bottom-0 bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+         @click.away="openMenu = false">
+        
+        <!-- Drag Handle -->
+        <div class="w-full flex justify-center pt-3 pb-2 cursor-pointer" @click="openMenu = false">
+            <div class="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+        </div>
+
+        <div class="px-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Menu Akun</h3>
+            <button @click="openMenu = false" class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Sheet Content -->
+        <div class="flex-1 overflow-y-auto p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] space-y-6">
+            
+            <!-- User Info -->
+            <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                <img src="https://ui-avatars.com/api/?name=PRADIPTA+ENDRA+MAULANA&amp;background=3b82f6&amp;color=fff" 
+                     alt="Avatar" class="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-slate-700">
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">PRADIPTA ENDRA MAULANA</h4>
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wider uppercase">siswa</span>
+                </div>
+            </div>
+
+            <!-- Other Navigation Menus -->
+                            <div>
+                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-2">Menu Lainnya</h4>
+                    <div class="grid grid-cols-4 gap-y-4 gap-x-2">
+                                                                                    <a href="https://pkl.smkn1ciamis.id/siswa/laporan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="file-text" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Laporan PKL</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/panduan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="library" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Buku Panduan</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/siswa/bantuan" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="help-circle" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Pusat Bantuan</span>
+                                </a>
+                                                                                                                <a href="https://pkl.smkn1ciamis.id/panduan-interaktif" class="flex flex-col items-center gap-2 group">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center border border-slate-100 dark:border-slate-700/50 group-hover:border-blue-200 dark:group-hover:bg-blue-50 transition-all">
+                                        <i data-lucide="sparkles" class="w-5 h-5 text-slate-600 dark:text-slate-300 group-hover:text-blue-600"></i>
+                                    </div>
+                                    <span class="text-[10px] font-medium text-slate-600 dark:text-slate-300 text-center leading-tight w-full">Panduan Interaktif</span>
+                                </a>
+                                                                        </div>
+                </div>
+            
+            <!-- Account Settings & Preferences -->
+            <div>
+                <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-2">Pengaturan Akun</h4>
+                <div class="space-y-2">
+                    
+                                            <a href="https://pkl.smkn1ciamis.id/siswa/profile" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                                <i data-lucide="user" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200">Lihat Profil</div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                        </a>
+                    
+                    <!-- Tentang Aplikasi Option -->
+                    <button @click="openMenu = false; setTimeout(() => document.getElementById('aboutModal').showModal(), 300)" 
+                        class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group">
+                        <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40">
+                            <i data-lucide="info" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200">Tentang Aplikasi</div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+
+                    <!-- Theme Toggle Option -->
+                    <button @click="
+                            theme = theme === 'light' ? 'dark' : 'light';
+                            localStorage.theme = theme;
+                            if (theme === 'dark') document.documentElement.classList.add('dark');
+                            else document.documentElement.classList.remove('dark');
+                        " 
+                        class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left">
+                        <div class="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg">
+                            <i x-show="theme === 'light'" data-lucide="moon" class="w-5 h-5"></i>
+                            <i x-show="theme === 'dark'" data-lucide="sun" class="w-5 h-5" x-cloak></i>
+                        </div>
+                        <div class="flex-1 font-medium text-sm text-slate-700 dark:text-slate-200" x-text="theme === 'light' ? 'Mode Gelap' : 'Mode Terang'"></div>
+                    </button>
+
+                    <!-- Logout -->
+                    <form method="POST" action="https://pkl.smkn1ciamis.id/logout" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem?')">
+                        <input type="hidden" name="_token" value="frqClFZL0dvrTNG20xRuhkR22InzEn9nkLvVIrzk" autocomplete="off">                        <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left group">
+                            <div class="p-2 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-lg group-hover:bg-red-100 dark:group-hover:bg-red-900/40">
+                                <i data-lucide="log-out" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 font-bold text-sm text-red-500">Keluar (Logout)</div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Submenu Sheets (Dynamic) -->
+            
+<style>
+    .overflow-y-auto::-webkit-scrollbar {
+        width: 4px;
+    }
+    .overflow-y-auto::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .dark .overflow-y-auto::-webkit-scrollbar-thumb {
+        background: #334155;
+    }
+</style>
+
+    <!-- Scripts -->
+        <script>
+        // Initialize Lucide icons after page load and after any pushed scripts
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // Dynamic Ellipsis Dropdown positioning (Drop-Up)
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            
+            // Only apply to ellipsis dropdown buttons
+            if (!btn.querySelector('.lucide-more-vertical') && !btn.querySelector('[data-lucide="more-vertical"]')) return;
+            
+            const container = btn.closest('.relative');
+            if (!container) return;
+            
+            const dropdown = container.querySelector('.absolute:not(button)');
+            if (!dropdown) return;
+            
+            // Calculate synchronously based on the button's position to prevent split-second scrollbar flicker
+            const btnRect = btn.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // Find any scrollable parent container or table that might clip the dropdown
+            const scrollParent = container.closest('.overflow-x-auto') || container.closest('.overflow-y-auto') || container.closest('table');
+            let shouldDropUp = false;
+            const threshold = 160; // Safe estimate for dropdown menu height
+            
+            if (scrollParent) {
+                const parentRect = scrollParent.getBoundingClientRect();
+                const spaceBelowParent = parentRect.bottom - btnRect.bottom;
+                const spaceBelowViewport = viewportHeight - btnRect.bottom;
+                
+                if (spaceBelowParent < threshold || spaceBelowViewport < threshold) {
+                    shouldDropUp = true;
+                }
+            } else {
+                const spaceBelowViewport = viewportHeight - btnRect.bottom;
+                if (spaceBelowViewport < threshold) {
+                    shouldDropUp = true;
+                }
+            }
+            
+            if (shouldDropUp) {
+                dropdown.style.top = 'auto';
+                dropdown.style.bottom = '100%';
+                dropdown.style.marginTop = '0px';
+                dropdown.style.marginBottom = '8px';
+            } else {
+                dropdown.style.top = '';
+                dropdown.style.bottom = '';
+                dropdown.style.marginTop = '';
+                dropdown.style.marginBottom = '';
+            }
+        });
+        
+        // Unsaved changes warning
+        const dirtyForms = new Set();
+        
+        ['input', 'change'].forEach(eventType => {
+            document.addEventListener(eventType, (e) => {
+                const form = e.target.closest('form');
+                if (form && form.method.toUpperCase() === 'POST' && !form.classList.contains('ignore-dirty')) {
+                    dirtyForms.add(form);
+                }
+            });
+        });
+
+        document.addEventListener('submit', (e) => {
+            if (dirtyForms.has(e.target)) {
+                dirtyForms.delete(e.target);
+            }
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (dirtyForms.size > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }
+
+        // Prevent browser caching on back button (BFCache)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        // Custom global override for standard window.alert
+        window.alert = function(message) {
+            const isDark = document.documentElement.classList.contains('dark');
+            Swal.fire({
+                title: 'Informasi',
+                text: message,
+                icon: 'info',
+                confirmButtonText: 'Mengerti',
+                buttonsStyling: false,
+                background: isDark ? '#0f172a' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                customClass: {
+                    confirmButton: 'px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer',
+                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                    title: 'text-lg font-bold text-slate-900 dark:text-slate-100',
+                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                }
+            });
+        };
+
+        // Professional toast wrapper function
+        window.showToast = function(message, type = 'success') {
+            const isDark = document.documentElement.classList.contains('dark');
+            const toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#f1f5f9' : '#1e293b',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            toast.fire({
+                icon: type,
+                title: message,
+                customClass: {
+                    popup: 'rounded-2xl border-none shadow-xl font-sans text-sm font-medium'
+                }
+            });
+        };
+
+        // Automatically convert native confirm() attributes on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Forms with inline confirm in onsubmit
+            document.querySelectorAll('form').forEach(form => {
+                const onsubmitAttr = form.getAttribute('onsubmit');
+                if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                    const match = onsubmitAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match) {
+                        const message = match[1];
+                        form.removeAttribute('onsubmit');
+                        form.addEventListener('submit', function(e) {
+                            if (form.dataset.swalConfirmed === 'true') {
+                                return;
+                            }
+                            e.preventDefault();
+                            const isDark = document.documentElement.classList.contains('dark');
+                            Swal.fire({
+                                title: 'Apakah Anda yakin?',
+                                text: message,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Lanjutkan',
+                                cancelButtonText: 'Batal',
+                                buttonsStyling: false,
+                                background: isDark ? '#0f172a' : '#ffffff',
+                                color: isDark ? '#f1f5f9' : '#1e293b',
+                                customClass: {
+                                    confirmButton: 'px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer mr-3',
+                                    cancelButton: 'px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    form.dataset.swalConfirmed = 'true';
+                                    form.submit();
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            // Buttons/links with inline confirm in onclick
+            document.querySelectorAll('[onclick]').forEach(el => {
+                const onclickAttr = el.getAttribute('onclick');
+                if (onclickAttr && onclickAttr.includes('confirm(')) {
+                    const match = onclickAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    if (match) {
+                        const message = match[1];
+                        el.removeAttribute('onclick');
+                        el.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const isDark = document.documentElement.classList.contains('dark');
+                            Swal.fire({
+                                title: 'Apakah Anda yakin?',
+                                text: message,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Lanjutkan',
+                                cancelButtonText: 'Batal',
+                                buttonsStyling: false,
+                                background: isDark ? '#0f172a' : '#ffffff',
+                                color: isDark ? '#f1f5f9' : '#1e293b',
+                                customClass: {
+                                    confirmButton: 'px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm focus:outline-none cursor-pointer mr-3',
+                                    cancelButton: 'px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-semibold rounded-2xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm focus:outline-none cursor-pointer',
+                                    popup: 'rounded-3xl border-none font-sans shadow-2xl',
+                                    htmlContainer: 'text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    const form = el.closest('form');
+                                    if (form) {
+                                        form.dataset.swalConfirmed = 'true';
+                                        form.submit();
+                                    } else if (el.tagName === 'A') {
+                                        window.location.href = el.href;
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }
+            });
+
+            // Dynamic Password Show/Hide Toggle
+            function initPasswordToggles() {
+                document.querySelectorAll('input[type="password"]').forEach(input => {
+                    if (input.dataset.passwordToggleInitialized) return;
+                    input.dataset.passwordToggleInitialized = 'true';
+
+                    // Check if parent already has a toggle button (e.g. custom layout)
+                    const parent = input.parentElement;
+                    if (parent && parent.querySelector('button')) {
+                        return;
+                    }
+
+                    // Add padding-right to prevent text overlap
+                    input.classList.add('pr-10');
+
+                    // If parent is not relative, wrap input in a relative wrapper
+                    let wrapper = parent;
+                    if (!parent.classList.contains('relative')) {
+                        wrapper = document.createElement('div');
+                        wrapper.className = 'relative w-full';
+                        input.parentNode.insertBefore(wrapper, input);
+                        wrapper.appendChild(input);
+                    }
+
+                    // Create toggle button
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-300 transition-colors focus:outline-none';
+                    button.innerHTML = '<i data-lucide="eye" class="h-5 w-5"></i>';
+                    wrapper.appendChild(button);
+
+                    // Click event to toggle type and icon
+                    let show = false;
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        show = !show;
+                        input.type = show ? 'text' : 'password';
+                        button.innerHTML = show 
+                            ? '<i data-lucide="eye-off" class="h-5 w-5"></i>' 
+                            : '<i data-lucide="eye" class="h-5 w-5"></i>';
+                        
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                });
+
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+
+            initPasswordToggles();
+
+            // Handle dynamically added password fields (e.g., in modals)
+            const observer = new MutationObserver((mutations) => {
+                let hasPassword = false;
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.matches && node.matches('input[type="password"]')) {
+                                hasPassword = true;
+                            } else if (node.querySelector && node.querySelector('input[type="password"]')) {
+                                hasPassword = true;
+                            }
+                        }
+                    });
+                });
+                if (hasPassword) {
+                    initPasswordToggles();
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // Auto-submit GET forms (Search & Filters)
+            const filterForms = document.querySelectorAll('form[method="GET"]');
+            
+            // Restore focus if needed
+            const focusedInputName = sessionStorage.getItem('autoSubmitFocusedInput');
+            if (focusedInputName) {
+                const inputToFocus = document.querySelector(`[name="${focusedInputName}"]`);
+                if (inputToFocus && (inputToFocus.type === 'text' || inputToFocus.type === 'search')) {
+                    setTimeout(() => {
+                        inputToFocus.focus();
+                        const val = inputToFocus.value;
+                        inputToFocus.value = '';
+                        inputToFocus.value = val;
+                    }, 50);
+                }
+                sessionStorage.removeItem('autoSubmitFocusedInput');
+            }
+
+            filterForms.forEach(form => {
+                if (form.classList.contains('no-auto-submit') || (form.getAttribute('action') && form.getAttribute('action').includes('logout'))) return;
+
+                let timeout = null;
+                const submitForm = (activeElement) => {
+                    if (activeElement && activeElement.name) {
+                        sessionStorage.setItem('autoSubmitFocusedInput', activeElement.name);
+                    }
+                    form.submit();
+                };
+
+                const inputs = form.querySelectorAll('input, select, textarea');
+                let hasAutoSubmitInputs = false;
+
+                inputs.forEach(input => {
+                    if (input.type === 'hidden') return;
+                    hasAutoSubmitInputs = true;
+
+                    if (input.type === 'text' || input.type === 'search') {
+                        input.addEventListener('input', (e) => {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(() => {
+                                submitForm(e.target);
+                            }, 800); // 800ms debounce
+                        });
+                        
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                clearTimeout(timeout);
+                                submitForm(e.target);
+                            }
+                        });
+                    } else {
+                        input.addEventListener('change', (e) => {
+                            submitForm(e.target);
+                        });
+                    }
+                });
+
+                // Hide submit button if the form has auto-submittable inputs
+                if (hasAutoSubmitInputs) {
+                    const submitBtns = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                    submitBtns.forEach(btn => btn.style.display = 'none');
+                }
+            });
+        });
+    </script>
+
+    
+    
+        <!-- Device Native Notification & Real-time Live Poller -->
+    <script>
+        (function() {
+            // Audio Chime Generator using Web Audio API (gentle & crisp mobile notification tone)
+            function playNotificationSound() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    
+                    const now = ctx.currentTime;
+                    // Tone 1
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(587.33, now); // D5
+                    gain1.gain.setValueAtTime(0.15, now);
+                    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start(now);
+                    osc1.stop(now + 0.22);
+
+                    // Tone 2 (higher melodic note)
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(880.00, now + 0.10); // A5
+                    gain2.gain.setValueAtTime(0.2, now + 0.10);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.40);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(now + 0.10);
+                    osc2.stop(now + 0.40);
+                } catch (e) {
+                    console.warn('Audio chime skipped:', e);
+                }
+            }
+
+            const vapidPublicKey = "BJgdVuD73H1oZ_6lPLvipi688tyALsA3sVa5moyzFzQnSnOhYZ60gX5ohI2A_o9emi3bDdE4F8XCfjKWvsfYtJQ";
+            const pushSubscribeUrl = "https:\/\/pkl.smkn1ciamis.id\/push\/subscribe";
+            const currentAuthUserId = 114;
+
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                const rawData = window.atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
+
+            async function syncWebPushSubscription() {
+                if (!vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    return;
+                }
+                if (Notification.permission !== 'granted') {
+                    return;
+                }
+
+                try {
+                    const reg = await navigator.serviceWorker.ready;
+                    let subscription = await reg.pushManager.getSubscription();
+                    if (!subscription) {
+                        subscription = await reg.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+                        });
+                    }
+
+                    const subJson = subscription.toJSON();
+                    if (!subJson || !subJson.endpoint || !subJson.keys) return;
+
+                    const syncKey = currentAuthUserId + ':' + subJson.endpoint;
+                    if (sessionStorage.getItem('webpush_synced') === syncKey) {
+                        return;
+                    }
+
+                    const encoding = (PushManager.supportedContentEncodings || ['aes128gcm'])[0];
+                    const res = await fetch(pushSubscribeUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({
+                            endpoint: subJson.endpoint,
+                            keys: subJson.keys,
+                            contentEncoding: encoding
+                        })
+                    });
+
+                    if (res.ok) {
+                        sessionStorage.setItem('webpush_synced', syncKey);
+                    }
+                } catch (err) {
+                    console.warn('WebPush subscription skipped:', err);
+                }
+            }
+
+            // Request Native Notification Permission
+            function requestNotificationPermission() {
+                if (!('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                    syncWebPushSubscription();
+                    return;
+                }
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(function(perm) {
+                        if (perm === 'granted') {
+                            console.log('Izin notifikasi perangkat diaktifkan.');
+                            syncWebPushSubscription();
+                        }
+                    });
+                }
+            }
+
+            // Trigger Native Mobile / Desktop Notification
+            function showNativeNotification(title, body, url, tag) {
+                playNotificationSound();
+
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const options = {
+                        body: body,
+                        icon: 'https://pkl.smkn1ciamis.id/logo.png',
+                        badge: 'https://pkl.smkn1ciamis.id/icons/badge-96x96.png',
+                        vibrate: [200, 100, 200],
+                        data: { url: url },
+                        tag: tag || 'mas-pkl-notif-' + Date.now(),
+                        renotify: true
+                    };
+
+                    if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+                        navigator.serviceWorker.ready.then(function(reg) {
+                            reg.showNotification(title, options);
+                        }).catch(function() {
+                            try {
+                                const n = new Notification(title, options);
+                                n.onclick = function() {
+                                    window.focus();
+                                    if (url) window.location.href = url;
+                                };
+                            } catch(e) {}
+                        });
+                    } else {
+                        try {
+                            const n = new Notification(title, options);
+                            n.onclick = function() {
+                                window.focus();
+                                if (url) window.location.href = url;
+                            };
+                        } catch(e) {}
+                    }
+                }
+
+                // Also display in-app Toast if window is open
+                if (window.showToast) {
+                    window.showToast(`${title}: ${body}`, 'info');
+                }
+            }
+
+            // Live Update UI Badges
+            function updateBadges(unreadNotif, unreadPesan) {
+                // Topbar Bell Badge
+                const topbarBadge = document.getElementById('topbar-notif-badge');
+                if (topbarBadge) {
+                    if (unreadNotif > 0) {
+                        topbarBadge.textContent = unreadNotif > 9 ? '9+' : unreadNotif;
+                        topbarBadge.classList.remove('hidden');
+                    } else {
+                        topbarBadge.classList.add('hidden');
+                    }
+                }
+
+                // Sidebar Pesan Badge
+                const pesanBadge = document.getElementById('sidebar-pesan-badge-pesan');
+                if (pesanBadge) {
+                    if (unreadPesan > 0) {
+                        pesanBadge.textContent = unreadPesan;
+                        pesanBadge.classList.remove('hidden');
+                    } else {
+                        pesanBadge.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Polling State Management
+            let lastNotifId = parseInt(sessionStorage.getItem('last_notif_id') || '0', 10);
+            let lastPesanId = parseInt(sessionStorage.getItem('last_pesan_id') || '0', 10);
+            let isFirstPoll = (lastNotifId === 0 && lastPesanId === 0);
+
+            async function pollDeviceNotifications() {
+                try {
+                    const params = new URLSearchParams({
+                        last_notif_id: lastNotifId,
+                        last_pesan_id: lastPesanId
+                    });
+
+                    const res = await fetch(`https://pkl.smkn1ciamis.id/notifikasi/poll?${params.toString()}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    // Update UI Badges live
+                    updateBadges(data.unread_notif_count, data.unread_pesan_count);
+
+                    if (isFirstPoll) {
+                        // Inisialisasi ID awal session tanpa memunculkan alert beruntun
+                        lastNotifId = data.max_notif_id;
+                        lastPesanId = data.max_pesan_id;
+                        sessionStorage.setItem('last_notif_id', lastNotifId);
+                        sessionStorage.setItem('last_pesan_id', lastPesanId);
+                        isFirstPoll = false;
+                        return;
+                    }
+
+                    // Tampilkan notifikasi sistem baru
+                    if (data.notifications && data.notifications.length > 0) {
+                        data.notifications.forEach(n => {
+                            showNativeNotification(n.title, n.body, n.url, 'notif-' + n.id);
+                        });
+                        lastNotifId = Math.max(lastNotifId, data.max_notif_id);
+                        sessionStorage.setItem('last_notif_id', lastNotifId);
+                    }
+
+                    // Tampilkan pesan chat baru
+                    if (data.messages && data.messages.length > 0) {
+                        const currentPath = window.location.pathname;
+                        data.messages.forEach(m => {
+                            if (!currentPath.includes('/pesan/' + m.id)) {
+                                showNativeNotification(m.title, m.body, m.url, 'pesan-' + m.id);
+                            }
+                        });
+                        lastPesanId = Math.max(lastPesanId, data.max_pesan_id);
+                        sessionStorage.setItem('last_pesan_id', lastPesanId);
+                    }
+                } catch (err) {
+                    // Fail silently on offline/network errors
+                }
+            }
+
+            // Auto-ask permission on first click/gesture
+            document.addEventListener('click', function onFirstGesture() {
+                requestNotificationPermission();
+                document.removeEventListener('click', onFirstGesture);
+            }, { once: true });
+
+            // Initial poll & start recurring interval
+            document.addEventListener('DOMContentLoaded', () => {
+                requestNotificationPermission();
+                pollDeviceNotifications();
+                setInterval(pollDeviceNotifications, 12000); // 12 detik polling hemat baterai
+            });
+        })();
+    </script>
+    
+                        <div id="reminder-settings-modal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md transition-opacity duration-300"
+     data-configured="0">
+    
+    <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xl p-6 sm:p-8 animate-in" onclick="event.stopPropagation()">
+        
+        <div class="flex items-start justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
+                    <i data-lucide="bell-ring" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        Atur Alarm Pengingat PKL
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Sesuaikan jam alarm dengan jadwal jam kerja tempat DUDI Anda.
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeReminderModal(true)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form id="reminder-settings-form" class="space-y-5" onsubmit="submitReminderSettings(event)">
+            <input type="hidden" name="_token" value="frqClFZL0dvrTNG20xRuhkR22InzEn9nkLvVIrzk" autocomplete="off">
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="sunrise" class="w-4 h-4 text-amber-500"></i>
+                        Alarm Absen Masuk
+                    </label>
+                    <input type="time" name="jam_notif_masuk" id="jam_notif_masuk" required value="07:00"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '07:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            07:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '07:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            07:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '08:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            08:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '08:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            08:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_masuk', '09:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-amber-500 hover:text-amber-500 transition-all cursor-pointer">
+                            09:00
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="sunset" class="w-4 h-4 text-orange-500"></i>
+                        Alarm Absen Pulang
+                    </label>
+                    <input type="time" name="jam_notif_pulang" id="jam_notif_pulang" required value="16:00"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '15:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            15:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '16:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            16:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '16:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            16:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '17:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            17:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_pulang', '17:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-orange-500 hover:text-orange-500 transition-all cursor-pointer">
+                            17:30
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="book-open" class="w-4 h-4 text-blue-500"></i>
+                        Alarm Isi Jurnal
+                    </label>
+                    <input type="time" name="jam_notif_jurnal" id="jam_notif_jurnal" required value="19:30"
+                           class="px-3 py-1.5 text-sm font-mono font-bold bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100 shadow-xs">
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '17:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            17:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '18:00')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            18:00
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '19:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            19:30
+                        </button>
+                                            <button type="button" onclick="setPreset('jam_notif_jurnal', '20:30')"
+                                class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-500 hover:text-blue-500 transition-all cursor-pointer">
+                            20:30
+                        </button>
+                                    </div>
+            </div>
+
+            
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <i data-lucide="calendar-off" class="w-4 h-4 text-sky-500"></i>
+                        Hari Libur Rutin DUDI
+                    </label>
+                    <span class="text-[10px] text-slate-400">Otomatis ditandai di kalender</span>
+                </div>
+                <div class="grid grid-cols-7 gap-1.5" id="routine-off-days-grid">
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="1"  class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Sen
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="2"  class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Sel
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="3"  class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Rab
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="4"  class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Kam
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="5"  class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Jum
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="6" checked class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Sab
+                            </span>
+                        </label>
+                                                                    <label class="cursor-pointer">
+                            <input type="checkbox" name="hari_libur_rutin[]" value="7" checked class="peer sr-only routine-off-checkbox">
+                            <span class="flex items-center justify-center py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 peer-checked:bg-sky-500 peer-checked:text-white peer-checked:border-sky-500 transition-colors select-none">
+                                Min
+                            </span>
+                        </label>
+                                    </div>
+                <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span class="text-[10px] text-slate-400 font-medium">Pilihan cepat:</span>
+                    <button type="button" onclick="setOffDaysPreset([6, 7])"
+                            class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-500 hover:text-sky-500 transition-colors cursor-pointer">
+                        Sabtu &amp; Minggu
+                    </button>
+                    <button type="button" onclick="setOffDaysPreset([7])"
+                            class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-500 hover:text-sky-500 transition-colors cursor-pointer">
+                        Minggu Saja
+                    </button>
+                    <button type="button" onclick="setOffDaysPreset([])"
+                            class="px-2 py-0.5 text-[11px] font-semibold rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-500 hover:text-sky-500 transition-colors cursor-pointer">
+                        Shift Rolling / Tidak Tetap
+                    </button>
+                </div>
+            </div>
+
+            <div id="reminder-msg" class="hidden text-xs font-medium text-center py-1"></div>
+
+            
+            <div class="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
+                <button type="submit" id="btn-save-reminder"
+                        class="w-full sm:flex-1 py-3 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2 transition-colors cursor-pointer">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    Simpan Alarm Pengingat
+                </button>
+                <button type="button" onclick="useDefaultReminder()"
+                        class="w-full sm:w-auto py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-all cursor-pointer">
+                    Gunakan Standar
+                </button>
+            </div>
+            <div class="text-center">
+                <button type="button" onclick="closeReminderModal(true)" class="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer">
+                    Nanti Saja
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function setPreset(inputId, time) {
+        const el = document.getElementById(inputId);
+        if (el) el.value = time;
+    }
+
+    function setOffDaysPreset(days) {
+        document.querySelectorAll('.routine-off-checkbox').forEach(cb => {
+            cb.checked = days.includes(parseInt(cb.value, 10));
+        });
+    }
+
+    function closeReminderModal(rememberSession = false) {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (rememberSession) {
+                sessionStorage.setItem('dismissed_reminder_modal', '1');
+            }
+        }
+    }
+
+    function openReminderModal() {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
+
+    function useDefaultReminder() {
+        setPreset('jam_notif_masuk', '07:00');
+        setPreset('jam_notif_pulang', '16:00');
+        setPreset('jam_notif_jurnal', '19:30');
+        setOffDaysPreset([6, 7]);
+        document.getElementById('reminder-settings-form').requestSubmit();
+    }
+
+    async function submitReminderSettings(e) {
+        e.preventDefault();
+        const form = document.getElementById('reminder-settings-form');
+        const btn = document.getElementById('btn-save-reminder');
+        const msg = document.getElementById('reminder-msg');
+
+        const selectedOffDays = Array.from(document.querySelectorAll('.routine-off-checkbox:checked'))
+            .map(cb => parseInt(cb.value, 10));
+
+        const data = {
+            jam_notif_masuk: document.getElementById('jam_notif_masuk')?.value || '07:00',
+            jam_notif_pulang: document.getElementById('jam_notif_pulang')?.value || '16:00',
+            jam_notif_jurnal: document.getElementById('jam_notif_jurnal')?.value || '19:30',
+            hari_libur_rutin: selectedOffDays,
+        };
+
+        if (btn) btn.disabled = true;
+        if (msg) {
+            msg.className = 'text-xs font-medium text-center text-amber-500 py-1 animate-pulse';
+            msg.textContent = 'Menyimpan jadwal alarm...';
+            msg.classList.remove('hidden');
+        }
+
+        try {
+            const res = await fetch("https://pkl.smkn1ciamis.id/siswa/profile/reminder-settings", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': 'frqClFZL0dvrTNG20xRuhkR22InzEn9nkLvVIrzk',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (!res.ok || !result.success) {
+                throw new Error(result.message || 'Gagal menyimpan pengaturan.');
+            }
+
+            if (msg) {
+                msg.className = 'text-xs font-medium text-center text-emerald-500 py-1';
+                msg.textContent = '✨ Jadwal alarm berhasil disimpan!';
+            }
+
+            const modal = document.getElementById('reminder-settings-modal');
+            if (modal) modal.setAttribute('data-configured', '1');
+
+            setTimeout(() => {
+                closeReminderModal(false);
+                if (window.location.pathname.includes('/siswa/profile')) {
+                    window.location.reload();
+                }
+            }, 800);
+        } catch (err) {
+            if (msg) {
+                msg.className = 'text-xs font-medium text-center text-rose-500 py-1';
+                msg.textContent = '⚠️ ' + err.message;
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('reminder-settings-modal');
+        if (modal) {
+            const isConfigured = modal.getAttribute('data-configured') === '1';
+            const isDismissed = sessionStorage.getItem('dismissed_reminder_modal') === '1';
+            if (isConfigured || isDismissed) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+    });
+</script>
+            
+    <script>
+    // Tangkap event sedini mungkin sebelum Alpine dimuat
+    window.deferredPwaPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPwaPrompt = e;
+        // Jika event ini muncul, berarti aplikasi pasti BELUM di-install (atau sudah di-uninstall)
+        localStorage.removeItem('pwa_installed_flag');
+        window.dispatchEvent(new Event('pwa-ready'));
+    });
+</script>
+
+<div x-data="pwaPrompt()" 
+     x-show="show" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 translate-y-10"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 translate-y-10"
+     class="fixed bottom-4 left-4 right-4 z-100 md:max-w-sm md:left-1/2 md:-translate-x-1/2 md:bottom-8"
+     style="display: none;">
+    
+    <div class="bg-[#1e293b] rounded-2xl shadow-2xl p-4 border border-slate-700/50 relative overflow-hidden">
+        <!-- Close button -->
+        <button @click="dismiss()" class="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors z-10 bg-[#1e293b] rounded-full p-1">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <div class="flex items-start gap-4 mb-4 mt-1">
+            <div class="w-14 h-14 flex items-center justify-center shrink-0">
+                <img src="https://pkl.smkn1ciamis.id/logo.png" alt="Logo" class="w-14 h-14 object-cover rounded-xl shadow-sm">
+            </div>
+            <div class="flex-1 pr-6">
+                <h3 class="text-white font-bold text-lg leading-tight mb-1">Install MAS-PKL</h3>
+                <p class="text-slate-400 text-xs leading-relaxed">Akses lebih cepat langsung dari layar utama HP kamu.</p>
+            </div>
+        </div>
+
+        <template x-if="!isIos">
+            <button @click="install()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-500/20 active:scale-[0.98]">
+                <i data-lucide="download" class="w-5 h-5"></i>
+                Install Sekarang
+            </button>
+        </template>
+        
+        <template x-if="isIos">
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-center">
+                <p class="text-xs text-blue-100 leading-relaxed">
+                    Untuk install di iOS:<br>
+                    Tap ikon <b class="text-white">Share</b> di bawah, lalu pilih<br>
+                    <b class="text-white">"Add to Home Screen"</b>
+                </p>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('pwaPrompt', () => ({
+            show: false,
+            deferredPrompt: null,
+            isIos: false,
+
+            init() {
+                const userAgent = window.navigator.userAgent.toLowerCase();
+                this.isIos = /iphone|ipad|ipod/.test(userAgent);
+                const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone) || window.matchMedia('(display-mode: standalone)').matches;
+                const isAlreadyInstalled = localStorage.getItem('pwa_installed_flag');
+                const isDismissed = localStorage.getItem('pwa_dismissed_flag');
+
+                // Jangan tampilkan jika dalam mode standalone, ATAU sedang dalam proses OS installing, ATAU sudah di-dismiss user
+                if (isInStandaloneMode || isAlreadyInstalled || isDismissed) {
+                    return;
+                }
+
+                if (window.deferredPwaPrompt) {
+                    this.deferredPrompt = window.deferredPwaPrompt;
+                } else {
+                    window.addEventListener('pwa-ready', () => {
+                        this.deferredPrompt = window.deferredPwaPrompt;
+                    });
+                }
+
+                // Selalu tampilkan setelah 1.5 detik jika belum di mode standalone
+                setTimeout(() => {
+                    // Pastikan tidak tampil jika flag sudah diset oleh tab lain
+                    if (!localStorage.getItem('pwa_installed_flag')) {
+                        this.show = true;
+                    }
+                }, 1500);
+
+                window.addEventListener('appinstalled', () => {
+                    localStorage.setItem('pwa_installed_flag', 'true');
+                    this.show = false;
+                    this.deferredPrompt = null;
+                });
+            },
+
+            async install() {
+                if (this.deferredPrompt) {
+                    this.deferredPrompt.prompt();
+                    const { outcome } = await this.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        // Tandai di localStorage bahwa OS sedang memproses instalasi
+                        localStorage.setItem('pwa_installed_flag', 'true');
+                        
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sedang Menginstall...',
+                                text: 'Aplikasi sedang ditambahkan ke layar utama. Tergantung tipe HP Anda, proses ini memakan waktu 5-30 detik. Silakan cek layar utama HP Anda sebentar lagi.',
+                                showConfirmButton: true,
+                                confirmButtonColor: '#2563eb'
+                            });
+                        }
+                    }
+                    this.deferredPrompt = null;
+                    this.show = false;
+                } else {
+                    // Fallback jika browser tidak memicu event (misalnya sudah di-install, Firefox, Incognito, In-App Browser)
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Status Pemasangan',
+                            html: `
+                                <div class="text-sm text-left text-slate-600">
+                                    <p class="mb-3">Sepertinya <b>aplikasi sudah ter-install</b> di perangkat Anda. Silakan cek layar utama (Home Screen) HP Anda.</p>
+                                    <p class="mb-2">Jika belum ada, browser yang Anda gunakan saat ini mungkin tidak mendukung instalasi otomatis 1-klik. Anda bisa memasangnya secara manual:</p>
+                                    <ol class="list-decimal ml-4">
+                                        <li class="mb-1">Tap menu <b>Titik Tiga (⋮)</b> atau <b>Share</b> di pojok browser.</li>
+                                        <li>Pilih <b>"Add to Home screen"</b> atau <b>"Install app"</b>.</li>
+                                    </ol>
+                                </div>
+                            `,
+                            confirmButtonColor: '#2563eb',
+                            confirmButtonText: 'Baik, Mengerti'
+                        });
+                    } else {
+                        alert('Jika aplikasi sudah ter-install, silakan cek Home Screen Anda. Jika belum, tap menu "Titik Tiga" (⋮) di browser, lalu pilih "Add to Home screen".');
+                    }
+                }
+            },
+
+            dismiss() {
+                // Sembunyikan dan simpan di localStorage agar tidak muncul lagi
+                localStorage.setItem('pwa_dismissed_flag', 'true');
+                this.show = false;
+            }
+        }));
+    });
+</script>
+</body>
+</html>

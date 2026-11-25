@@ -73,6 +73,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/jurnal/cetak', [SimakController::class, 'printJournal'])->name('journals.print');
     Route::get('/jurnal/portofolio/cetak', [SimakController::class, 'printPortfolio'])->name('journals.portfolio.print');
     Route::post('/jurnal', [SimakController::class, 'storeJournal'])->name('journals.store');
+    Route::delete('/jurnal/{id}', [SimakController::class, 'destroyJournal'])->name('journals.destroy');
+    Route::post('/jurnal/jadwal-libur', [SimakController::class, 'updateRoutineOffDays'])->name('journals.off_days.update');
 
     // Task Submission
     Route::post('/tugas/{id}/submit', [SimakController::class, 'submitTask'])->name('tasks.submit');

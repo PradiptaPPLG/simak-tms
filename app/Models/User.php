@@ -23,7 +23,52 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'routine_off_days' => 'array',
         ];
+    }
+
+    /**
+     * Check if a specific date is a configured routine off day
+     */
+    public function isOffDay($date): bool
+    {
+        if (empty($this->routine_off_days) || !is_array($this->routine_off_days)) {
+            return false;
+        }
+        $dayOfWeekIso = \Carbon\Carbon::parse($date)->dayOfWeekIso; // 1 = Senin, ..., 7 = Minggu
+        return in_array($dayOfWeekIso, $this->routine_off_days) || in_array((string)$dayOfWeekIso, $this->routine_off_days);
+    }
+
+    /**
+     * Check whether student has ever configured their routine off days
+     */
+    public function hasConfiguredOffDays(): bool
+    {
+        return !is_null($this->routine_off_days);
+    }
+
+    /**
+     * Human-readable day names of routine off days
+     */
+    public function getOffDaysLabelsAttribute(): array
+    {
+        $map = [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ];
+        $days = (array)($this->routine_off_days ?? []);
+        $labels = [];
+        foreach ($days as $d) {
+            if (isset($map[(int)$d])) {
+                $labels[] = $map[(int)$d];
+            }
+        }
+        return $labels;
     }
 
     protected static function booted()
