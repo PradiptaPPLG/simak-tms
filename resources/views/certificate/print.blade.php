@@ -147,9 +147,7 @@
 
         <!-- Subtle Watermark Logo Center -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.035] select-none z-0">
-            <div class="w-[500px] h-[500px] rounded-full border-[36px] border-slate-900 flex items-center justify-center font-black text-9xl tracking-tighter">
-                TMS
-            </div>
+            <img src="{{ asset('images/logo/logo_tms.png') }}" alt="Watermark TMS" class="w-[480px] h-[480px] object-contain grayscale">
         </div>
 
         <!-- ============================================================== -->
@@ -160,9 +158,7 @@
                 
                 <!-- Brand Logo & Identity -->
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white flex items-center justify-center font-black text-base shadow-lg shadow-slate-900/20 border border-slate-700/40 shrink-0">
-                        <span class="text-white">T</span><span class="text-red-500">M</span><span class="text-amber-400">S</span>
-                    </div>
+                    <img src="{{ asset('images/logo/logo_tms.png') }}" alt="Logo PT. Teknologi Multi Sistem" class="w-12 h-12 object-contain shrink-0">
                     <div>
                         <div class="font-cinzel font-black text-slate-950 text-base tracking-[0.18em] leading-none">
                             PT. TEKNOLOGI MULTI SISTEM

@@ -33,7 +33,10 @@
     <div class="max-w-3xl w-full space-y-6">
 
         <!-- Top Brand Header -->
-        <div class="text-center space-y-2">
+        <div class="text-center space-y-3">
+            <div class="inline-flex items-center justify-center">
+                <img src="{{ asset('images/logo/logo_tms.png') }}" alt="Logo PT. Teknologi Multi Sistem" class="w-16 h-16 object-contain drop-shadow-md">
+            </div>
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold shadow-lg">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>Portal Verifikasi Publik Resmi SIMAK-TMS</span>
