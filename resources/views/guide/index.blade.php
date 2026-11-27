@@ -194,7 +194,9 @@
                     Menu Utama: <b>Dashboard Mentor, Siswa Bimbingan, Validasi Logbook, Rapor Nilai, Galeri Karya</b>
                 </div>
             </div>
+            @endif
 
+            @if($currentRole === 'admin_tms')
             <!-- 3. ROLE ADMIN TMS -->
             <div class="mas-card p-6 space-y-5 border-t-4 border-t-emerald-600 flex flex-col justify-between">
                 <div class="space-y-4">
