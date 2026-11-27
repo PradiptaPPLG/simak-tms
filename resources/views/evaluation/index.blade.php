@@ -29,6 +29,33 @@
         @endif
     </div>
 
+    @if(isset($enrollments) && $enrollments->count() > 0)
+        <!-- Pivot Multi-Angkatan Selector (1 Peserta bisa >1 Sertifikat / PKL) -->
+        <div class="mas-card p-4 space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+                <div class="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                    <i data-lucide="layers" class="w-4 h-4 text-red-600"></i>
+                    <span>Riwayat Keikutsertaan PKL &amp; Sertifikat ({{ $enrollments->count() }} Periode)</span>
+                </div>
+                <span class="text-[10px] text-slate-400 font-medium">Klik angkatan untuk melihat nilai, mentor, &amp; sertifikat masing-masing</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @foreach($enrollments as $enr)
+                    @php
+                        $isSel = isset($selectedEnrollment) && $selectedEnrollment->id === $enr->id;
+                    @endphp
+                    <a href="{{ route('evaluation.index', ['batch_id' => $enr->batch_id]) }}"
+                       class="px-3.5 py-2 rounded-xl border text-xs transition-all flex items-center gap-2 {{ $isSel ? 'bg-red-600 text-white border-red-600 shadow-sm font-bold' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-semibold' }}">
+                        <span>{{ $enr->batch->batch_name ?? 'Angkatan #' . $enr->batch_id }}</span>
+                        <span class="px-1.5 py-0.5 rounded-md text-[10px] font-mono {{ $isSel ? 'bg-white/20 text-white' : 'bg-white text-slate-600 border border-slate-200' }}">
+                            {{ number_format($enr->final_score, 1) }} ({{ $enr->grade }})
+                        </span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @if($evaluation)
         <!-- Final Score Summary Card -->
         <div class="mas-card p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-l-4 border-l-red-600">
@@ -39,7 +66,10 @@
                     {{ $user->school_origin }} • {{ $user->major }}
                 </div>
                 <div class="text-xs text-slate-400 mt-2">
-                    Penilai Industri: <b class="text-slate-800">{{ $evaluation->mentor->name ?? 'Farhan Ramadhan (Head of Software TMS)' }}</b>
+                    Penilai Industri: <b class="text-slate-800">{{ $evaluation->mentor->name ?? 'Mentor Pembimbing TMS' }}</b>
+                    @if(!empty($evaluation->batch))
+                        • Angkatan: <b class="text-red-600">{{ $evaluation->batch->batch_name }}</b>
+                    @endif
                 </div>
             </div>
 

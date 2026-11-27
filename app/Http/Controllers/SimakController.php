@@ -469,14 +469,46 @@ class SimakController extends Controller
     // ==========================================
     // EVALUASI & NILAI
     // ==========================================
-    public function evaluation()
+    public function evaluation(Request $request)
     {
         $user = Auth::user();
-        $evaluation = Evaluation::with('mentor')->where('user_id', $user->id)->first();
+        $enrollments = BatchStudent::with(['batch', 'mentor'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        $selectedEnrollment = null;
+        if ($enrollments->isNotEmpty()) {
+            $reqBatchId = $request->get('batch_id');
+            $selectedEnrollment = $reqBatchId
+                ? ($enrollments->firstWhere('batch_id', (int) $reqBatchId) ?? $enrollments->first())
+                : $enrollments->first();
+        }
+
+        // Prioritaskan data nilai dari pivot batch_students; fallback ke evaluations legacy jika belum ada
+        if ($selectedEnrollment) {
+            $evaluation = (object) [
+                'technical_skill' => $selectedEnrollment->technical_skill,
+                'discipline' => $selectedEnrollment->discipline,
+                'teamwork' => $selectedEnrollment->teamwork,
+                'initiative' => $selectedEnrollment->initiative,
+                'final_score' => $selectedEnrollment->final_score,
+                'grade' => $selectedEnrollment->grade,
+                'certificate_number' => $selectedEnrollment->certificate_number,
+                'issue_date' => $selectedEnrollment->issue_date,
+                'general_notes' => $selectedEnrollment->mentor_notes,
+                'is_published' => $selectedEnrollment->is_published,
+                'mentor' => $selectedEnrollment->mentor ?? $user->mentor,
+                'batch' => $selectedEnrollment->batch,
+            ];
+        } else {
+            $evaluation = Evaluation::with('mentor')->where('user_id', $user->id)->first();
+        }
+
         $completedTasksCount = TaskSubmission::where('user_id', $user->id)->where('status', 'approved')->count();
         $approvedJournalsCount = DailyJournal::where('user_id', $user->id)->where('status', 'approved')->count();
 
-        return view('evaluation.index', compact('user', 'evaluation', 'completedTasksCount', 'approvedJournalsCount'));
+        return view('evaluation.index', compact('user', 'evaluation', 'enrollments', 'selectedEnrollment', 'completedTasksCount', 'approvedJournalsCount'));
     }
 
     // ==========================================
@@ -2156,13 +2188,15 @@ class SimakController extends Controller
         $totalStudents = User::where('role', 'siswa')->count();
         $assignedStudentsCount = User::where('role', 'siswa')->whereNotNull('mentor_id')->count();
         $ratio = $totalMentors > 0 ? round($totalStudents / $totalMentors, 1) : 0;
+        $director = $this->getDirectorSettings();
 
         return view('admin.mentors', compact(
             'mentors',
             'totalMentors',
             'totalStudents',
             'assignedStudentsCount',
-            'ratio'
+            'ratio',
+            'director'
         ));
     }
 
@@ -2325,11 +2359,96 @@ class SimakController extends Controller
         return view('certificate.verify_search', compact('recentVerifications'));
     }
 
-    public function verifyShow($certificate_number)
+    private function getDirectorSettings(): array
     {
-        $certNo = trim($certificate_number);
+        try {
+            $rows = \Illuminate\Support\Facades\DB::table('app_settings')
+                ->whereIn('key', ['director_name', 'director_signature_name', 'director_title'])
+                ->pluck('value', 'key');
+        } catch (\Throwable $e) {
+            $rows = collect();
+        }
 
-        // Find evaluation by certificate_number or account_id / NIS
+        return [
+            'name' => $rows['director_name'] ?? 'Dani Ramdhani, S.T.',
+            'signature' => $rows['director_signature_name'] ?? 'Dani Ramdhani',
+            'title' => $rows['director_title'] ?? 'Direktur Utama PT. TMS',
+        ];
+    }
+
+    public function adminUpdateDirector(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $validated = $request->validate([
+            'director_name' => 'required|string|max:120',
+            'director_signature_name' => 'required|string|max:80',
+            'director_title' => 'required|string|max:120',
+        ]);
+
+        foreach ($validated as $k => $v) {
+            \Illuminate\Support\Facades\DB::table('app_settings')->updateOrInsert(
+                ['key' => $k],
+                ['value' => trim($v), 'updated_at' => now(), 'created_at' => now()]
+            );
+        }
+
+        return back()->with('success', 'Data Direktur Utama untuk tanda tangan E-Sertifikat berhasil diperbarui!');
+    }
+
+    /**
+     * Resolve certificate & evaluation data from Pivot BatchStudent FIRST (multi-batch support),
+     * falling back to legacy Evaluation if no pivot record exists.
+     */
+    private function resolveCertificateRecord(string $certNo): ?array
+    {
+        // 1. Cari di tabel pivot batch_students berdasarkan nomor sertifikat persis
+        $bs = BatchStudent::with(['batch', 'student.mentor', 'mentor'])
+            ->where('certificate_number', $certNo)
+            ->first();
+
+        // 2. Jika tidak ketemu, cari berdasarkan account_id / nis_nim siswa pada pivot terbaru yang terbit
+        if (!$bs) {
+            $bs = BatchStudent::with(['batch', 'student.mentor', 'mentor'])
+                ->where('is_published', true)
+                ->whereHas('student', function ($q) use ($certNo) {
+                    $q->where('account_id', $certNo)
+                      ->orWhere('nis_nim', $certNo)
+                      ->orWhere('username', $certNo);
+                })
+                ->latest()
+                ->first();
+        }
+
+        if ($bs && $bs->student && $bs->is_published && !empty($bs->student->account_id)) {
+            $student = $bs->student;
+            $mentor = $bs->mentor ?? $student->mentor;
+            if (!$mentor) return null;
+
+            $evalObj = (object) [
+                'technical_skill' => $bs->technical_skill,
+                'discipline' => $bs->discipline,
+                'teamwork' => $bs->teamwork,
+                'initiative' => $bs->initiative,
+                'final_score' => $bs->final_score,
+                'grade' => $bs->grade,
+                'predicate' => $bs->final_score >= 85 ? 'Sangat Memuaskan (A)' : ($bs->final_score >= 75 ? 'Memuaskan (B)' : 'Baik (C)'),
+                'certificate_number' => $bs->certificate_number,
+                'issue_date' => $bs->issue_date,
+                'general_notes' => $bs->mentor_notes,
+                'is_published' => $bs->is_published,
+                'mentor' => $mentor,
+            ];
+
+            return [
+                'evaluation' => $evalObj,
+                'student' => $student,
+                'mentor' => $mentor,
+                'batch' => $bs->batch ?? $student->batch ?? Batch::first(),
+            ];
+        }
+
+        // 3. Fallback ke tabel evaluations legacy
         $evaluation = Evaluation::with(['user.mentor', 'user.batch', 'mentor'])
             ->where('certificate_number', $certNo)
             ->orWhereHas('user', function ($q) use ($certNo) {
@@ -2340,14 +2459,35 @@ class SimakController extends Controller
             ->first();
 
         if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
-            return response()->view('certificate.verify_not_found', ['certificate_number' => $certNo], 404);
+            return null;
         }
 
         $student = $evaluation->user;
         $mentor = $evaluation->mentor ?? $student->mentor;
         $batch = $student->batch ?? Batch::first();
 
-        // Projects built by this student or in this batch (>1 project per batch)
+        return [
+            'evaluation' => $evaluation,
+            'student' => $student,
+            'mentor' => $mentor,
+            'batch' => $batch,
+        ];
+    }
+
+    public function verifyShow($certificate_number)
+    {
+        $certNo = trim($certificate_number);
+        $resolved = $this->resolveCertificateRecord($certNo);
+
+        if (!$resolved) {
+            return response()->view('certificate.verify_not_found', ['certificate_number' => $certNo], 404);
+        }
+
+        $evaluation = $resolved['evaluation'];
+        $student = $resolved['student'];
+        $mentor = $resolved['mentor'];
+        $batch = $resolved['batch'];
+
         $projects = ShowcaseProject::where('batch_id', $batch ? $batch->id : 1)
             ->orWhere('creator_id', $student->id)
             ->get();
@@ -2358,26 +2498,19 @@ class SimakController extends Controller
     public function apiVerify($certificate_number)
     {
         $certNo = trim($certificate_number);
+        $resolved = $this->resolveCertificateRecord($certNo);
 
-        $evaluation = Evaluation::with(['user.mentor', 'user.batch', 'mentor'])
-            ->where('certificate_number', $certNo)
-            ->orWhereHas('user', function ($q) use ($certNo) {
-                $q->where('account_id', $certNo)
-                  ->orWhere('nis_nim', $certNo)
-                  ->orWhere('username', $certNo);
-            })
-            ->first();
-
-        if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
+        if (!$resolved) {
             return response()->json([
                 'found' => false,
                 'message' => 'Sertifikat tidak ditemukan atau belum diterbitkan secara resmi oleh PT. TMS.'
             ], 404);
         }
 
-        $student = $evaluation->user;
-        $mentor = $evaluation->mentor ?? $student->mentor;
-        $batch = $student->batch ?? Batch::first();
+        $evaluation = $resolved['evaluation'];
+        $student = $resolved['student'];
+        $mentor = $resolved['mentor'];
+        $batch = $resolved['batch'];
 
         return response()->json([
             'found' => true,
@@ -2400,23 +2533,19 @@ class SimakController extends Controller
     public function printCertificate($certificate_number)
     {
         $certNo = trim($certificate_number);
+        $resolved = $this->resolveCertificateRecord($certNo);
 
-        $evaluation = Evaluation::with(['user.mentor', 'user.batch', 'mentor'])
-            ->where('certificate_number', $certNo)
-            ->orWhereHas('user', function ($q) use ($certNo) {
-                $q->where('account_id', $certNo);
-            })
-            ->first();
-
-        if (!$evaluation || empty($evaluation->user) || empty($evaluation->user->mentor_id) || empty($evaluation->user->account_id) || !$evaluation->is_published) {
+        if (!$resolved) {
             abort(403, 'Sertifikat kelulusan belum dapat dicetak. Siswa masih berstatus magang aktif atau belum menyelesaikan evaluasi nilai akhir oleh pembimbing mentor industri PT. TMS.');
         }
 
-        $student = $evaluation->user;
-        $mentor = $evaluation->mentor ?? $student->mentor;
-        $batch = $student->batch ?? Batch::first();
+        $evaluation = $resolved['evaluation'];
+        $student = $resolved['student'];
+        $mentor = $resolved['mentor'];
+        $batch = $resolved['batch'];
+        $director = $this->getDirectorSettings();
 
-        return view('certificate.print', compact('evaluation', 'student', 'mentor', 'batch', 'certNo'));
+        return view('certificate.print', compact('evaluation', 'student', 'mentor', 'batch', 'certNo', 'director'));
     }
 
     // ==========================================

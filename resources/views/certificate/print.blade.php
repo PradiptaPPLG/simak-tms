@@ -340,14 +340,14 @@
                     </div>
 
                     <div>
-                        <!-- Tanda Tangan Direktur Utama -->
+                        <!-- Tanda Tangan Direktur Utama (Dinamis dari Pengaturan Admin) -->
                         <div class="font-script text-base text-slate-800 leading-none h-6 flex items-end justify-center">
-                            Dani Ramdhani
+                            {{ $director['signature'] ?? 'Dani Ramdhani' }}
                         </div>
                         <div class="border-t border-slate-400 mt-1 pt-0.5 text-[8.5px] font-bold text-slate-800">
-                            Dani Ramdhani, S.T.
+                            {{ $director['name'] ?? 'Dani Ramdhani, S.T.' }}
                         </div>
-                        <div class="text-[7.5px] text-slate-500 font-medium">Direktur Utama PT. TMS</div>
+                        <div class="text-[7.5px] text-slate-500 font-medium">{{ $director['title'] ?? 'Direktur Utama PT. TMS' }}</div>
                     </div>
                 </div>
 

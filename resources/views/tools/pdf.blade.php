@@ -231,6 +231,20 @@
                 <!-- Populated by JS per active tool -->
             </div>
 
+            <!-- Live Progress Bar (Worker Background Processing) -->
+            <div id="ws-progress-wrap" class="hidden p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                    <span id="ws-progress-label" class="flex items-center gap-2">
+                        <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-600 animate-pulse"></i>
+                        <span>Memproses di background worker...</span>
+                    </span>
+                    <span id="ws-progress-pct" class="font-mono text-indigo-600">0%</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div id="ws-progress-bar" class="h-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full transition-all duration-200" style="width: 0%"></div>
+                </div>
+            </div>
+
             <!-- Status / Progress Feedback -->
             <div id="ws-status" class="hidden p-4 rounded-xl border text-xs font-semibold flex items-center gap-3"></div>
 
@@ -356,8 +370,56 @@
         setTimeout(() => URL.revokeObjectURL(url), 1500);
     }
 
+    // Progress Bar & Background Web Worker Helper
+    function setProgress(percent, label) {
+        const wrap = document.getElementById('ws-progress-wrap');
+        if (percent === null || percent === undefined) {
+            if (wrap) wrap.classList.add('hidden');
+            return;
+        }
+        if (wrap) wrap.classList.remove('hidden');
+        const bar = document.getElementById('ws-progress-bar');
+        const pct = document.getElementById('ws-progress-pct');
+        const lbl = document.getElementById('ws-progress-label');
+        if (bar) bar.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+        if (pct) pct.textContent = `${Math.round(percent)}%`;
+        if (lbl && label) {
+            lbl.innerHTML = `<i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-600 animate-pulse"></i><span>${label}</span>`;
+            lucide.createIcons();
+        }
+    }
+
+    function runPdfWorkerTask(action, payload) {
+        return new Promise((resolve, reject) => {
+            const worker = new Worker("{{ asset('vendor/pdf-tools/pdf-worker.js') }}");
+            const taskId = Date.now();
+            setProgress(5, 'Menjalankan background worker...');
+            worker.onmessage = function(e) {
+                const msg = e.data;
+                if (msg.type === 'progress') {
+                    setProgress(msg.percent, msg.label);
+                } else if (msg.type === 'done') {
+                    setTimeout(() => setProgress(null), 500);
+                    worker.terminate();
+                    resolve(msg.result);
+                } else if (msg.type === 'error') {
+                    setProgress(null);
+                    worker.terminate();
+                    reject(new Error(msg.error));
+                }
+            };
+            worker.onerror = function(err) {
+                setProgress(null);
+                worker.terminate();
+                reject(new Error(err.message || 'Worker gagal dijalankan.'));
+            };
+            worker.postMessage({ taskId, action, payload });
+        });
+    }
+
     // Status Banner Helper
     function setStatus(type, msg) {
+        if (type !== 'loading') setProgress(null);
         const el = document.getElementById('ws-status');
         if (!msg) {
             el.classList.add('hidden');
@@ -613,16 +675,11 @@
 
     async function executeMerge() {
         try {
-            setStatus('loading', 'Menggabungkan halaman PDF...');
-            const mergedPdf = await PDFLib.PDFDocument.create();
-            for (const item of state.files) {
-                const srcDoc = await PDFLib.PDFDocument.load(item.bytes, { ignoreEncryption: true });
-                const copiedPages = await mergedPdf.copyPages(srcDoc, srcDoc.getPageIndices());
-                copiedPages.forEach((p) => mergedPdf.addPage(p));
-            }
-            const outBytes = await mergedPdf.save();
-            downloadBlob(new Blob([outBytes], { type: 'application/pdf' }), 'merged_simak_tms.pdf');
-            setStatus('success', `Berhasil menggabungkan ${state.files.length} file PDF (${mergedPdf.getPageCount()} halaman)!`);
+            setStatus('loading', 'Menggabungkan halaman PDF di background worker...');
+            const filesPayload = state.files.map(item => item.bytes.slice(0));
+            const res = await runPdfWorkerTask('merge', { files: filesPayload });
+            downloadBlob(new Blob([res.bytes], { type: 'application/pdf' }), 'merged_simak_tms.pdf');
+            setStatus('success', `Berhasil menggabungkan ${state.files.length} file PDF!`);
         } catch (err) {
             setStatus('error', 'Gagal menggabungkan PDF: ' + err.message);
         }
@@ -1173,20 +1230,14 @@
         try {
             const activePages = state.pages.filter(p => !p.deleted);
             if (!activePages.length) return;
-            setStatus('loading', 'Menyimpan perubahan orientasi dan halaman...');
-            const srcDoc = await PDFLib.PDFDocument.load(state.singleFile.bytes, { ignoreEncryption: true });
-            const outDoc = await PDFLib.PDFDocument.create();
-            for (const pInfo of activePages) {
-                const [copied] = await outDoc.copyPages(srcDoc, [pInfo.pageNum - 1]);
-                if (pInfo.rotation !== 0) {
-                    const currentRot = copied.getRotation().angle;
-                    copied.setRotation(PDFLib.degrees((currentRot + pInfo.rotation) % 360));
-                }
-                outDoc.addPage(copied);
-            }
-            const outBytes = await outDoc.save();
-            downloadBlob(new Blob([outBytes], { type: 'application/pdf' }), `organized_${state.singleFile.name}`);
-            setStatus('success', `Berhasil menyimpan PDF baru (${activePages.length} halaman)!`);
+            setStatus('loading', 'Menyimpan perubahan orientasi dan halaman di background worker...');
+            const pagesPayload = activePages.map(p => ({ idx: p.pageNum - 1, rot: p.rotation }));
+            const res = await runPdfWorkerTask('rotate', {
+                bytes: state.singleFile.bytes.slice(0),
+                pages: pagesPayload
+            });
+            downloadBlob(new Blob([res.bytes], { type: 'application/pdf' }), `organized_${state.singleFile.name}`);
+            setStatus('success', `Berhasil menyimpan PDF baru (${res.pageCount} halaman)!`);
         } catch (err) {
             setStatus('error', 'Gagal menyimpan PDF: ' + err.message);
         }
@@ -1199,40 +1250,89 @@
         showWorkspaceBody();
         const body = document.getElementById('ws-body');
         body.innerHTML = `
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div class="text-xs font-extrabold text-slate-900">${state.singleFile.name}</div>
-                <div class="text-[11px] text-slate-500">${state.singleFile.pageCount} halaman akan diberi watermark teks</div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                <div>
+                    <div class="text-xs font-extrabold text-slate-900">${state.singleFile.name}</div>
+                    <div class="text-[11px] text-slate-500">${state.singleFile.pageCount} halaman akan diberi watermark teks (Background Worker)</div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold">Live Preview</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Watermark</label>
-                    <input type="text" id="wm-text" value="DOKUMEN PKL - PT. TMS" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-purple-500" />
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                <!-- Left: Settings -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Teks Watermark</label>
+                        <input type="text" id="wm-text" value="DOKUMEN PKL - PT. TMS" oninput="updateWatermarkPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-purple-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Warna Teks</label>
+                        <select id="wm-color" onchange="updateWatermarkPreview()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-900">
+                            <option value="red">Merah TMS (#e11d48)</option>
+                            <option value="slate">Hitam / Slate Gelap</option>
+                            <option value="blue">Biru Korporat</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Ukuran Font: <span id="wm-size-val">42</span>pt</label>
+                        <input type="range" id="wm-size" min="20" max="80" value="42" class="w-full accent-purple-600" oninput="document.getElementById('wm-size-val').textContent=this.value; updateWatermarkPreview();" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Transparansi (Opacity): <span id="wm-op-val">25</span>%</label>
+                        <input type="range" id="wm-opacity" min="10" max="80" value="25" class="w-full accent-purple-600" oninput="document.getElementById('wm-op-val').textContent=this.value; updateWatermarkPreview();" />
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Warna Teks</label>
-                    <select id="wm-color" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-900">
-                        <option value="red">Merah TMS (#e11d48)</option>
-                        <option value="slate">Hitam / Slate Gelap</option>
-                        <option value="blue">Biru Korporat</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Ukuran Font: <span id="wm-size-val">42</span>pt</label>
-                    <input type="range" id="wm-size" min="20" max="80" value="42" class="w-full accent-purple-600" oninput="document.getElementById('wm-size-val').textContent=this.value" />
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Transparansi (Opacity): <span id="wm-op-val">25</span>%</label>
-                    <input type="range" id="wm-opacity" min="10" max="80" value="25" class="w-full accent-purple-600" oninput="document.getElementById('wm-op-val').textContent=this.value" />
+
+                <!-- Right: Live Visual A4 Preview -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Pratinjau Hasil Watermark</div>
+                    <div id="wm-preview-box" class="relative w-full max-w-[210px] aspect-[3/4] bg-white rounded-xl border border-slate-200 shadow-inner overflow-hidden p-4 flex flex-col justify-between select-none">
+                        <div class="space-y-1.5 opacity-30">
+                            <div class="h-2.5 w-2/3 bg-slate-300 rounded"></div>
+                            <div class="h-1.5 w-full bg-slate-200 rounded"></div>
+                            <div class="h-1.5 w-5/6 bg-slate-200 rounded"></div>
+                            <div class="h-1.5 w-4/5 bg-slate-200 rounded"></div>
+                            <div class="h-1.5 w-full bg-slate-200 rounded mt-3"></div>
+                            <div class="h-1.5 w-3/4 bg-slate-200 rounded"></div>
+                        </div>
+                        <div class="space-y-1.5 opacity-30">
+                            <div class="h-1.5 w-full bg-slate-200 rounded"></div>
+                            <div class="h-1.5 w-2/3 bg-slate-200 rounded"></div>
+                        </div>
+                        <div id="wm-preview-text" class="absolute inset-0 flex items-center justify-center pointer-events-none font-black text-center whitespace-nowrap" style="transform: rotate(-45deg); color: #e11d48; opacity: 0.25; font-size: 14px;">
+                            DOKUMEN PKL - PT. TMS
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="pt-2 flex justify-end">
                 <button type="button" onclick="executeWatermark()" class="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold transition-all shadow-md shadow-purple-600/20 flex items-center gap-2 cursor-pointer">
                     <i data-lucide="stamp" class="w-4 h-4"></i>
-                    <span>Terapkan Watermark & Unduh PDF</span>
+                    <span>Terapkan Watermark &amp; Unduh PDF</span>
                 </button>
             </div>
         `;
         lucide.createIcons();
+        updateWatermarkPreview();
+    }
+
+    function updateWatermarkPreview() {
+        const prev = document.getElementById('wm-preview-text');
+        if (!prev) return;
+        const text = document.getElementById('wm-text')?.value.trim() || 'WATERMARK';
+        const colorOpt = document.getElementById('wm-color')?.value || 'red';
+        const sizePt = parseInt(document.getElementById('wm-size')?.value || '42', 10);
+        const opacity = parseInt(document.getElementById('wm-opacity')?.value || '25', 10) / 100;
+
+        let colorHex = '#e11d48';
+        if (colorOpt === 'slate') colorHex = '#1e293b';
+        else if (colorOpt === 'blue') colorHex = '#1d4ed8';
+
+        prev.textContent = text;
+        prev.style.color = colorHex;
+        prev.style.opacity = opacity;
+        prev.style.fontSize = Math.max(9, Math.round(sizePt * 0.34)) + 'px';
     }
 
     async function executeWatermark() {
@@ -1240,35 +1340,19 @@
             const text = document.getElementById('wm-text').value.trim().replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
             if (!text) return setStatus('error', 'Harap isi teks watermark (huruf/angka standar) terlebih dahulu.');
             const colorOpt = document.getElementById('wm-color').value;
-            const fontSize = parseInt(document.getElementById('wm-size').value);
-            const opacity = parseInt(document.getElementById('wm-opacity').value) / 100;
+            const fontSize = parseInt(document.getElementById('wm-size').value, 10);
+            const opacity = parseInt(document.getElementById('wm-opacity').value, 10) / 100;
 
-            setStatus('loading', 'Menambahkan watermark ke seluruh halaman...');
-            const pdfDoc = await PDFLib.PDFDocument.load(state.singleFile.bytes, { ignoreEncryption: true });
-            const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-
-            let rgbColor = PDFLib.rgb(0.88, 0.11, 0.28);
-            if (colorOpt === 'slate') rgbColor = PDFLib.rgb(0.15, 0.18, 0.25);
-            else if (colorOpt === 'blue') rgbColor = PDFLib.rgb(0.1, 0.35, 0.85);
-
-            const pages = pdfDoc.getPages();
-            pages.forEach(page => {
-                const { width, height } = page.getSize();
-                const textWidth = font.widthOfTextAtSize(text, fontSize);
-                page.drawText(text, {
-                    x: width / 2 - (textWidth * Math.cos(Math.PI / 4)) / 2,
-                    y: height / 2 - (textWidth * Math.sin(Math.PI / 4)) / 2,
-                    size: fontSize,
-                    font: font,
-                    color: rgbColor,
-                    opacity: opacity,
-                    rotate: PDFLib.degrees(45),
-                });
+            setStatus('loading', 'Menambahkan watermark di background worker...');
+            const res = await runPdfWorkerTask('watermark', {
+                bytes: state.singleFile.bytes.slice(0),
+                text,
+                colorOpt,
+                fontSize,
+                opacity
             });
-
-            const outBytes = await pdfDoc.save();
-            downloadBlob(new Blob([outBytes], { type: 'application/pdf' }), `watermarked_${state.singleFile.name}`);
-            setStatus('success', `Watermark berhasil diterapkan pada ${pages.length} halaman!`);
+            downloadBlob(new Blob([res.bytes], { type: 'application/pdf' }), `watermarked_${state.singleFile.name}`);
+            setStatus('success', `Watermark berhasil diterapkan pada ${res.pageCount} halaman!`);
         } catch (err) {
             setStatus('error', 'Gagal menambahkan watermark: ' + err.message);
         }

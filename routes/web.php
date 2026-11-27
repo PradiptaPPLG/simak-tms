@@ -129,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/mentor', [SimakController::class, 'adminStoreMentor'])->name('admin.mentors.store');
         Route::put('/admin/mentor/{id}', [SimakController::class, 'adminUpdateMentor'])->name('admin.mentors.update');
         Route::delete('/admin/mentor/{id}', [SimakController::class, 'adminDeleteMentor'])->name('admin.mentors.destroy');
+        Route::post('/admin/settings/director', [SimakController::class, 'adminUpdateDirector'])->name('admin.settings.director');
         Route::post('/admin/users/{id}/reset-password', [SimakController::class, 'adminResetPassword'])->name('admin.users.reset_password');
         Route::post('/admin/tugas', [SimakController::class, 'adminCreateTask'])->name('admin.tasks.store');
         Route::post('/admin/users', [SimakController::class, 'adminStoreUser'])->name('admin.users.store');

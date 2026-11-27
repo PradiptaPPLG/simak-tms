@@ -57,6 +57,41 @@
         </div>
     </div>
 
+    <!-- 1.5 Pengaturan Pimpinan / Direktur Utama (TTD E-Sertifikat) -->
+    <div class="mas-card p-5 border-l-4 border-l-amber-500 bg-gradient-to-r from-amber-50/40 via-white to-white">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900">Pengaturan Direktur Utama (Tanda Tangan E-Sertifikat)</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Nama, tanda tangan kaligrafi, dan jabatan ini tampil resmi di seluruh E-Sertifikat PKL.</p>
+                </div>
+            </div>
+
+            <form action="{{ route('admin.settings.director') }}" method="POST" class="grid grid-cols-1 sm:grid-cols-4 gap-2.5 w-full lg:w-auto items-end">
+                @csrf
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap &amp; Gelar</label>
+                    <input type="text" name="director_name" required value="{{ $director['name'] ?? 'Dani Ramdhani, S.T.' }}" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Teks TTD Kaligrafi</label>
+                    <input type="text" name="director_signature_name" required value="{{ $director['signature'] ?? 'Dani Ramdhani' }}" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Jabatan</label>
+                    <input type="text" name="director_title" required value="{{ $director['title'] ?? 'Direktur Utama PT. TMS' }}" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-amber-500">
+                </div>
+                <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer h-[34px]">
+                    <i data-lucide="save" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Simpan Direktur</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- 2. Search & Filter Bar -->
     <div class="mas-card p-4">
         <form action="{{ route('admin.mentors') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
