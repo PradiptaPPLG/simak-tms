@@ -103,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/mentor/siswa/import', [SimakController::class, 'mentorImportStudents'])->name('mentor.students.import');
         Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
         Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
+        Route::post('/mentor/jurnal/{id}/reject', [SimakController::class, 'rejectJournal'])->name('mentor.journal.reject');
         Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
         Route::post('/mentor/tugas/{id}/grade', [SimakController::class, 'gradeSubmission'])->name('mentor.task.grade');
         Route::post('/batch-students/{id}/grade', [SimakController::class, 'updateBatchStudentGrade'])->name('batch_students.grade');

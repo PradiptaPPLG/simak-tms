@@ -225,21 +225,66 @@
                 @endphp
 
                 @if($status === 'filled' || $status === 'all_filled')
-                    {{-- 1. TERISI LENGKAP (HIJAU RESMI) --}}
+                    {{-- 1. TERISI LENGKAP & DISETUJUI (HIJAU RESMI) --}}
                     <a href="{{ route('mentor.review', ['student_id' => $selectedStudentId, 'date' => $dayStr]) }}#panel-detail-tanggal"
                        class="h-14 sm:h-16 rounded-xl flex flex-col items-center justify-between p-1.5 sm:p-2 transition-all cursor-pointer relative bg-emerald-50 border border-emerald-300 text-emerald-800 hover:bg-emerald-100/90 hover:shadow-xs
                               {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
-                       title="{{ $dayStr }}: Jurnal terisi lengkap ({{ $jCount }}/{{ $tCount }} siswa). Klik untuk melihat detail.">
+                       title="{{ $dayStr }}: Jurnal disetujui ({{ $jCount }}/{{ $tCount }} siswa). Klik untuk melihat detail.">
                         <div class="w-full flex items-center justify-between">
                             <span class="text-xs sm:text-sm font-black text-emerald-800 leading-none">{{ $d }}</span>
                             <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i>
                         </div>
                         <span class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-200/80 text-emerald-900 leading-none">
                             @if($selectedStudentId !== 'all')
-                                Diisi
+                                ACC
                             @else
                                 {{ $jCount }}/{{ $tCount }}
                             @endif
+                        </span>
+                    </a>
+
+                @elseif($status === 'pending')
+                    {{-- 1b. PENDING MENUNGGU ACC (ORANYE + LOGO JAM) --}}
+                    <a href="{{ route('mentor.review', ['student_id' => $selectedStudentId, 'date' => $dayStr]) }}#panel-detail-tanggal"
+                       class="h-14 sm:h-16 rounded-xl flex flex-col items-center justify-between p-1.5 sm:p-2 transition-all cursor-pointer relative bg-orange-50 border-2 border-orange-400 text-orange-900 hover:bg-orange-100/90 hover:shadow-xs
+                              {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
+                       title="{{ $dayStr }}: Pending menunggu review mentor ({{ $jCount }}/{{ $tCount }} siswa).">
+                        <div class="w-full flex items-center justify-between">
+                            <span class="text-xs sm:text-sm font-black text-orange-900 leading-none">{{ $d }}</span>
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-600"></i>
+                        </div>
+                        <span class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-200 text-orange-950 leading-none">
+                            Pending
+                        </span>
+                    </a>
+
+                @elseif($status === 'revisi')
+                    {{-- 1c. PERLU PERHATIAN / REVISI (UNGU) --}}
+                    <a href="{{ route('mentor.review', ['student_id' => $selectedStudentId, 'date' => $dayStr]) }}#panel-detail-tanggal"
+                       class="h-14 sm:h-16 rounded-xl flex flex-col items-center justify-between p-1.5 sm:p-2 transition-all cursor-pointer relative bg-purple-50 border-2 border-purple-400 text-purple-900 hover:bg-purple-100/90 hover:shadow-xs
+                              {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
+                       title="{{ $dayStr }}: Perlu perhatian / revisi ({{ $jCount }}/{{ $tCount }} siswa).">
+                        <div class="w-full flex items-center justify-between">
+                            <span class="text-xs sm:text-sm font-black text-purple-900 leading-none">{{ $d }}</span>
+                            <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-purple-600"></i>
+                        </div>
+                        <span class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-200 text-purple-950 leading-none">
+                            Revisi
+                        </span>
+                    </a>
+
+                @elseif($status === 'rejected')
+                    {{-- 1d. DITOLAK (MERAH) --}}
+                    <a href="{{ route('mentor.review', ['student_id' => $selectedStudentId, 'date' => $dayStr]) }}#panel-detail-tanggal"
+                       class="h-14 sm:h-16 rounded-xl flex flex-col items-center justify-between p-1.5 sm:p-2 transition-all cursor-pointer relative bg-rose-50 border-2 border-rose-400 text-rose-900 hover:bg-rose-100/90 hover:shadow-xs
+                              {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
+                       title="{{ $dayStr }}: Jurnal ditolak ({{ $jCount }}/{{ $tCount }} siswa).">
+                        <div class="w-full flex items-center justify-between">
+                            <span class="text-xs sm:text-sm font-black text-rose-900 leading-none">{{ $d }}</span>
+                            <i data-lucide="x-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                        </div>
+                        <span class="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-200 text-rose-950 leading-none">
+                            Ditolak
                         </span>
                     </a>
 
@@ -316,37 +361,60 @@
             @endfor
         </div>
 
-        <!-- Legend / Petunjuk Indikator Warna Kalender -->
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center gap-4 text-xs">
-            <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-2xs">
-                    <i data-lucide="check-circle-2" class="w-3 h-3"></i>
+        <!-- Legend / Petunjuk Indikator Warna Kalender (Default Hide di Mobile) -->
+        <div class="mt-4 pt-3.5 border-t border-slate-100">
+            <button type="button"
+                    onclick="const el = document.getElementById('mentor-journal-legend'); const ch = document.getElementById('mentor-legend-chevron'); const isHidden = el.classList.contains('hidden'); el.classList.toggle('hidden', !isHidden); el.classList.toggle('flex', isHidden); if (ch) ch.classList.toggle('rotate-180', isHidden);"
+                    class="sm:hidden w-full flex items-center justify-between text-xs font-bold text-slate-600 py-1 cursor-pointer">
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Keterangan Warna & Status</span>
                 </span>
-                <span class="text-slate-700"><b class="text-emerald-700">Hijau:</b> Jurnal Terisi Lengkap</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700 shadow-2xs">
-                    <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                </span>
-                <span class="text-slate-700"><b class="text-amber-700">Kuning:</b> Sebagian Mengisi</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-lg bg-rose-50 border border-rose-300 flex items-center justify-center text-rose-700 shadow-2xs">
-                    <i data-lucide="alert-circle" class="w-3 h-3"></i>
-                </span>
-                <span class="text-slate-700"><b class="text-rose-700">Merah:</b> Hari Kerja Bolong</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-lg bg-sky-50 border border-sky-400 flex items-center justify-center text-sky-700 shadow-2xs">
-                    <i data-lucide="clock" class="w-3 h-3"></i>
-                </span>
-                <span class="text-slate-700"><b class="text-sky-700">Biru Muda:</b> Hari Ini</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
-                    <i data-lucide="coffee" class="w-3 h-3"></i>
-                </span>
-                <span class="text-slate-500">Weekend / Libur</span>
+                <i id="mentor-legend-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+            </button>
+            <div id="mentor-journal-legend" class="hidden sm:flex flex-wrap items-center gap-3.5 sm:gap-4 text-xs mt-2.5 sm:mt-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-2xs">
+                        <i data-lucide="check-circle-2" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-emerald-700">Hijau:</b> Disetujui</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-orange-50 border-2 border-orange-400 flex items-center justify-center text-orange-700 shadow-2xs">
+                        <i data-lucide="clock" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-orange-700">Oranye:</b> Pending</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-purple-50 border-2 border-purple-400 flex items-center justify-center text-purple-700 shadow-2xs">
+                        <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-purple-700">Ungu:</b> Revisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700 shadow-2xs">
+                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-amber-700">Kuning:</b> Sebagian Mengisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-rose-50 border border-rose-300 flex items-center justify-center text-rose-700 shadow-2xs">
+                        <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-rose-700">Merah:</b> Bolong / Ditolak</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-sky-50 border border-sky-400 flex items-center justify-center text-sky-700 shadow-2xs">
+                        <i data-lucide="clock" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-sky-700">Biru Muda:</b> Hari Ini</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
+                        <i data-lucide="coffee" class="w-3 h-3"></i>
+                    </span>
+                    <span class="text-slate-500">Weekend / Libur</span>
+                </div>
             </div>
         </div>
     </div>
@@ -434,8 +502,27 @@
             @forelse($selectedDateJournals as $journal)
                 @php
                     $hasNote = !empty($journal->mentor_feedback);
+                    $jStatus = $journal->status ?? 'pending';
+                    $cardBorder = match($jStatus) {
+                        'approved' => 'border-l-emerald-500',
+                        'revisi'   => 'border-l-purple-500',
+                        'rejected' => 'border-l-rose-500',
+                        default    => 'border-l-orange-500',
+                    };
+                    $badgeConfig = match($jStatus) {
+                        'approved' => ['bg' => 'bg-emerald-100 text-emerald-800', 'icon' => 'check-circle', 'text' => 'Disetujui (ACC)'],
+                        'revisi'   => ['bg' => 'bg-purple-100 text-purple-800 border border-purple-200', 'icon' => 'alert-circle', 'text' => 'Perlu Perhatian / Revisi'],
+                        'rejected' => ['bg' => 'bg-rose-100 text-rose-800 border border-rose-200', 'icon' => 'x-circle', 'text' => 'Ditolak'],
+                        default    => ['bg' => 'bg-orange-100 text-orange-800 border border-orange-200', 'icon' => 'clock', 'text' => 'Pending (Menunggu Review)'],
+                    };
+                    $noteBoxClass = match($jStatus) {
+                        'revisi'   => 'bg-purple-50 border-purple-200 text-purple-900',
+                        'rejected' => 'bg-rose-50 border-rose-200 text-rose-900',
+                        'approved' => 'bg-emerald-50 border-emerald-200 text-emerald-900',
+                        default    => 'bg-orange-50 border-orange-200 text-orange-900',
+                    };
                 @endphp
-                <div class="mas-card p-5 sm:p-6 space-y-4 border-l-4 {{ $hasNote ? 'border-l-emerald-500' : 'border-l-amber-500' }}">
+                <div class="mas-card p-5 sm:p-6 space-y-4 border-l-4 {{ $cardBorder }}">
                     
                     <!-- Header Bar of Journal -->
                     <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 border-b border-slate-100 pb-3">
@@ -453,27 +540,35 @@
                                     <span class="text-slate-400">•</span>
                                     <span class="text-slate-500 font-mono">{{ $journal->user->school_origin ?? 'SMKN 1 Ciamis' }}</span>
                                     <span class="text-slate-400">•</span>
-                                    @if($hasNote)
-                                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                                            <i data-lucide="check" class="w-3 h-3"></i> Sudah Ada Catatan
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
-                                            <i data-lucide="clock" class="w-3 h-3"></i> Belum Diberi Catatan
-                                        </span>
-                                    @endif
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded {{ $badgeConfig['bg'] }}">
+                                        <i data-lucide="{{ $badgeConfig['icon'] }}" class="w-3 h-3"></i> {{ $badgeConfig['text'] }}
+                                    </span>
                                 </div>
                                 <h3 class="text-base font-black text-slate-900 mt-1">{{ $journal->activity_title }}</h3>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
                             @if($journal->commit_url)
                                 <a href="{{ $journal->commit_url }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-mono font-medium transition-colors flex items-center gap-1.5">
                                     <i data-lucide="git-commit" class="w-3.5 h-3.5 text-red-400"></i>
                                     <span>Commit Git</span>
                                 </a>
                             @endif
+                            <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                    <span>ACC</span>
+                                </button>
+                            </form>
+                            <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                    <span>Tolak</span>
+                                </button>
+                            </form>
                         </div>
                     </div>
 
@@ -487,49 +582,49 @@
 
                     <!-- Existing Mentor Note Display (if exists) -->
                     @if($hasNote)
-                        <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-1">
+                        <div class="p-3.5 rounded-xl border text-xs space-y-1 {{ $noteBoxClass }}">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-[10px] uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                                <span class="font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
                                     <i data-lucide="message-square-quote" class="w-3.5 h-3.5"></i>
                                     <span>Catatan Bimbingan Mentor (oleh {{ $journal->mentor->name ?? 'Staff Mentor' }}):</span>
                                 </span>
-                                <span class="text-[10px] text-emerald-600">Tersinkron di kalender logbook siswa</span>
+                                <span class="text-[10px] opacity-80">Tersinkron di kalender logbook siswa</span>
                             </div>
-                            <p class="font-medium text-emerald-950 pl-5 leading-relaxed">"{{ $journal->mentor_feedback }}"</p>
+                            <p class="font-medium pl-5 leading-relaxed">"{{ $journal->mentor_feedback }}"</p>
                         </div>
                     @endif
 
-                    <!-- Form Sisipkan / Update Catatan Mentor -->
+                    <!-- Form Sisipkan / Update Catatan Mentor (Kirim Saran -> Status Ungu / Revisi) -->
                     <form action="{{ route('mentor.journal.note', $journal->id) }}" method="POST" class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 space-y-3">
                         @csrf
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                                <span>{{ $hasNote ? 'Perbarui Catatan / Bimbingan Mentor' : 'Sisipkan Catatan / Bimbingan Mentor' }}</span>
-                                <span class="text-[10px] text-slate-400 font-normal">Siswa akan membaca catatan ini pada kalender logbook pribadinya</span>
+                                <span>Kirim Saran / Catatan Revisi Mentor</span>
+                                <span class="text-[10px] text-purple-600 font-semibold">Mengirim saran menandai jurnal Ungu (Perlu Perhatian / Revisi)</span>
                             </label>
                             <textarea id="mentor-note-{{ $journal->id }}" name="mentor_feedback" rows="2" required
-                                      placeholder="Sisipkan apresiasi, evaluasi penulisan kode, atau arahan bimbingan industri untuk siswa..."
-                                      class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 leading-relaxed">{{ old('mentor_feedback', $journal->mentor_feedback ?? '') }}</textarea>
+                                      placeholder="Sisipkan saran perbaikan, evaluasi penulisan kode, atau arahan bimbingan industri untuk siswa..."
+                                      class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 leading-relaxed">{{ old('mentor_feedback', $journal->mentor_feedback ?? '') }}</textarea>
                         </div>
 
                         <!-- Quick suggestion chips -->
                         <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
                             <span class="text-slate-400 text-[10px] mr-1">Rekomendasi Cepat:</span>
-                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Aktivitas terverifikasi dan memenuhi standar dokumentasi kerja PT. TMS.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-red-300 hover:text-red-600 text-slate-600 transition-colors text-[10px] cursor-pointer">
-                                Standar TMS Terpenuhi
+                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Mohon lengkapi detail pekerjaan dan sertakan tautan commit Git yang relevan.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-purple-300 hover:text-purple-700 text-slate-600 transition-colors text-[10px] cursor-pointer">
+                                Lengkapi Detail & Commit Git
                             </button>
-                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Struktur kode dan alur commit Git rapi. Pertahankan penamaan commit yang deskriptif.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-red-300 hover:text-red-600 text-slate-600 transition-colors text-[10px] cursor-pointer">
-                                Git Commit Rapi
+                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Struktur kode sudah berjalan, namun rapikan penamaan variabel dan perbaiki validasi input.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-purple-300 hover:text-purple-700 text-slate-600 transition-colors text-[10px] cursor-pointer">
+                                Rapikan Kode & Validasi
                             </button>
-                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Bagus, implementasi logika fitur sudah sesuai arsitektur. Lanjutkan ke sprint berikutnya.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-red-300 hover:text-red-600 text-slate-600 transition-colors text-[10px] cursor-pointer">
-                                Sesuai Arsitektur
+                            <button type="button" onclick="setQuickNote('mentor-note-{{ $journal->id }}', 'Perlu penyesuaian alur fitur dengan arsitektur modul. Silakan revisi lalu simpan ulang.')" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-purple-300 hover:text-purple-700 text-slate-600 transition-colors text-[10px] cursor-pointer">
+                                Sesuaikan Arsitektur
                             </button>
                         </div>
 
                         <div class="flex items-center justify-end pt-1">
-                            <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                                <i data-lucide="send" class="w-3.5 h-3.5 text-emerald-400"></i>
-                                <span>{{ $hasNote ? 'Perbarui Catatan Mentor' : 'Simpan Catatan Mentor' }}</span>
+                            <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                <span>Kirim Saran (Tandai Revisi)</span>
                             </button>
                         </div>
                     </form>

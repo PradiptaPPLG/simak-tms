@@ -187,36 +187,61 @@
 
         <div class="space-y-3">
             @forelse($pendingJournals as $journal)
-                <div class="p-4 rounded-xl border border-slate-200 bg-white hover:border-red-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="space-y-1.5 flex-1">
-                        <div class="flex items-center gap-2 text-xs">
-                            <span class="font-bold text-slate-900">{{ $journal->user->name }}</span>
-                            <span class="text-slate-400">•</span>
-                            <span class="text-slate-500 font-medium">{{ $journal->user->school_origin }}</span>
-                            <span class="text-slate-400">•</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Masuk: {{ $journal->created_at->format('H:i') }} WIB</span>
-                        </div>
-                        <div class="text-xs font-bold text-slate-800">{{ $journal->activity_title }}</div>
-                        <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
-                        
-                        @if($journal->commit_url)
-                            <div class="text-[11px] text-slate-500 flex items-center gap-1.5 pt-1">
-                                <i data-lucide="git-commit" class="w-3.5 h-3.5 text-red-600"></i>
-                                <span>Bukti Commit Git:</span>
-                                <a href="{{ $journal->commit_url }}" target="_blank" class="text-red-600 hover:underline font-mono">{{ $journal->commit_url }}</a>
+                <div class="p-4 rounded-xl border border-slate-200 bg-white hover:border-orange-300 transition-all space-y-3">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="space-y-1.5 flex-1">
+                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <span class="font-bold text-slate-900">{{ $journal->user->name }}</span>
+                                <span class="text-slate-400">•</span>
+                                <span class="text-slate-500 font-medium">{{ $journal->user->school_origin }}</span>
+                                <span class="text-slate-400">•</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200">
+                                    <i data-lucide="clock" class="w-3 h-3 text-orange-600"></i>
+                                    Pending • {{ $journal->created_at->format('H:i') }} WIB
+                                </span>
                             </div>
-                        @endif
+                            <div class="text-xs font-bold text-slate-800">{{ $journal->activity_title }}</div>
+                            <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
+                            
+                            @if($journal->commit_url)
+                                <div class="text-[11px] text-slate-500 flex items-center gap-1.5 pt-1">
+                                    <i data-lucide="git-commit" class="w-3.5 h-3.5 text-red-600"></i>
+                                    <span>Bukti Commit Git:</span>
+                                    <a href="{{ $journal->commit_url }}" target="_blank" class="text-red-600 hover:underline font-mono">{{ $journal->commit_url }}</a>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+                            <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                    <span>ACC</span>
+                                </button>
+                            </form>
+                            <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    <span>Tolak</span>
+                                </button>
+                            </form>
+                            <button type="button" onclick="document.getElementById('dash-saran-{{ $journal->id }}').classList.toggle('hidden')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+                                <span>Kirim Saran</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white transition-all shadow-xs flex items-center gap-1.5">
-                                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
-                                <span>Setujui (1-Click)</span>
-                            </button>
-                        </form>
-                    </div>
+                    <form id="dash-saran-{{ $journal->id }}" action="{{ route('mentor.journal.note', $journal->id) }}" method="POST" class="hidden pt-3 border-t border-slate-100 flex flex-col sm:flex-row gap-2">
+                        @csrf
+                        <input type="text" name="mentor_feedback" required placeholder="Tulis saran / catatan revisi untuk siswa (status jurnal akan menjadi Ungu / Revisi)..." class="flex-1 bg-slate-50 border border-purple-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500">
+                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0">
+                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                            <span>Kirim Saran</span>
+                        </button>
+                    </form>
                 </div>
             @empty
                 <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-xl border border-slate-100">

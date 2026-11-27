@@ -386,7 +386,7 @@ class SimakController extends Controller
                 'commit_url' => $request->commit_url,
                 'mentor_id' => $existing ? $existing->mentor_id : $mentorId,
                 'mentor_feedback' => $existing ? $existing->mentor_feedback : null,
-                'status' => ($existing && $existing->mentor_feedback) ? 'approved' : 'pending',
+                'status' => ($existing && $existing->status === 'approved') ? 'approved' : 'pending',
             ]
         );
 
@@ -609,9 +609,15 @@ class SimakController extends Controller
                 $status = 'weekend';
             } elseif ($selectedStudentId !== 'all') {
                 if ($submittedCount > 0) {
-                    $status = 'filled'; // Hijau
+                    $jStatus = $dayJournals->first()->status ?? 'pending';
+                    $status = match ($jStatus) {
+                        'approved' => 'filled',
+                        'revisi' => 'revisi',
+                        'rejected' => 'rejected',
+                        default => 'pending',
+                    };
                 } elseif ($isToday) {
-                    $status = 'today_pending'; // Oranye
+                    $status = 'today_pending'; // Hari ini belum diisi
                 } elseif ($isPast) {
                     $status = 'missed'; // Merah (Bolong)
                 } else {
@@ -620,11 +626,19 @@ class SimakController extends Controller
             } else {
                 // Mode Semua Siswa
                 if ($submittedCount >= $targetCount && $targetCount > 0) {
-                    $status = 'all_filled'; // Hijau (Semua mengisi)
+                    if ($dayJournals->contains('status', 'revisi')) {
+                        $status = 'revisi';
+                    } elseif ($dayJournals->contains('status', 'rejected')) {
+                        $status = 'rejected';
+                    } elseif ($dayJournals->contains('status', 'pending')) {
+                        $status = 'pending';
+                    } else {
+                        $status = 'all_filled'; // Hijau (Semua mengisi & disetujui)
+                    }
                 } elseif ($submittedCount > 0) {
                     $status = 'partial'; // Kuning / Oranye (Ada yang mengisi, ada yang bolong)
                 } elseif ($isToday) {
-                    $status = 'today_pending'; // Oranye
+                    $status = 'today_pending'; // Hari ini belum diisi
                 } elseif ($isPast) {
                     $status = 'missed'; // Merah (Semua bolong di hari kerja lampau)
                 } else {
@@ -667,12 +681,8 @@ class SimakController extends Controller
 
         // 7. Statistik Ringkas
         $totalJournalsMonth = $allMonthJournals->count();
-        $pendingFeedbackCount = $allMonthJournals->where(function($j) {
-            return empty($j->mentor_feedback);
-        })->count();
-        $reviewedCount = $allMonthJournals->where(function($j) {
-            return !empty($j->mentor_feedback);
-        })->count();
+        $pendingFeedbackCount = $allMonthJournals->whereIn('status', ['pending', 'revisi'])->count();
+        $reviewedCount = $allMonthJournals->where('status', 'approved')->count();
 
         // Submissions tugas siswa
         $pendingSubmissions = TaskSubmission::with(['task', 'user'])->where('status', 'submitted')->latest()->get();
@@ -715,10 +725,10 @@ class SimakController extends Controller
         $journal->update([
             'mentor_id' => $user->id,
             'mentor_feedback' => $request->mentor_feedback,
-            'status' => 'approved',
+            'status' => 'revisi',
         ]);
 
-        return back()->with('success', 'Catatan & arahan bimbingan mentor berhasil disisipkan untuk siswa!');
+        return back()->with('success', 'Saran & catatan mentor terkirim! Jurnal ditandai Perlu Perhatian / Revisi.');
     }
 
     public function approveJournal($id)
@@ -738,7 +748,28 @@ class SimakController extends Controller
             'mentor_feedback' => $journal->mentor_feedback ?: 'Aktivitas terverifikasi dan memenuhi standar dokumentasi kerja PT. Teknologi Multi Sistem.',
         ]);
 
-        return back()->with('success', 'Jurnal berhasil ditandai dan disetujui!');
+        return back()->with('success', 'Jurnal berhasil disetujui (ACC)!');
+    }
+
+    public function rejectJournal(Request $request, $id)
+    {
+        $user = $this->authorizeMentorOrAdmin();
+
+        $journal = DailyJournal::with('user')->findOrFail($id);
+
+        if ($user->role === 'mentor' && $journal->user && $journal->user->mentor_id && $journal->user->mentor_id !== $user->id) {
+            abort(403, 'Akses Ditolak: Anda bukan mentor pembimbing resmi untuk siswa pemilik logbook ini.');
+        }
+
+        $journal->update([
+            'status' => 'rejected',
+            'mentor_id' => $user->role === 'mentor' ? $user->id : ($journal->mentor_id ?? $user->id),
+            'mentor_feedback' => $request->filled('mentor_feedback')
+                ? $request->mentor_feedback
+                : ($journal->mentor_feedback ?: 'Jurnal ditolak oleh mentor. Silakan perbaiki catatan kegiatan dan kirim ulang.'),
+        ]);
+
+        return back()->with('success', 'Jurnal ditandai Ditolak. Siswa dapat memperbarui dan mengirim ulang.');
     }
 
     public function gradeSubmission(Request $request, $id)

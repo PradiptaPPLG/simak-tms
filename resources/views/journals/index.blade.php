@@ -117,32 +117,52 @@
                     $isExpired = ($isPast && !$journal && !$isDateOff);
                 @endphp
 
-                @if($journal && !$isDateOff)
-                    {{-- 1. JURNAL TERISI PADA HARI KERJA (HIJAU RESMI) --}}
+                @if($journal)
+                    @php
+                        $jStatus = $journal->status ?? 'pending';
+                        $cellConfig = match($jStatus) {
+                            'approved' => [
+                                'bg' => 'bg-emerald-50 border-emerald-300 text-emerald-800 hover:bg-emerald-100/80',
+                                'num' => 'text-emerald-800',
+                                'icon' => 'check-circle',
+                                'iconColor' => 'text-emerald-600',
+                                'label' => 'Disetujui Mentor',
+                            ],
+                            'revisi' => [
+                                'bg' => 'bg-purple-50 border-2 border-purple-400 text-purple-900 hover:bg-purple-100/80',
+                                'num' => 'text-purple-900',
+                                'icon' => 'alert-circle',
+                                'iconColor' => 'text-purple-600',
+                                'label' => 'Perlu Perhatian / Revisi',
+                            ],
+                            'rejected' => [
+                                'bg' => 'bg-rose-50 border-2 border-rose-400 text-rose-900 hover:bg-rose-100/80',
+                                'num' => 'text-rose-900',
+                                'icon' => 'x-circle',
+                                'iconColor' => 'text-rose-600',
+                                'label' => 'Ditolak Mentor',
+                            ],
+                            default => [
+                                'bg' => 'bg-orange-50 border-2 border-orange-400 text-orange-900 hover:bg-orange-100/80',
+                                'num' => 'text-orange-900',
+                                'icon' => 'clock',
+                                'iconColor' => 'text-orange-600',
+                                'label' => 'Pending (Menunggu Review Mentor)',
+                            ],
+                        };
+                    @endphp
                     <a href="{{ route('journals.index', ['date' => $dayStr]) }}#form-jurnal"
-                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-emerald-50 border border-emerald-300 text-emerald-800 hover:bg-emerald-100/80 hover:shadow-xs
+                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative border {{ $cellConfig['bg'] }} hover:shadow-xs
                               {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
-                       title="Jurnal Terisi ({{ $dayStr }}). Klik untuk melihat/mengedit logbook.">
-                        <span class="text-xs sm:text-sm font-black text-emerald-800 leading-none">{{ $d }}</span>
+                       title="{{ $cellConfig['label'] }} ({{ $dayStr }}){{ $isDateOff ? ' — Bertabrakan dengan hari libur' : '' }}. Klik untuk melihat/mengedit logbook.">
+                        <span class="text-xs sm:text-sm font-black {{ $cellConfig['num'] }} leading-none">{{ $d }}</span>
                         <div class="mt-1 flex items-center justify-center">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
-                        </div>
-                    </a>
-
-                @elseif($journal && $isDateOff)
-                    {{-- JURNAL BERTABRAKAN DI HARI LIBUR (Gambar 1 & 2) --}}
-                    <a href="{{ route('journals.index', ['date' => $dayStr]) }}#form-jurnal"
-                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-emerald-50 border-2 border-emerald-400 text-emerald-900 hover:bg-emerald-100/90 hover:shadow-xs
-                              {{ $isSelected ? 'ring-2 ring-slate-900 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
-                       title="Jurnal bertabrakan dengan hari libur ({{ $dayStr }}). Klik untuk melihat atau menghapus logbook agar kalender rapi.">
-                        <span class="text-xs sm:text-sm font-black text-emerald-800 leading-none">{{ $d }}</span>
-                        <div class="mt-1 flex items-center justify-center">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                            <i data-lucide="{{ $cellConfig['icon'] }}" class="w-3.5 h-3.5 {{ $cellConfig['iconColor'] }}"></i>
                         </div>
                     </a>
 
                 @elseif($isDateOff)
-                    {{-- 2. HARI LIBUR / OFF SHIFT (BIRU DENGAN ICON USER-X - PERSIS SEPERTI GAMBAR USER) --}}
+                    {{-- HARI LIBUR / OFF SHIFT (BIRU DENGAN ICON USER-X) --}}
                     <a href="{{ route('journals.index', ['date' => $dayStr]) }}#form-jurnal"
                        class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100 hover:shadow-xs
                               {{ $isSelected ? 'ring-2 ring-sky-500 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
@@ -154,9 +174,9 @@
                     </a>
 
                 @elseif($isToday)
-                    {{-- 3. HARI INI (AKTIF UNTUK DIISI - ORANYE) --}}
+                    {{-- HARI INI BELUM DIISI (KUNING/AMBER GARIS PUTUS) --}}
                     <a href="{{ route('journals.index', ['date' => $dayStr]) }}#form-jurnal"
-                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-amber-50 border-2 border-amber-500 text-amber-900 shadow-xs ring-2 ring-amber-500/20 hover:bg-amber-100/80
+                       class="h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center p-1 sm:p-1.5 transition-all cursor-pointer relative bg-amber-50/70 border-2 border-dashed border-amber-400 text-amber-900 shadow-xs hover:bg-amber-100/80
                               {{ $isSelected ? 'ring-2 ring-amber-600 ring-offset-2 z-10 scale-105 shadow-md' : 'hover:scale-102' }}"
                        title="Hari Ini ({{ $dayStr }}) - Klik untuk mengisi jurnal kegiatan aktif">
                         <span class="text-xs sm:text-sm font-black text-amber-900 leading-none">{{ $d }}</span>
@@ -188,39 +208,73 @@
             @endfor
         </div>
 
-        <!-- Calendar Legend & Penjelasan Indikator Status -->
-        <div class="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center gap-4 text-xs">
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-2xs">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        <!-- Calendar Legend & Penjelasan Indikator Status (Default Hide di Mobile) -->
+        <div class="mt-4 pt-3.5 border-t border-slate-100">
+            <button type="button"
+                    onclick="toggleJournalLegend('student-journal-legend', 'student-legend-chevron')"
+                    class="sm:hidden w-full flex items-center justify-between text-xs font-bold text-slate-600 py-1 cursor-pointer">
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Keterangan Warna & Status</span>
                 </span>
-                <span class="text-slate-700"><b class="text-emerald-700">Hijau:</b> Jurnal Diisi</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-2xs">
-                    <i data-lucide="user-x" class="w-3.5 h-3.5 text-sky-600"></i>
-                </span>
-                <span class="text-slate-700"><b class="text-sky-600">Biru:</b> Hari Libur / Off Shift</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-amber-50 border border-amber-400 flex items-center justify-center text-amber-700 shadow-2xs">
-                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
-                </span>
-                <span class="text-slate-700"><b class="text-amber-700">Oranye:</b> Hari Ini</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
-                    <i data-lucide="ban" class="w-3.5 h-3.5 text-slate-400"></i>
-                </span>
-                <span class="text-slate-600"><b class="text-slate-500">Abu:</b> Terlewat / Terkunci</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400">
-                    <span class="text-xs font-bold text-slate-300">-</span>
-                </span>
-                <span class="text-slate-500">Akan Datang</span>
+                <i id="student-legend-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+            </button>
+            <div id="student-journal-legend" class="hidden sm:flex flex-wrap items-center gap-3.5 sm:gap-4 text-xs mt-2.5 sm:mt-0">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center justify-center text-emerald-700 shadow-2xs">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-emerald-700">Hijau:</b> Disetujui</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-orange-50 border-2 border-orange-400 flex items-center justify-center text-orange-700 shadow-2xs">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-600"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-orange-700">Oranye:</b> Pending (Menunggu ACC)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-purple-50 border-2 border-purple-400 flex items-center justify-center text-purple-700 shadow-2xs">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-purple-600"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-purple-700">Ungu:</b> Perlu Perhatian / Revisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-rose-50 border-2 border-rose-400 flex items-center justify-center text-rose-700 shadow-2xs">
+                        <i data-lucide="x-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-rose-700">Merah:</b> Ditolak</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-2xs">
+                        <i data-lucide="user-x" class="w-3.5 h-3.5 text-sky-600"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-sky-600">Biru:</b> Hari Libur</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-amber-50/70 border-2 border-dashed border-amber-400 flex items-center justify-center text-amber-700 shadow-2xs">
+                        <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-600"></i>
+                    </span>
+                    <span class="text-slate-700"><b class="text-amber-700">Hari Ini:</b> Belum Diisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                        <i data-lucide="ban" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </span>
+                    <span class="text-slate-600"><b class="text-slate-500">Abu:</b> Terlewat</span>
+                </div>
             </div>
         </div>
+        <script>
+            function toggleJournalLegend(legendId, chevronId) {
+                const el = document.getElementById(legendId);
+                const ch = document.getElementById(chevronId);
+                if (!el) return;
+                const isHidden = el.classList.contains('hidden');
+                el.classList.toggle('hidden', !isHidden);
+                el.classList.toggle('flex', isHidden);
+                if (ch) ch.classList.toggle('rotate-180', isHidden);
+            }
+        </script>
     </div>
 
     <!-- 2. Form Input / Edit Jurnal Kegiatan / Empty State Libur (#form-jurnal) -->
@@ -311,15 +365,26 @@
 
                 <div>
                     @if($selectedJournal)
-                        @if(!empty($selectedJournal->mentor_feedback))
+                        @php $sjStatus = $selectedJournal->status ?? 'pending'; @endphp
+                        @if($sjStatus === 'approved')
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold">
                                 <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                <span>Mentor Telah Memberi Catatan</span>
+                                <span>Disetujui Mentor</span>
+                            </span>
+                        @elseif($sjStatus === 'revisi')
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-300 text-purple-800 text-xs font-bold">
+                                <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-purple-600"></i>
+                                <span>Perlu Perhatian / Revisi</span>
+                            </span>
+                        @elseif($sjStatus === 'rejected')
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold">
+                                <i data-lucide="x-circle" class="w-3.5 h-3.5 text-rose-600"></i>
+                                <span>Ditolak Mentor</span>
                             </span>
                         @else
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-bold">
-                                <i data-lucide="clock" class="w-3.5 h-3.5 text-red-500"></i>
-                                <span>Menunggu Catatan Mentor</span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-300 text-orange-800 text-xs font-bold">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-orange-600"></i>
+                                <span>Pending (Menunggu Review Mentor)</span>
                             </span>
                         @endif
                     @elseif($isSelectedDateOff)
@@ -338,22 +403,67 @@
 
             <!-- Feedback Card dari Mentor -->
             @if($selectedJournal && !empty($selectedJournal->mentor_feedback))
-                <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-2.5 shadow-2xs">
-                    <div class="flex items-center justify-between">
+                @php
+                    $fbStatus = $selectedJournal->status ?? 'pending';
+                    $fbTheme = match($fbStatus) {
+                        'revisi' => [
+                            'wrap' => 'bg-purple-50/80 border-purple-300 text-purple-950',
+                            'iconBox' => 'bg-purple-600',
+                            'title' => 'text-purple-950',
+                            'sub' => 'text-purple-700',
+                            'subBold' => 'text-purple-900',
+                            'badge' => 'bg-purple-200/80 text-purple-900',
+                            'badgeText' => 'Perlu Perhatian / Revisi',
+                            'innerBorder' => 'border-purple-200',
+                        ],
+                        'rejected' => [
+                            'wrap' => 'bg-rose-50/80 border-rose-300 text-rose-950',
+                            'iconBox' => 'bg-rose-600',
+                            'title' => 'text-rose-950',
+                            'sub' => 'text-rose-700',
+                            'subBold' => 'text-rose-900',
+                            'badge' => 'bg-rose-200/80 text-rose-900',
+                            'badgeText' => 'Ditolak Mentor',
+                            'innerBorder' => 'border-rose-200',
+                        ],
+                        'approved' => [
+                            'wrap' => 'bg-emerald-50/80 border-emerald-200 text-emerald-950',
+                            'iconBox' => 'bg-emerald-600',
+                            'title' => 'text-emerald-950',
+                            'sub' => 'text-emerald-700',
+                            'subBold' => 'text-emerald-900',
+                            'badge' => 'bg-emerald-200/80 text-emerald-900',
+                            'badgeText' => '✓ Disetujui Mentor',
+                            'innerBorder' => 'border-emerald-100',
+                        ],
+                        default => [
+                            'wrap' => 'bg-orange-50/80 border-orange-200 text-orange-950',
+                            'iconBox' => 'bg-orange-500',
+                            'title' => 'text-orange-950',
+                            'sub' => 'text-orange-700',
+                            'subBold' => 'text-orange-900',
+                            'badge' => 'bg-orange-200/80 text-orange-900',
+                            'badgeText' => 'Menunggu Review Ulang',
+                            'innerBorder' => 'border-orange-200',
+                        ],
+                    };
+                @endphp
+                <div class="p-4 rounded-2xl border space-y-2.5 shadow-2xs {{ $fbTheme['wrap'] }}">
+                    <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0 aspect-square">
+                            <div class="w-8 h-8 rounded-xl text-white flex items-center justify-center shadow-xs shrink-0 aspect-square {{ $fbTheme['iconBox'] }}">
                                 <i data-lucide="message-square-quote" class="w-4 h-4"></i>
                             </div>
                             <div>
-                                <h3 class="text-xs font-black uppercase tracking-wider text-emerald-950">Catatan & Bimbingan Mentor Industri</h3>
-                                <p class="text-[11px] text-emerald-700">Pembimbing: <b class="text-emerald-900">{{ $selectedJournal->mentor->name ?? 'Staff Mentor TMS' }}</b></p>
+                                <h3 class="text-xs font-black uppercase tracking-wider {{ $fbTheme['title'] }}">Catatan & Bimbingan Mentor Industri</h3>
+                                <p class="text-[11px] {{ $fbTheme['sub'] }}">Pembimbing: <b class="{{ $fbTheme['subBold'] }}">{{ $selectedJournal->mentor->name ?? 'Staff Mentor TMS' }}</b></p>
                             </div>
                         </div>
-                        <span class="px-2.5 py-0.5 rounded-full bg-emerald-200/80 text-emerald-900 text-[10px] font-black uppercase tracking-wider">
-                            ✓ Catatan Tersedia
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 {{ $fbTheme['badge'] }}">
+                            {{ $fbTheme['badgeText'] }}
                         </span>
                     </div>
-                    <div class="bg-white/90 rounded-xl p-3.5 border border-emerald-100 text-xs text-slate-800 leading-relaxed font-medium">
+                    <div class="bg-white/90 rounded-xl p-3.5 border text-xs text-slate-800 leading-relaxed font-medium {{ $fbTheme['innerBorder'] }}">
                         "{{ $selectedJournal->mentor_feedback }}"
                     </div>
                 </div>
@@ -433,17 +543,27 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1.5">Status Pengisian</label>
+                        @php
+                            $stBadge = match($selectedJournal->status ?? null) {
+                                'approved' => ['icon' => 'check-circle-2', 'iconColor' => 'text-emerald-600', 'textColor' => 'text-emerald-700', 'text' => 'Jurnal Disetujui', 'pillBg' => 'bg-emerald-100 text-emerald-800', 'pill' => 'Disetujui'],
+                                'revisi'   => ['icon' => 'alert-circle', 'iconColor' => 'text-purple-600', 'textColor' => 'text-purple-700', 'text' => 'Perlu Perhatian / Revisi', 'pillBg' => 'bg-purple-100 text-purple-800', 'pill' => 'Revisi'],
+                                'rejected' => ['icon' => 'x-circle', 'iconColor' => 'text-rose-600', 'textColor' => 'text-rose-700', 'text' => 'Jurnal Ditolak', 'pillBg' => 'bg-rose-100 text-rose-800', 'pill' => 'Ditolak'],
+                                'pending'  => ['icon' => 'clock', 'iconColor' => 'text-orange-600', 'textColor' => 'text-orange-700', 'text' => 'Menunggu Review Mentor', 'pillBg' => 'bg-orange-100 text-orange-800', 'pill' => 'Pending'],
+                                default    => $isSelectedDateOff
+                                    ? ['icon' => 'user-x', 'iconColor' => 'text-sky-600', 'textColor' => 'text-sky-700', 'text' => 'Hari Libur / Off Shift (Tidak Wajib)', 'pillBg' => 'bg-sky-100 text-sky-800 border border-sky-200', 'pill' => 'Off Shift']
+                                    : ($isDateExpired
+                                        ? ['icon' => 'ban', 'iconColor' => 'text-slate-400', 'textColor' => 'text-slate-500', 'text' => 'Terkunci (Terlewat)', 'pillBg' => 'bg-slate-200 text-slate-500', 'pill' => 'Terkunci']
+                                        : ($isDateFuture
+                                            ? ['icon' => 'clock', 'iconColor' => 'text-amber-500', 'textColor' => 'text-amber-700', 'text' => 'Terkunci (Masa Depan)', 'pillBg' => 'bg-amber-100 text-amber-800', 'pill' => 'Belum Buka']
+                                            : ['icon' => 'file-edit', 'iconColor' => 'text-slate-500', 'textColor' => 'text-slate-700', 'text' => 'Belum Ada Jurnal', 'pillBg' => 'bg-slate-200 text-slate-600', 'pill' => 'Draft'])),
+                            };
+                        @endphp
                         <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="{{ $selectedJournal ? 'check-circle-2' : ($isSelectedDateOff ? 'user-x' : ($isDateExpired ? 'ban' : ($isDateFuture ? 'clock' : 'file-edit'))) }}" 
-                                   class="w-4 h-4 {{ $selectedJournal ? 'text-emerald-600' : ($isSelectedDateOff ? 'text-sky-600' : ($isDateExpired ? 'text-slate-400' : ($isDateFuture ? 'text-amber-500' : 'text-slate-500'))) }}"></i>
-                                <span class="font-bold {{ $selectedJournal ? 'text-emerald-700' : ($isSelectedDateOff ? 'text-sky-700' : ($isDateExpired ? 'text-slate-500' : ($isDateFuture ? 'text-amber-700' : 'text-slate-700'))) }}">
-                                    {{ $selectedJournal ? 'Jurnal Sudah Diisi' : ($isSelectedDateOff ? 'Hari Libur / Off Shift (Tidak Wajib)' : ($isDateExpired ? 'Terkunci (Terlewat)' : ($isDateFuture ? 'Terkunci (Masa Depan)' : 'Belum Ada Jurnal'))) }}
-                                </span>
+                                <i data-lucide="{{ $stBadge['icon'] }}" class="w-4 h-4 {{ $stBadge['iconColor'] }}"></i>
+                                <span class="font-bold {{ $stBadge['textColor'] }}">{{ $stBadge['text'] }}</span>
                             </div>
-                            <span class="text-[10px] {{ $selectedJournal ? 'bg-emerald-100 text-emerald-800' : ($isSelectedDateOff ? 'bg-sky-100 text-sky-800 border border-sky-200' : ($isDateExpired ? 'bg-slate-200 text-slate-500' : ($isDateFuture ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600'))) }} font-bold px-2 py-0.5 rounded">
-                                {{ $selectedJournal ? 'Tersimpan' : ($isSelectedDateOff ? 'Off Shift' : ($isDateExpired ? 'Terkunci' : ($isDateFuture ? 'Belum Buka' : 'Draft'))) }}
-                            </span>
+                            <span class="text-[10px] {{ $stBadge['pillBg'] }} font-bold px-2 py-0.5 rounded">{{ $stBadge['pill'] }}</span>
                         </div>
                     </div>
                 </div>
