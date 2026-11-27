@@ -181,10 +181,12 @@
                                 <i data-lucide="graduation-cap" class="w-4 h-4 text-slate-400"></i>
                                 <span>{{ $user->school_origin }} • {{ $user->major }}</span>
                             </div>
-                            <div class="flex items-center gap-1.5">
-                                <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
-                                <span>{{ $user->location ?? 'Ciamis, Jawa Barat, ID' }}</span>
-                            </div>
+                            @if($user->mentor)
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="briefcase" class="w-4 h-4 text-red-500"></i>
+                                    <span class="font-semibold text-red-700">Divisi {{ $user->mentor->location ?? 'IT / Software Engineering' }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

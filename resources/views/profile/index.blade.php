@@ -132,10 +132,6 @@
                         <span>{{ $user->school_origin }} • {{ $user->major }}</span>
                     </div>
                     <div class="flex items-center gap-2.5">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
-                        <span>{{ $user->location ?? 'Ciamis, Jawa Barat, ID' }}</span>
-                    </div>
-                    <div class="flex items-center gap-2.5">
                         <i data-lucide="mail" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
                         <span class="font-mono text-slate-700">{{ $user->email }}</span>
                     </div>
@@ -546,21 +542,12 @@
                         </div>
                     </div>
 
-                    <!-- Row 6: Tech Stack Skills & Location -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tech Stack / Skills (Dipisah koma)</label>
-                            <input type="text" name="skills" value="{{ old('skills', $user->skills ?? 'PHP, Laravel 11, Tailwind CSS, MySQL, JavaScript, Git, REST API') }}"
-                                   placeholder="PHP, Laravel, Vue.js, Tailwind, MySQL"
-                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Domisili / Lokasi</label>
-                            <input type="text" name="location" value="{{ old('location', $user->location ?? 'Ciamis, Jawa Barat, ID') }}"
-                                   placeholder="Ciamis, Jawa Barat, ID"
-                                   class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
-                        </div>
+                    <!-- Row 6: Tech Stack Skills -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Tech Stack / Skills (Dipisah koma)</label>
+                        <input type="text" name="skills" value="{{ old('skills', $user->skills ?? 'PHP, Laravel 11, Tailwind CSS, MySQL, JavaScript, Git, REST API') }}"
+                               placeholder="PHP, Laravel, Vue.js, Tailwind, MySQL"
+                               class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                     </div>
 
                     <!-- Submit Button -->
