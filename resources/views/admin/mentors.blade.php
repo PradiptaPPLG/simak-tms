@@ -118,7 +118,29 @@
                     </div>
                     <div class="flex items-center justify-end gap-1.5">
                         <button type="button" onclick="openEditMentorModal({{ json_encode(['id' => $mentor->id, 'name' => $mentor->name, 'email' => $mentor->email, 'headline' => $mentor->major ?? $mentor->headline, 'phone_number' => $mentor->phone_number, 'bio' => $mentor->bio, 'location' => $mentor->location ?? 'IT / Software Engineering']) }})" class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-bold cursor-pointer">Edit</button>
-                        <button type="button" onclick="openResetPasswordModal({{ $mentor->id }}, '{{ addslashes($mentor->name) }}', '{{ $mentor->account_id ?? $mentor->username ?? $mentor->id }}', 'mentor')" class="px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold cursor-pointer">Reset Sandi</button>
+                        <div class="relative inline-block text-left dropdown-container">
+                            <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center cursor-pointer" title="Opsi Aksi Mentor">
+                                <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                            </button>
+                            <div class="action-dropdown hidden absolute right-0 bottom-full mb-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 divide-y divide-slate-100 text-left">
+                                <div class="py-1">
+                                    <button type="button" onclick="openResetPasswordModal({{ $mentor->id }}, '{{ addslashes($mentor->name) }}', '{{ $mentor->account_id ?? $mentor->username ?? $mentor->id }}', 'mentor')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 text-left cursor-pointer">
+                                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-amber-500"></i>
+                                        <span>Reset Sandi</span>
+                                    </button>
+                                </div>
+                                <div class="py-1">
+                                    <form action="{{ route('admin.mentors.destroy', $mentor->id) }}" method="POST" onsubmit="return confirm('Hapus akun mentor {{ addslashes($mentor->name) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 text-left cursor-pointer">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+                                            <span>Hapus Mentor</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @empty

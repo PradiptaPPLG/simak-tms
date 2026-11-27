@@ -161,12 +161,38 @@
                         <span class="text-slate-500 truncate">{{ $reg->email }}</span>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button type="button" onclick="openDetailModal({{ json_encode($reg) }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer">Detail</button>
-                            @if($reg->status === 'pending')
-                                <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" class="inline" onsubmit="return confirm('Setujui pendaftaran {{ addslashes($reg->full_name) }}?');">
-                                    @csrf
-                                    <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold cursor-pointer">Setujui</button>
-                                </form>
-                            @endif
+                            <div class="relative inline-block text-left dropdown-container">
+                                <button type="button" onclick="toggleActionDropdown(this, event)" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 flex items-center justify-center cursor-pointer" title="Opsi Aksi">
+                                    <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                </button>
+                                <div class="action-dropdown hidden absolute right-0 bottom-full mb-1.5 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 divide-y divide-slate-100 text-left">
+                                    @if($reg->status === 'pending')
+                                        <div class="py-1">
+                                            <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" onsubmit="return confirm('Setujui pendaftaran PKL atas nama {{ addslashes($reg->full_name) }}?');">
+                                                @csrf
+                                                <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 text-left cursor-pointer">
+                                                    <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                                    <span>Setujui Pendaftaran</span>
+                                                </button>
+                                            </form>
+                                            <button type="button" onclick="openRejectModal({{ $reg->id }}, '{{ addslashes($reg->full_name) }}')" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 text-left cursor-pointer">
+                                                <i data-lucide="x" class="w-3.5 h-3.5 text-rose-500"></i>
+                                                <span>Tolak Pendaftaran</span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                    <div class="py-1">
+                                        <form method="POST" action="{{ route('admin.registrations.destroy', $reg->id) }}" onsubmit="return confirm('Hapus data pendaftaran {{ addslashes($reg->full_name) }}?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="w-full flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 text-left cursor-pointer">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-500"></i>
+                                                <span>Hapus Antrian</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
