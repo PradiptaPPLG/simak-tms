@@ -260,9 +260,11 @@
                     Menu Utama: <b>Monitoring Global, Pendaftaran PKL, Data Siswa, Data Mentor, Angkatan & Project DUDI, Sekolah Mitra, Laporan Rekap</b>
                 </div>
             </div>
+            @endif
 
         </div>
 
+        @if($currentRole === 'admin_tms')
         <!-- Alur Operasional: Verifikasi Pendaftaran PKL & Penerbitan ID Akun Siswa -->
         <div class="mas-card p-6 bg-gradient-to-r from-red-50/50 via-white to-amber-50/40 border border-slate-200 space-y-4">
             <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
