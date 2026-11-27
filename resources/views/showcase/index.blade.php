@@ -84,12 +84,32 @@
 
                     <!-- Team Members (Anggota Tim Siswa PKL) -->
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mb-1.5">
                             <i data-lucide="users" class="w-3.5 h-3.5 text-red-600"></i>
                             <span>Anggota Tim Pengembang:</span>
                         </div>
-                        <div class="text-xs font-semibold text-slate-800 mt-0.5">
-                            {{ $project->team_members ?? ($project->creator->name ?? 'Tim Siswa PKL') }}
+                        <div class="flex flex-wrap gap-1.5">
+                            @php
+                                $memberEntries = array_filter(array_map('trim', explode(',', (string) ($project->team_members ?? ($project->creator->name ?? 'Tim Siswa PKL')))));
+                            @endphp
+                            @foreach($memberEntries as $entry)
+                                @php
+                                    $cleanName = trim(preg_replace('/\s*\([^)]*\)\s*/', '', $entry));
+                                    $isCreator = $project->creator && strcasecmp(trim($project->creator->name), $cleanName) === 0;
+                                    $avatarSrc = $isCreator && $project->creator->avatar ? $project->creator->avatar : null;
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 pl-1 pr-2 py-0.5 rounded-full bg-white border border-slate-200/80 text-[11px] font-semibold text-slate-800 shadow-2xs">
+                                    <span class="w-5 h-5 rounded-full overflow-hidden bg-slate-900 text-white text-[9px] font-bold flex items-center justify-center shrink-0">
+                                        @if($avatarSrc)
+                                            <img src="{{ $avatarSrc }}" alt="{{ $cleanName }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <span style="display:none;" class="w-full h-full items-center justify-center">{{ strtoupper(substr($cleanName, 0, 1)) }}</span>
+                                        @else
+                                            {{ strtoupper(substr($cleanName, 0, 1)) }}
+                                        @endif
+                                    </span>
+                                    <span>{{ $entry }}</span>
+                                </span>
+                            @endforeach
                         </div>
                     </div>
                 </div>
