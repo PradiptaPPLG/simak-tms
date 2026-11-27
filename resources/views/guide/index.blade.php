@@ -322,6 +322,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
     </div>
 
@@ -347,6 +348,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
+                        @if($currentRole === 'siswa' || $currentRole === 'admin_tms')
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="layout-dashboard" class="w-4 h-4 text-red-600"></i>
@@ -365,6 +367,7 @@
                             <td class="py-3 px-3 text-slate-600">Formulir logbook kegiatan harian, catatan capaian, kendala, serta commit Git.</td>
                             <td class="py-3 px-3 text-slate-500">Klik tombol "Tambah Logbook Baru", isi deskripsi kegiatan dan tautan commit GitHub.</td>
                         </tr>
+                        @endif
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="folder-git-2" class="w-4 h-4 text-red-600"></i>
@@ -372,7 +375,7 @@
                             </td>
                             <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">Semua Role</span></td>
                             <td class="py-3 px-3 text-slate-600">Galeri showcase karya perangkat lunak hasil kreasi siswa PKL yang siap diuji publik.</td>
-                            <td class="py-3 px-3 text-slate-500">Filter berdasarkan angkatan, klik tombol "Repo" untuk source code dan "Live" untuk demo.</td>
+                            <td class="py-3 px-3 text-slate-500">Filter berdasarkan angkatan, klik tombol "Repo" untuk source code dan "Live/Demo" untuk demo.</td>
                         </tr>
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
@@ -383,6 +386,7 @@
                             <td class="py-3 px-3 text-slate-600">Rapor penilaian industri mencakup 4 pilar kompetensi, grafik radar keahlian, dan transkrip.</td>
                             <td class="py-3 px-3 text-slate-500">Siswa dapat melihat rapor; Mentor/Admin berwenang mengisi dan memperbarui nilai siswa.</td>
                         </tr>
+                        @if($currentRole === 'siswa' || $currentRole === 'admin_tms')
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="user" class="w-4 h-4 text-red-600"></i>
@@ -392,6 +396,8 @@
                             <td class="py-3 px-3 text-slate-600">Halaman biodata profesional ala GitHub, heatmap kontribusi, QR Code e-sertifikat, dan link medsos.</td>
                             <td class="py-3 px-3 text-slate-500">Gunakan form di bawah halaman untuk melengkapi URL GitHub, LinkedIn, dan foto profil.</td>
                         </tr>
+                        @endif
+                        @if($currentRole === 'mentor' || $currentRole === 'admin_tms')
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="users" class="w-4 h-4 text-slate-900"></i>
@@ -410,6 +416,8 @@
                             <td class="py-3 px-3 text-slate-600">Antarmuka review cepat untuk memeriksa jurnal harian siswa dan menyisipkan catatan mentor.</td>
                             <td class="py-3 px-3 text-slate-500">Tulis saran di kolom catatan atau klik rekomendasi cepat, lalu klik "Simpan Catatan".</td>
                         </tr>
+                        @endif
+                        @if($currentRole === 'admin_tms')
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-600"></i>
@@ -464,6 +472,7 @@
                             <td class="py-3 px-3 text-slate-600">Direktori SMK/Kampus mitra, nomor kontak guru pembimbing sekolah, dan dokumen MoU.</td>
                             <td class="py-3 px-3 text-slate-500">Simpan kontak guru pembimbing dan detail kerjasama untuk rekrutmen jangka panjang.</td>
                         </tr>
+                        @endif
                         <tr>
                             <td class="py-3 px-3 font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
