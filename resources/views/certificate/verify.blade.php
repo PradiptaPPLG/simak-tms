@@ -28,18 +28,18 @@
         }
     </style>
 </head>
-<body class="py-10 px-4 sm:px-6 flex items-center justify-center min-h-screen">
+<body class="py-8 px-4 sm:px-6 flex flex-col items-center justify-center min-h-screen">
 
-    <div class="max-w-3xl w-full space-y-6">
+    <div class="max-w-3xl w-full space-y-5 my-auto">
 
         <!-- Top Brand Header -->
-        <div class="text-center space-y-3">
-            <div class="inline-flex items-center justify-center">
-                <img src="{{ asset('images/logo/logo_tms.png') }}" alt="Logo PT. Teknologi Multi Sistem" class="w-16 h-16 object-contain drop-shadow-md">
-            </div>
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold shadow-lg">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Portal Verifikasi Publik Resmi SIMAK-TMS</span>
+        <div class="flex flex-col items-center text-center space-y-2.5">
+            <div class="flex items-center justify-center gap-3">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK-TMS" class="w-11 h-11 rounded-xl object-contain shadow-md">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold shadow-lg">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Portal Verifikasi Publik Resmi SIMAK-TMS</span>
+                </div>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">PT. TEKNOLOGI MULTI SISTEM</h1>
             <p class="text-xs text-slate-300">Sistem Informasi Manajemen Aktivitas, Karya & Sertifikasi Siswa Praktik Kerja Lapangan (PKL)</p>
@@ -71,8 +71,13 @@
                 <!-- Student Identity Header -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-slate-900/25 shrink-0 border border-slate-700/50">
-                            {{ substr($student->name, 0, 2) }}
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-slate-900/25 shrink-0 border border-slate-200 overflow-hidden">
+                            @if($student->avatar)
+                                <img src="{{ $student->avatar }}" alt="{{ $student->name }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <span style="display:none;" class="w-full h-full items-center justify-center">{{ substr($student->name, 0, 2) }}</span>
+                            @else
+                                {{ substr($student->name, 0, 2) }}
+                            @endif
                         </div>
                         <div>
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] uppercase border border-emerald-200 mb-1">
