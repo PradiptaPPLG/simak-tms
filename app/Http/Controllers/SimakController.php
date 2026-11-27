@@ -2440,7 +2440,7 @@ class SimakController extends Controller
             ->where('batch_id', $selectedBatchId)
             ->get();
 
-        $allStudents = User::where('role', 'siswa')->orderBy('name')->get();
+        $allStudents = User::where('role', 'siswa')->with('batchEnrollments')->orderBy('name')->get();
         $mentors = User::where('role', 'mentor')->orderBy('name')->get();
 
         return view('admin.batches', compact(

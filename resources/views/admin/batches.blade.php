@@ -761,7 +761,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Angkatan (Batch) *</label>
-                <select id="proj-batch-id" name="batch_id" required class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                <select id="proj-batch-id" name="batch_id" required onchange="filterProjectStudentDropdowns()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                     @foreach($batches as $b)
                         <option value="{{ $b->id }}" {{ $selectedBatchId == $b->id ? 'selected' : '' }}>{{ $b->batch_name }} ({{ $b->period_year }})</option>
                     @endforeach
@@ -1020,23 +1020,64 @@
     }
 
     // Modal Project
-    const ALL_STUDENTS_FOR_PROJECT = @json($allStudents->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'account_id' => $s->account_id ?? $s->id])->values());
+    const ALL_STUDENTS_FOR_PROJECT = @json($allStudents->map(function($s) {
+        $batchIds = $s->batchEnrollments->pluck('batch_id')->map(fn($id) => (int)$id)->toArray();
+        if ($s->batch_id) $batchIds[] = (int)$s->batch_id;
+        return [
+            'id' => $s->id,
+            'name' => $s->name,
+            'account_id' => $s->account_id ?? $s->id,
+            'batch_ids' => array_values(array_unique($batchIds)),
+        ];
+    })->values());
+
+    function getFilteredStudentsForSelectedBatch() {
+        const batchId = parseInt(document.getElementById('proj-batch-id')?.value || '0', 10);
+        if (!batchId) return ALL_STUDENTS_FOR_PROJECT;
+        return ALL_STUDENTS_FOR_PROJECT.filter(s => s.batch_ids.includes(batchId));
+    }
+
+    function populateStudentSelect(selectEl, students, preserveVal = '', emptyLabel = '-- Pilih Siswa --') {
+        const prev = preserveVal || selectEl.value;
+        selectEl.innerHTML = '';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = students.length > 0 ? emptyLabel : '-- Belum ada siswa di angkatan ini --';
+        selectEl.appendChild(defaultOpt);
+
+        students.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.setAttribute('data-name', s.name);
+            opt.textContent = `${s.name} (${s.account_id})`;
+            if (String(s.id) === String(prev)) opt.selected = true;
+            selectEl.appendChild(opt);
+        });
+    }
+
+    function filterProjectStudentDropdowns(preserveLeadId = null) {
+        const students = getFilteredStudentsForSelectedBatch();
+        const leadSel = document.getElementById('proj-creator-id');
+        if (leadSel) {
+            populateStudentSelect(leadSel, students, preserveLeadId, '-- Pilih Siswa Utama --');
+            if (!leadSel.value && students.length > 0 && preserveLeadId === null) {
+                leadSel.selectedIndex = 1;
+            }
+        }
+        document.querySelectorAll('#proj-extra-members .extra-member-select').forEach(sel => {
+            populateStudentSelect(sel, students, sel.value, '-- Pilih Anggota --');
+        });
+        syncTeamMembersString();
+    }
 
     function addExtraTeamMemberRow(selectedId = '', roleText = 'Developer') {
         const container = document.getElementById('proj-extra-members');
         const row = document.createElement('div');
         row.className = 'grid grid-cols-12 gap-2 items-center bg-slate-50/70 p-2 rounded-xl border border-slate-200/80 extra-member-row';
 
-        let opts = '<option value="">-- Pilih Anggota --</option>';
-        ALL_STUDENTS_FOR_PROJECT.forEach(s => {
-            const sel = String(s.id) === String(selectedId) ? 'selected' : '';
-            opts += `<option value="${s.id}" data-name="${s.name}" ${sel}>${s.name} (${s.account_id})</option>`;
-        });
-
         row.innerHTML = `
             <div class="col-span-7">
                 <select onchange="syncTeamMembersString()" class="extra-member-select w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500">
-                    ${opts}
                 </select>
             </div>
             <div class="col-span-4">
@@ -1049,6 +1090,8 @@
             </div>
         `;
         container.appendChild(row);
+        const sel = row.querySelector('.extra-member-select');
+        populateStudentSelect(sel, getFilteredStudentsForSelectedBatch(), selectedId, '-- Pilih Anggota --');
         if (window.lucide) lucide.createIcons();
         syncTeamMembersString();
     }
@@ -1095,6 +1138,7 @@
         if (batchId) {
             document.getElementById('proj-batch-id').value = batchId;
         }
+        filterProjectStudentDropdowns();
 
         modal.classList.remove('hidden');
         if (window.lucide) lucide.createIcons();
@@ -1116,12 +1160,10 @@
         document.getElementById('proj-repo').value = project.repo_url || '';
         document.getElementById('proj-live').value = project.live_url || '';
 
-        // Populate Lead & Extra Members
+        // Populate Lead & Extra Members (filtered by selected batch)
         document.getElementById('proj-extra-members').innerHTML = '';
+        filterProjectStudentDropdowns(project.creator_id || '');
         const leadSel = document.getElementById('proj-creator-id');
-        if (project.creator_id) {
-            leadSel.value = project.creator_id;
-        }
         const rawMembers = (project.team_members || '').split(',').map(s => s.trim()).filter(Boolean);
         rawMembers.forEach((entry, idx) => {
             const match = entry.match(/^(.+?)\s*\(([^)]+)\)$/);
