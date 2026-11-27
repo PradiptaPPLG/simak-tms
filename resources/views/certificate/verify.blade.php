@@ -28,35 +28,35 @@
         }
     </style>
 </head>
-<body class="py-8 px-4 sm:px-6 flex flex-col items-center justify-center min-h-screen">
+<body class="py-6 sm:py-10 px-3.5 sm:px-6 min-h-screen overflow-x-hidden">
 
-    <div class="max-w-3xl w-full space-y-5 my-auto">
+    <div class="max-w-3xl w-full mx-auto space-y-5">
 
         <!-- Top Brand Header -->
-        <div class="flex flex-col items-center text-center space-y-2.5">
-            <div class="flex items-center justify-center gap-3">
-                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK-TMS" class="w-11 h-11 rounded-xl object-contain shadow-md">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold shadow-lg">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Portal Verifikasi Publik Resmi SIMAK-TMS</span>
+        <div class="flex flex-col items-center text-center space-y-2.5 px-1">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                <img src="{{ asset('images/logo/simak-icon.png') }}" alt="SIMAK-TMS" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-contain shadow-md shrink-0">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[11px] sm:text-xs font-semibold shadow-lg max-w-full">
+                    <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                    <span class="truncate">Portal Verifikasi Publik Resmi SIMAK-TMS</span>
                 </div>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">PT. TEKNOLOGI MULTI SISTEM</h1>
-            <p class="text-xs text-slate-300">Sistem Informasi Manajemen Aktivitas, Karya & Sertifikasi Siswa Praktik Kerja Lapangan (PKL)</p>
+            <h1 class="text-lg sm:text-3xl font-black text-white tracking-tight">PT. TEKNOLOGI MULTI SISTEM</h1>
+            <p class="text-[11px] sm:text-xs text-slate-300 leading-relaxed">Sistem Informasi Manajemen Aktivitas, Karya &amp; Sertifikasi Siswa Praktik Kerja Lapangan (PKL)</p>
         </div>
 
         <!-- Main Verified Card -->
         <div class="verified-card rounded-3xl overflow-hidden border border-slate-100">
             
             <!-- Green / Emerald Verification Ribbon -->
-            <div class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 px-6 py-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20">
-                        <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+            <div class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 px-4 sm:px-6 py-4 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/20">
+                        <i data-lucide="shield-check" class="w-5 h-5 sm:w-6 sm:h-6 text-white"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <div class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-100">Status Dokumen Otentik</div>
-                        <div class="text-base font-black tracking-wide">SERTIFIKAT RESMI TERVERIFIKASI DUDI</div>
+                        <div class="text-sm sm:text-base font-black tracking-wide leading-snug">SERTIFIKAT RESMI TERVERIFIKASI DUDI</div>
                     </div>
                 </div>
                 <div class="sm:text-right font-mono text-xs bg-emerald-700/60 px-3.5 py-2 rounded-xl border border-emerald-400/40">

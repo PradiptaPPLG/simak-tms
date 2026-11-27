@@ -12,7 +12,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Kelola data seluruh siswa magang lintas sekolah mitra, pembagian mentor pembimbing, serta rekapitulasi penugasan.</p>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto no-print">
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto no-print">
             <!-- Green Export Button (Opens Format Choice Modal) -->
             <button type="button" onclick="openExportModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Unduh Berkas Spreadsheet Data Siswa (Excel / CSV)">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
@@ -136,7 +136,106 @@
             </a>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Mobile Card List (Responsive < 768px) -->
+        <div class="md:hidden divide-y divide-slate-100">
+            @forelse($interns as $intern)
+                @php
+                    $hasCert = !empty($intern->account_id) && !empty($intern->mentor_id) && !empty($intern->evaluation) && $intern->evaluation->is_published;
+                @endphp
+                <div class="p-4 space-y-3 hover:bg-slate-50/70 transition-colors">
+                    <!-- Row 1: Avatar, Name, ID & Status -->
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold flex items-center justify-center border border-red-500/30 shrink-0 text-xs">
+                                @if($intern->avatar)
+                                    <img src="{{ $intern->avatar }}" alt="{{ $intern->name }}" class="w-full h-full object-cover">
+                                @else
+                                    {{ substr($intern->name, 0, 2) }}
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <div class="font-bold text-slate-900 text-xs truncate">
+                                    {{ $intern->name }}
+                                </div>
+                                <div class="flex items-center flex-wrap gap-1 mt-0.5">
+                                    @if(!empty($intern->account_id))
+                                        <span class="font-mono text-red-600 font-bold text-[10px]">ID: {{ $intern->account_id }}</span>
+                                    @else
+                                        <span class="font-mono text-amber-700 bg-amber-100/90 px-1.5 py-0.5 rounded text-[9px] font-bold border border-amber-300">(belum terdaftar)</span>
+                                    @endif
+                                    <span class="text-[10px] text-slate-400 truncate max-w-[140px]">• {{ $intern->email }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="shrink-0">
+                            @if($intern->status === 'alumni')
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold text-[9.5px]">Alumni</span>
+                            @elseif(empty($intern->account_id) || empty($intern->mentor_id))
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold text-[9.5px]">Pending</span>
+                            @elseif($intern->evaluation)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold font-mono text-[10px]">Nilai: {{ $intern->evaluation->final_score }}</span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[9.5px]">✓ Aktif</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Row 2: School & Mentor Grid -->
+                    <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                        <div class="min-w-0">
+                            <div class="text-[9.5px] font-bold text-slate-400 uppercase">Sekolah & Jurusan</div>
+                            <div class="font-semibold text-slate-800 truncate mt-0.5">{{ $intern->school_origin ?? 'SMKN 1 Ciamis' }}</div>
+                            <div class="text-[10px] text-slate-500 truncate">{{ $intern->major ?? 'PPLG' }}</div>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-[9.5px] font-bold text-slate-400 uppercase">Pembimbing TMS</div>
+                            @if($intern->mentor)
+                                <div class="font-bold text-slate-800 truncate mt-0.5">{{ $intern->mentor->name }}</div>
+                                <div class="text-[10px] text-red-600 font-semibold truncate">{{ $intern->mentor->location ?? 'Software Eng.' }}</div>
+                            @else
+                                <div class="text-amber-700 font-bold text-[10.5px] mt-0.5 flex items-center gap-1">
+                                    <i data-lucide="alert-triangle" class="w-3 h-3 shrink-0"></i>
+                                    <span>Belum Ada Mentor</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Quick Actions -->
+                    <div class="flex items-center justify-between gap-2 pt-1 no-print">
+                        <div class="text-[10.5px] text-slate-500 font-medium">
+                            <b class="text-slate-800 font-mono">{{ $intern->projects->count() ?? 0 }}</b> Proyek
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="openEditModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ addslashes($intern->email) }}', '{{ addslashes($intern->school_origin ?? 'SMKN 1 Ciamis') }}', '{{ addslashes($intern->major ?? 'PPLG') }}', '{{ $intern->mentor_id }}', '{{ $intern->status ?? 'aktif' }}', '{{ $intern->alumni_status ?? 'bekerja' }}', '{{ addslashes($intern->alumni_current_at ?? '') }}')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                                <i data-lucide="edit-2" class="w-3 h-3"></i>
+                                <span>Edit</span>
+                            </button>
+                            @if(!empty($intern->account_id) && !empty($intern->mentor_id))
+                                <button type="button" onclick="openEvaluationModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->account_id }}', {{ $intern->evaluation->technical_skill ?? 85 }}, {{ $intern->evaluation->discipline ?? 90 }}, {{ $intern->evaluation->teamwork ?? 85 }}, {{ $intern->evaluation->initiative ?? 85 }}, '{{ $intern->evaluation->certificate_number ?? ('TMS-CERT-' . date('Y') . '-' . $intern->account_id) }}', '{{ $intern->evaluation->issue_date ?? date('Y-m-d') }}', '{{ addslashes($intern->evaluation->general_notes ?? 'Peserta menunjukkan progres koding sangat baik.') }}')" class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="award" class="w-3 h-3"></i>
+                                    <span>Nilai</span>
+                                </button>
+                            @endif
+                            @if($hasCert)
+                                <a href="{{ route('certificate.print', $intern->evaluation->certificate_number ?? ('TMS-CERT-2026-' . $intern->account_id)) }}" target="_blank" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1">
+                                    <i data-lucide="printer" class="w-3 h-3"></i>
+                                    <span>Sertif</span>
+                                </a>
+                            @endif
+                            <button type="button" onclick="openStudentDeletionModal({{ $intern->id }}, '{{ addslashes($intern->name) }}', '{{ $intern->status ?? 'aktif' }}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 cursor-pointer" title="Hapus Siswa">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-xs text-slate-400">Tidak ada siswa magang yang sesuai dengan pencarian atau filter.</div>
+            @endforelse
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead>
                     <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[10px]">

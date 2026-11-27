@@ -12,7 +12,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Tinjau biodata pendaftar, seleksi administrasi, verifikasi kuota, dan pembuatan data siswa magang.</p>
         </div>
 
-        <div class="flex items-center gap-2 no-print">
+        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto no-print">
             <!-- Green Export Button (Opens Format Choice Modal) -->
             <button type="button" onclick="openExportModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer" title="Unduh Berkas Spreadsheet Data Pendaftaran (Excel / CSV)">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
@@ -137,7 +137,45 @@
             <span class="text-[11px] text-slate-400">Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</span>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Mobile Card List (Responsive < 768px) -->
+        <div class="md:hidden divide-y divide-slate-100">
+            @forelse($registrations as $reg)
+                <div class="p-4 space-y-2.5">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <span class="font-mono text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{{ $reg->registration_code }}</span>
+                            <div class="font-bold text-slate-900 text-xs mt-1 truncate">{{ $reg->full_name }}</div>
+                            <div class="text-[10px] text-slate-500 font-mono">NIS: {{ $reg->nis ?? '-' }} • {{ $reg->school_origin ?? 'SMKN 1 Ciamis' }}</div>
+                        </div>
+                        <div class="shrink-0">
+                            @if($reg->status === 'pending')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Pending</span>
+                            @elseif($reg->status === 'approved')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Disetujui</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">Ditolak</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 pt-1 text-[11px] no-print">
+                        <span class="text-slate-500 truncate">{{ $reg->email }}</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="openDetailModal({{ json_encode($reg) }})" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer">Detail</button>
+                            @if($reg->status === 'pending')
+                                <form method="POST" action="{{ route('admin.registrations.approve', $reg->id) }}" class="inline" onsubmit="return confirm('Setujui pendaftaran {{ addslashes($reg->full_name) }}?');">
+                                    @csrf
+                                    <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold cursor-pointer">Setujui</button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-8 text-center text-xs text-slate-400">Belum ada data pendaftaran.</div>
+            @endforelse
+        </div>
+
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left text-xs" id="reg-table">
                 <thead>
                     <tr class="border-b border-slate-200 bg-slate-50/50 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
