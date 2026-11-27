@@ -188,48 +188,51 @@
         <div class="space-y-3">
             @forelse($pendingJournals as $journal)
                 <div class="p-4 rounded-xl border border-slate-200 bg-white hover:border-orange-300 transition-all space-y-3">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="space-y-1.5 flex-1">
-                            <div class="flex flex-wrap items-center gap-2 text-xs">
-                                <span class="font-bold text-slate-900">{{ $journal->user->name }}</span>
-                                <span class="text-slate-400">•</span>
-                                <span class="text-slate-500 font-medium">{{ $journal->user->school_origin }}</span>
-                                <span class="text-slate-400">•</span>
-                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200">
+                    <div class="flex flex-col md:flex-row md:items-start justify-between gap-3.5">
+                        <div class="space-y-1.5 flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 min-w-0">
+                                    <span class="font-bold text-slate-900">{{ $journal->user->name }}</span>
+                                    <span class="text-slate-300">•</span>
+                                    <span class="text-slate-500 font-medium">{{ $journal->user->school_origin }}</span>
+                                </div>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200 shrink-0">
                                     <i data-lucide="clock" class="w-3 h-3 text-orange-600"></i>
                                     Pending • {{ $journal->created_at->format('H:i') }} WIB
                                 </span>
                             </div>
-                            <div class="text-xs font-bold text-slate-800">{{ $journal->activity_title }}</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">{{ $journal->activity_title }}</div>
                             <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
                             
                             @if($journal->commit_url)
-                                <div class="text-[11px] text-slate-500 flex items-center gap-1.5 pt-1">
-                                    <i data-lucide="git-commit" class="w-3.5 h-3.5 text-red-600"></i>
-                                    <span>Bukti Commit Git:</span>
-                                    <a href="{{ $journal->commit_url }}" target="_blank" class="text-red-600 hover:underline font-mono">{{ $journal->commit_url }}</a>
+                                <div class="pt-1">
+                                    <a href="{{ $journal->commit_url }}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition-colors max-w-full">
+                                        <i data-lucide="link-2" class="w-3.5 h-3.5 text-red-600 shrink-0"></i>
+                                        <span class="truncate">Lihat Tautan Bukti</span>
+                                        <i data-lucide="external-link" class="w-3 h-3 text-slate-400 shrink-0"></i>
+                                    </a>
                                 </div>
                             @endif
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
-                            <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
+                        <div class="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 flex-shrink-0 pt-1 md:pt-0">
+                            <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST" class="w-full sm:w-auto">
                                 @csrf
-                                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                <button type="submit" class="w-full sm:w-auto px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer">
+                                    <i data-lucide="check" class="w-3.5 h-3.5 shrink-0"></i>
                                     <span>ACC</span>
                                 </button>
                             </form>
-                            <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST">
+                            <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST" class="w-full sm:w-auto">
                                 @csrf
-                                <button type="submit" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                <button type="submit" class="w-full sm:w-auto px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer">
+                                    <i data-lucide="x" class="w-3.5 h-3.5 shrink-0"></i>
                                     <span>Tolak</span>
                                 </button>
                             </form>
-                            <button type="button" onclick="document.getElementById('dash-saran-{{ $journal->id }}').classList.toggle('hidden')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
-                                <i data-lucide="message-square-plus" class="w-4 h-4"></i>
-                                <span>Kirim Saran</span>
+                            <button type="button" onclick="document.getElementById('dash-saran-{{ $journal->id }}').classList.toggle('hidden')" class="w-full sm:w-auto px-2.5 sm:px-3.5 py-2 rounded-xl text-[11px] sm:text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap">
+                                <i data-lucide="message-square-plus" class="w-3.5 h-3.5 shrink-0"></i>
+                                <span>Saran</span>
                             </button>
                         </div>
                     </div>
@@ -253,12 +256,12 @@
 
     <!-- 4. Section: Live Telemetri Siswa Bimbingan Saat Ini (Yang Sekarang) -->
     <div class="mas-card p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <i data-lucide="users" class="w-5 h-5 text-red-600"></i>
+        <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2 min-w-0">
+                <i data-lucide="users" class="w-5 h-5 text-red-600 shrink-0"></i>
                 <span>Status Kehadiran & Progres Koding Siswa Aktif</span>
             </h2>
-            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg">
+            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg shrink-0 whitespace-nowrap">
                 Lab Software TMS
             </span>
         </div>
@@ -266,37 +269,61 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @foreach($activeInterns as $intern)
                 <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold flex items-center justify-center border-2 border-red-500">
+                    @php
+                        $todayInternJournal = $intern->journals->first(function($j) {
+                            return \Carbon\Carbon::parse($j->journal_date)->isToday();
+                        });
+                    @endphp
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
+                        <div class="flex items-start justify-between sm:justify-start gap-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-900 text-white font-extrabold flex items-center justify-center border-2 border-red-500 shrink-0 aspect-square">
                                 @if($intern->avatar)
                                     <img src="{{ $intern->avatar }}" alt="{{ $intern->name }}" class="w-full h-full object-cover">
                                 @else
                                     {{ substr($intern->name, 0, 2) }}
                                 @endif
                             </div>
-                            <div>
-                                <h3 class="text-xs font-bold text-slate-900">{{ $intern->name }} <span class="font-mono text-red-600 font-bold">({{ $intern->account_id ?? 'belum terdaftar' }})</span></h3>
-                                <div class="text-[10px] text-slate-400 font-mono">ID: {{ $intern->account_id ?? 'Menunggu Mentor' }} • {{ $intern->major }}</div>
+
+                            {{-- Badge Check-in tampil sejajar avatar di kanan pada mobile --}}
+                            <div class="sm:hidden shrink-0">
+                                @if($todayInternJournal)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                        Check-in {{ $todayInternJournal->created_at->format('H:i') }} WIB
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold whitespace-nowrap">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        Belum Check-in
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="hidden sm:block min-w-0">
+                                <h3 class="text-xs font-bold text-slate-900 leading-snug">{{ $intern->name }} <span class="font-mono text-red-600 font-bold">({{ $intern->account_id ?? 'belum terdaftar' }})</span></h3>
+                                <div class="text-[10px] text-slate-400 font-mono leading-snug">ID: {{ $intern->account_id ?? 'Menunggu Mentor' }} • {{ $intern->major }}</div>
                             </div>
                         </div>
 
-                        @php
-                            $todayInternJournal = $intern->journals->first(function($j) {
-                                return \Carbon\Carbon::parse($j->journal_date)->isToday();
-                            });
-                        @endphp
-                        @if($todayInternJournal)
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                                Check-in {{ $todayInternJournal->created_at->format('H:i') }} WIB
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                Belum Check-in
-                            </span>
-                        @endif
+                        {{-- Biodata full width di bawah avatar pada mobile --}}
+                        <div class="sm:hidden min-w-0">
+                            <h3 class="text-xs font-bold text-slate-900 leading-snug">{{ $intern->name }} <span class="font-mono text-red-600 font-bold">({{ $intern->account_id ?? 'belum terdaftar' }})</span></h3>
+                            <div class="text-[10px] text-slate-400 font-mono leading-snug mt-0.5">ID: {{ $intern->account_id ?? 'Menunggu Mentor' }} • {{ $intern->major }}</div>
+                        </div>
+
+                        <div class="hidden sm:block shrink-0">
+                            @if($todayInternJournal)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold whitespace-nowrap">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                                    Check-in {{ $todayInternJournal->created_at->format('H:i') }} WIB
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-semibold whitespace-nowrap">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    Belum Check-in
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="text-xs text-slate-600 space-y-1 border-t border-slate-200/60 pt-2.5">

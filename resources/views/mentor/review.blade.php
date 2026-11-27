@@ -550,9 +550,9 @@
 
                         <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
                             @if($journal->commit_url)
-                                <a href="{{ $journal->commit_url }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-mono font-medium transition-colors flex items-center gap-1.5">
-                                    <i data-lucide="git-commit" class="w-3.5 h-3.5 text-red-400"></i>
-                                    <span>Commit Git</span>
+                                <a href="{{ $journal->commit_url }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-semibold transition-colors flex items-center gap-1.5">
+                                    <i data-lucide="link-2" class="w-3.5 h-3.5 text-red-400"></i>
+                                    <span>Tautan Bukti</span>
                                 </a>
                             @endif
                             <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">

@@ -1,6 +1,6 @@
 @extends('layouts.simak')
 
-@section('title', 'Siswa Bimbingan & Monitoring Performa • SIMAK-TMS')
+@section('title', ($isRaporMode ?? false) ? 'Penilaian & Rapor DUDI Siswa • SIMAK-TMS' : 'Siswa Bimbingan & Monitoring Performa • SIMAK-TMS')
 
 @section('content')
 <div class="space-y-6">
@@ -8,8 +8,14 @@
     <!-- Page Heading -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900">Siswa Bimbingan & Monitoring Performa</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Pantau performa koding, rekapitulasi logbook jurnal harian, dan karya portofolio siswa bimbingan Anda.</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900">
+                {{ ($isRaporMode ?? false) ? 'Penilaian & Rapor DUDI Siswa' : 'Siswa Bimbingan & Monitoring Performa' }}
+            </h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                {{ ($isRaporMode ?? false)
+                    ? 'Input nilai 4 pilar kompetensi industri, kelola grade rapor DUDI, serta cetak dan verifikasi e-sertifikat siswa.'
+                    : 'Pantau performa koding, rekapitulasi logbook jurnal harian, dan karya portofolio siswa bimbingan Anda.' }}
+            </p>
         </div>
 
         <div class="grid grid-cols-2 gap-2 w-full sm:w-auto shrink-0 no-print">
@@ -102,7 +108,112 @@
 
     </div>
 
-    <!-- 2. Accordion List: Siswa Bimbingan dengan Fitur Dropdown Inspect Performa -->
+    @if($isRaporMode ?? false)
+    <!-- 2A. MODE RAPOR: Daftar Penilaian 4 Pilar & Sertifikat DUDI Siswa -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div>
+                <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-red-600"></i>
+                    <span>Daftar Nilai Rapor DUDI &amp; E-Sertifikat</span>
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Perbarui nilai 4 pilar industri per angkatan atau cetak langsung e-sertifikat siswa.</p>
+            </div>
+        </div>
+
+        @forelse($students as $student)
+            @php
+                $enrollments = $student->batchEnrollments;
+            @endphp
+            <div class="mas-card p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-11 h-11 rounded-2xl overflow-hidden bg-slate-900 text-white font-black text-xs flex items-center justify-center border-2 border-red-500/30 shrink-0 aspect-square">
+                            @if($student->avatar)
+                                <img src="{{ $student->avatar }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ strtoupper(substr($student->name, 0, 2)) }}
+                            @endif
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-sm font-black text-slate-900">{{ $student->name }} <span class="font-mono text-red-600 text-xs">({{ $student->account_id ?? 'belum terdaftar' }})</span></h3>
+                            <div class="text-[11px] text-slate-400 font-mono truncate">{{ $student->school_origin ?? 'SMKN 1 Ciamis' }} • {{ $student->major ?? 'PPLG' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-bold">
+                            {{ $enrollments->count() }} Periode / Sertifikat
+                        </span>
+                    </div>
+                </div>
+
+                @forelse($enrollments as $enr)
+                    <form action="{{ route('batch_students.grade', $enr->id) }}" method="POST" class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+                        @csrf
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-xs font-black text-slate-800 flex flex-wrap items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px]">{{ $enr->batch->batch_name ?? 'Angkatan #' . $enr->batch_id }}</span>
+                                @if($enr->certificate_number)
+                                    <span class="font-mono text-[11px] text-slate-500">{{ $enr->certificate_number }}</span>
+                                @endif
+                            </div>
+                            <div class="text-xs font-mono font-black text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
+                                Akhir: {{ number_format($enr->final_score ?? 0, 1) }} [{{ $enr->grade ?? '-' }}]
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Teknis</label>
+                                <input type="number" name="technical_skill" min="0" max="100" step="0.1" value="{{ $enr->technical_skill ?? 85 }}" required class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Disiplin</label>
+                                <input type="number" name="discipline" min="0" max="100" step="0.1" value="{{ $enr->discipline ?? 90 }}" required class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Kerjasama Tim</label>
+                                <input type="number" name="teamwork" min="0" max="100" step="0.1" value="{{ $enr->teamwork ?? 88 }}" required class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Inisiatif</label>
+                                <input type="number" name="initiative" min="0" max="100" step="0.1" value="{{ $enr->initiative ?? 85 }}" required class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" name="mentor_notes" value="{{ $enr->mentor_notes }}" placeholder="Catatan evaluasi rapor DUDI..." class="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs">
+                            <button type="submit" class="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold cursor-pointer shrink-0">
+                                Simpan Nilai
+                            </button>
+                        </div>
+
+                        @if($enr->certificate_number)
+                            <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/70">
+                                <a href="{{ route('certificate.print', $enr->certificate_number) }}" target="_blank" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+                                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                    <span>Cetak Sertifikat</span>
+                                </a>
+                                <a href="{{ route('verify.show', $enr->certificate_number) }}" target="_blank" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 text-xs font-bold rounded-lg flex items-center gap-1.5">
+                                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                    <span>Verifikasi QR</span>
+                                </a>
+                            </div>
+                        @endif
+                    </form>
+                @empty
+                    <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                        Siswa ini belum terdaftar pada angkatan (tabel pivot) untuk dinilai. Hubungi Admin TMS untuk mendaftarkan ke angkatan.
+                    </div>
+                @endforelse
+            </div>
+        @empty
+            <div class="mas-card p-10 text-center text-slate-400 text-xs">Belum ada siswa bimbingan terdaftar.</div>
+        @endforelse
+    </div>
+    @else
+    <!-- 2B. MODE SISWA: Accordion List Siswa Bimbingan dengan Fitur Dropdown Inspect Performa -->
     <div class="space-y-4">
         <div class="flex items-center justify-between border-b border-slate-200 pb-2">
             <div>
@@ -278,75 +389,39 @@
 
                     <!-- C. Riwayat Logbook Jurnal Siswa -->
                     <div class="space-y-2.5">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
                             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="book-open" class="w-4 h-4 text-red-600"></i>
-                                <span>Riwayat Logbook Jurnal Kegiatan Siswa</span>
+                                <span>Ringkasan Logbook Jurnal Siswa</span>
                             </h4>
-                            <span class="text-[10px] text-slate-400">{{ $student->journals->count() }} Jurnal Tercatat</span>
+                            <a href="{{ route('mentor.review', ['student_id' => $student->id]) }}" class="text-[11px] text-red-600 font-bold hover:underline flex items-center gap-1">
+                                <span>Buka Detail di Pusat Review</span>
+                                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                            </a>
                         </div>
 
-                        @if($student->journals->count() > 0)
-                            <div class="space-y-2">
-                                @foreach($student->journals as $journal)
-                                    <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
-                                        <div class="flex items-start justify-between gap-2">
-                                            <div>
-                                                <div class="text-xs font-bold text-slate-900">{{ $journal->activity_title }}</div>
-                                                <div class="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
-                                                    <span>{{ \Carbon\Carbon::parse($journal->journal_date)->translatedFormat('l, d F Y') }}</span>
-                                                    @if($journal->commit_url)
-                                                        <a href="{{ $journal->commit_url }}" target="_blank" class="text-red-600 hover:underline flex items-center gap-1">
-                                                            <i data-lucide="git-commit" class="w-3 h-3"></i>
-                                                            <span>Commit Git</span>
-                                                        </a>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                @if(!empty($journal->mentor_feedback))
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                                                        <i data-lucide="check" class="w-3 h-3"></i> Ada Catatan Mentor
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px]">
-                                                        <i data-lucide="clock" class="w-3 h-3"></i> Belum Diberi Catatan
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Deskripsi Kegiatan / Catatan Siswa:</div>
-                                            <p class="text-xs text-slate-700 leading-relaxed">{{ $journal->activity_detail }}</p>
-                                        </div>
-
-                                        @if(!empty($journal->mentor_feedback))
-                                            <div class="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200 text-emerald-900 text-xs space-y-0.5">
-                                                <div class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Catatan Pembimbing:</div>
-                                                <p class="font-medium text-emerald-950">"{{ $journal->mentor_feedback }}"</p>
-                                            </div>
-                                        @endif
-
-                                        <div class="flex items-center justify-end pt-1">
-                                            <a href="{{ route('mentor.review') }}" class="text-[11px] text-red-600 font-bold hover:underline flex items-center gap-1">
-                                                <i data-lucide="edit-3" class="w-3 h-3"></i>
-                                                <span>{{ !empty($journal->mentor_feedback) ? 'Edit Catatan di Review Hub' : 'Sisipkan Catatan di Review Hub' }}</span>
-                                            </a>
-                                        </div>
-                                    </div>
-                                @endforeach
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                                <span class="text-emerald-800 font-semibold">Disetujui</span>
+                                <span class="font-mono font-black text-emerald-700">{{ $student->journals->where('status', 'approved')->count() }}</span>
                             </div>
-                        @else
-                            <div class="p-4 rounded-xl bg-slate-50 text-center text-xs text-slate-400">
-                                Siswa belum mengisikan logbook kegiatan.
+                            <div class="p-3 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-between">
+                                <span class="text-orange-800 font-semibold">Pending</span>
+                                <span class="font-mono font-black text-orange-700">{{ $student->journals->where('status', 'pending')->count() }}</span>
                             </div>
-                        @endif
+                            <div class="p-3 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-between">
+                                <span class="text-purple-800 font-semibold">Revisi</span>
+                                <span class="font-mono font-black text-purple-700">{{ $student->journals->where('status', 'revisi')->count() }}</span>
+                            </div>
+                            <div class="p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+                                <span class="text-rose-800 font-semibold">Ditolak</span>
+                                <span class="font-mono font-black text-rose-700">{{ $student->journals->where('status', 'rejected')->count() }}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- D. Quick Action Footer Links -->
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <div class="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-slate-100">
                         @if(!empty($student->account_id))
                             <a href="{{ $student->profile_url }}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-2xs">
                                 <svg class="w-3.5 h-3.5 fill-current shrink-0 text-slate-900" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
@@ -358,11 +433,11 @@
                                 <span>Profil Belum Tersedia</span>
                             </button>
                         @endif
-                        <a href="{{ route('evaluation.index') }}" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-2xs">
+                        <a href="{{ route('mentor.students', ['mode' => 'rapor']) }}" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-2xs">
                             <i data-lucide="award" class="w-3.5 h-3.5 text-red-600"></i>
                             <span>Rapor Nilai Industri</span>
                         </a>
-                        <a href="{{ route('mentor.review') }}" class="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
+                        <a href="{{ route('mentor.review', ['student_id' => $student->id]) }}" class="px-4 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
                             <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
                             <span>Validasi Logbook</span>
                         </a>
@@ -377,6 +452,7 @@
             </div>
         @endforelse
     </div>
+    @endif
 
     <!-- TABLE KHUSUS CETAK DOKUMEN / PRINT REKAP RESMI PT. TMS -->
     <div class="print-header mt-4">

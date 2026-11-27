@@ -421,7 +421,11 @@
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                         <span>Monitoring Batch Sekarang</span>
                     </a>
-                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    @php
+                        $isMobMentorRapor = request()->routeIs('mentor.students*') && request('mode') === 'rapor';
+                        $isMobMentorSiswa = request()->routeIs('mentor.students*') && !$isMobMentorRapor;
+                    @endphp
+                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ $isMobMentorSiswa ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         <span>Siswa Bimbingan</span>
                     </a>
@@ -429,7 +433,7 @@
                         <i data-lucide="check-check" class="w-4 h-4"></i>
                         <span>Validasi Jurnal Masuk</span>
                     </a>
-                    <a href="{{ route('mentor.students') }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ request()->routeIs('mentor.students*') ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
+                    <a href="{{ route('mentor.students', ['mode' => 'rapor']) }}" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold {{ $isMobMentorRapor ? 'bg-red-50 text-red-600' : 'text-slate-700' }}">
                         <i data-lucide="award" class="w-4 h-4"></i>
                         <span>Penilaian & Rapor</span>
                     </a>
@@ -705,7 +709,11 @@
                 <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                 <span class="text-[10px]">Monitor</span>
             </a>
-            <a href="{{ route('mentor.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('mentor.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            @php
+                $isBotMentorRapor = request()->routeIs('mentor.students*') && request('mode') === 'rapor';
+                $isBotMentorSiswa = request()->routeIs('mentor.students*') && !$isBotMentorRapor;
+            @endphp
+            <a href="{{ route('mentor.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ $isBotMentorSiswa ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="users" class="w-5 h-5"></i>
                 <span class="text-[10px]">Siswa</span>
             </a>
@@ -715,7 +723,7 @@
                 </div>
                 <span class="text-[10px] font-bold">Review</span>
             </a>
-            <a href="{{ route('mentor.students') }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ request()->routeIs('mentor.students*') ? 'text-red-600 font-bold' : 'text-slate-500' }}">
+            <a href="{{ route('mentor.students', ['mode' => 'rapor']) }}" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-colors {{ $isBotMentorRapor ? 'text-red-600 font-bold' : 'text-slate-500' }}">
                 <i data-lucide="award" class="w-5 h-5"></i>
                 <span class="text-[10px]">Rapor</span>
             </a>

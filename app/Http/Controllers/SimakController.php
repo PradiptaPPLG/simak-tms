@@ -1374,19 +1374,20 @@ class SimakController extends Controller
     // ==========================================
     // MENTOR STUDENTS INSPECT & STATS
     // ==========================================
-    public function mentorStudents()
+    public function mentorStudents(Request $request)
     {
         $mentor = $this->authorizeMentorOrAdmin();
+        $isRaporMode = $request->get('mode') === 'rapor';
         $students = User::where('role', 'siswa')
             ->with(['journals' => function($q) {
                 $q->latest();
-            }, 'showcaseProjects', 'evaluation', 'mentor'])
+            }, 'showcaseProjects', 'evaluation', 'mentor', 'batchEnrollments.batch'])
             ->get();
         
         $totalStudents = $students->count();
         $totalApprovedJournals = DailyJournal::where('status', 'approved')->count();
 
-        return view('mentor.students', compact('mentor', 'students', 'totalStudents', 'totalApprovedJournals'));
+        return view('mentor.students', compact('mentor', 'students', 'totalStudents', 'totalApprovedJournals', 'isRaporMode'));
     }
 
     /**
