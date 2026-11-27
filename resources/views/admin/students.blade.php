@@ -126,7 +126,7 @@
             <div>
                 <h2 class="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
                     <i data-lucide="users" class="w-5 h-5 text-red-600"></i>
-                    <span>Daftar Siswa Magang Terdaftar ({{ $interns->count() }})</span>
+                    <span>Daftar Siswa Magang Terdaftar ({{ $interns->total() }})</span>
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">Seluruh data siswa aktif dan alumni magang di PT. Teknologi Multi Sistem.</p>
             </div>
@@ -499,6 +499,12 @@
                 </tbody>
             </table>
         </div>
+
+        @if($interns->hasPages())
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50 no-print">
+                {{ $interns->links() }}
+            </div>
+        @endif
     </div>
 
     <!-- 4. Form Registrasi Akun Siswa Secara Manual -->

@@ -132,7 +132,7 @@
         <div class="p-4 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <i data-lucide="list-checks" class="w-5 h-5 text-red-600"></i>
-                <h2 class="text-sm font-bold text-slate-900">Daftar Formulir Antrian Pendaftaran ({{ $registrations->count() }})</h2>
+                <h2 class="text-sm font-bold text-slate-900">Daftar Formulir Antrian Pendaftaran ({{ $registrations->total() }})</h2>
             </div>
             <span class="text-[11px] text-slate-400">Diperbarui: {{ now()->translatedFormat('d F Y, H:i') }}</span>
         </div>
@@ -361,6 +361,12 @@
                 </tbody>
             </table>
         </div>
+
+        @if($registrations->hasPages())
+            <div class="px-4 py-3 border-t border-slate-100 bg-slate-50/50 no-print">
+                {{ $registrations->links() }}
+            </div>
+        @endif
     </div>
 </div>
 

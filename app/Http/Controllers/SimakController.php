@@ -1211,7 +1211,7 @@ class SimakController extends Controller
             $query->where('status', $request->status);
         }
 
-        $interns = $query->latest()->get();
+        $interns = $query->latest()->paginate(15)->withQueryString();
         $mentors = User::where('role', 'mentor')->get();
         $batches = Batch::all();
         $totalInterns = User::where('role', 'siswa')->count();
@@ -3023,7 +3023,7 @@ class SimakController extends Controller
             $query->where('status', $status);
         }
 
-        $registrations = $query->get();
+        $registrations = $query->paginate(15)->withQueryString();
 
         $counts = [
             'all' => PklRegistration::count(),
