@@ -1020,16 +1020,19 @@
     }
 
     // Modal Project
-    const ALL_STUDENTS_FOR_PROJECT = @json($allStudents->map(function($s) {
-        $batchIds = $s->batchEnrollments->pluck('batch_id')->map(fn($id) => (int)$id)->toArray();
-        if ($s->batch_id) $batchIds[] = (int)$s->batch_id;
-        return [
-            'id' => $s->id,
-            'name' => $s->name,
-            'account_id' => $s->account_id ?? $s->id,
-            'batch_ids' => array_values(array_unique($batchIds)),
-        ];
-    })->values());
+    @php
+        $projectStudentsPayload = $allStudents->map(function($s) {
+            $batchIds = $s->batchEnrollments->pluck('batch_id')->map(fn($id) => (int)$id)->toArray();
+            if ($s->batch_id) $batchIds[] = (int)$s->batch_id;
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'account_id' => $s->account_id ?? $s->id,
+                'batch_ids' => array_values(array_unique($batchIds)),
+            ];
+        })->values();
+    @endphp
+    const ALL_STUDENTS_FOR_PROJECT = @json($projectStudentsPayload);
 
     function getFilteredStudentsForSelectedBatch() {
         const batchId = parseInt(document.getElementById('proj-batch-id')?.value || '0', 10);
