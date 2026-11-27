@@ -415,10 +415,10 @@
                                     <span class="text-slate-400 text-[11px]">Private Repo</span>
                                 @endif
 
-                                @if($p->live_url || $p->demo_url)
-                                    <a href="{{ $p->live_url ?? $p->demo_url }}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 shadow-xs transition-all">
+                                @if(filled($p->live_url) || filled($p->demo_url))
+                                    <a href="{{ filled($p->live_url) ? $p->live_url : $p->demo_url }}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 shadow-xs transition-all">
                                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                                        <span>Live Demo</span>
+                                        <span>Link Live/Demo</span>
                                     </a>
                                 @endif
                             </div>

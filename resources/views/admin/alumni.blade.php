@@ -26,11 +26,12 @@
                 <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-100 shrink-0"></i>
                 <span>Import Excel / CSV</span>
             </button>
-            <a href="{{ route('admin.students', ['status' => 'alumni']) }}" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+            <a href="{{ route('admin.students', ['status' => 'alumni']) }}" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5">
                 <i data-lucide="table" class="w-4 h-4 text-slate-500 shrink-0"></i>
+                <span class="sm:hidden">Mode Tabel</span>
                 <span class="hidden sm:inline">Mode Tabel Siswa</span>
             </a>
-            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                 <i data-lucide="printer" class="w-4 h-4 text-red-400 shrink-0"></i>
                 <span>Cetak Rekap</span>
             </button>

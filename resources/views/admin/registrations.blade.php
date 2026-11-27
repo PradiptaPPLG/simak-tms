@@ -27,9 +27,9 @@
                 <i data-lucide="external-link" class="w-4 h-4 text-red-400 shrink-0"></i>
                 <span>Buka Form Pendaftaran</span>
             </a>
-            <button onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
+            <button onclick="window.print()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
                 <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
-                <span class="hidden sm:inline">Cetak Rekap</span>
+                <span>Cetak Rekap</span>
             </button>
         </div>
     </div>

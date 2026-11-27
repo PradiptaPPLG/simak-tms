@@ -969,7 +969,18 @@ class SimakController extends Controller
         // 1. Prioritas keamanan: cari berdasarkan hashed URI unik
         $user = User::where('profile_hash', $identifier)->first();
 
-        // 2. Fallback kompatibilitas: jika diakses via ID numerik/account_id lama, redirect 301 ke URI ber-hash
+        // 2. Fallback untuk user lama/seeder yang kolom profile_hash-nya masih NULL (dihitung dinamis oleh accessor)
+        if (!$user) {
+            $user = User::whereNull('profile_hash')
+                ->get()
+                ->first(fn ($u) => hash_equals($u->profile_hash, (string) $identifier));
+
+            if ($user) {
+                $user->update(['profile_hash' => $identifier]);
+            }
+        }
+
+        // 3. Fallback kompatibilitas: jika diakses via ID numerik/account_id lama, redirect 301 ke URI ber-hash
         if (!$user) {
             $legacyUser = User::where('account_id', $identifier)
                 ->orWhere('id', $identifier)
@@ -2504,7 +2515,7 @@ class SimakController extends Controller
             'short_description' => $request->short_description,
             'full_description' => $request->full_description ?? $request->short_description,
             'status' => $request->status,
-            'live_url' => $request->live_url,
+            'live_url' => filled($request->live_url) ? trim($request->live_url) : null,
             'repo_url' => $request->repo_url,
             'is_featured' => $request->boolean('is_featured', true),
         ]);
@@ -2525,7 +2536,7 @@ class SimakController extends Controller
             'team_members' => $request->team_members,
             'short_description' => $request->short_description,
             'status' => $request->status ?? $project->status,
-            'live_url' => $request->live_url,
+            'live_url' => filled($request->live_url) ? trim($request->live_url) : null,
             'repo_url' => $request->repo_url,
         ]);
 

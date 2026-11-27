@@ -116,20 +116,22 @@
     @endif
 
     <!-- Tab Switcher: Siswa & Rapor DUDI vs Project Digital Angkatan -->
-    <div class="flex items-center gap-2 border-b border-slate-200">
+    <div class="grid grid-cols-2 sm:flex sm:items-center gap-1 sm:gap-2 border-b border-slate-200">
         <a href="{{ route('admin.batches', ['batch_id' => $selectedBatchId, 'tab' => 'students']) }}"
-           class="px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-2 border-b-2 {{ $activeTab === 'students' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
-            <i data-lucide="users" class="w-4 h-4"></i>
-            <span>👥 Siswa & Penilaian Rapor DUDI</span>
-            <span class="px-2 py-0.5 text-[10px] font-mono rounded-full {{ $activeTab === 'students' ? 'bg-red-50 text-red-700 font-black' : 'bg-slate-100 text-slate-600' }}">
+           class="px-2.5 sm:px-4 py-2.5 text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 border-b-2 whitespace-nowrap {{ $activeTab === 'students' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
+            <i data-lucide="users" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+            <span class="sm:hidden">Rapor Siswa</span>
+            <span class="hidden sm:inline">Siswa &amp; Penilaian Rapor DUDI</span>
+            <span class="px-1.5 sm:px-2 py-0.5 text-[10px] font-mono rounded-full shrink-0 {{ $activeTab === 'students' ? 'bg-red-50 text-red-700 font-black' : 'bg-slate-100 text-slate-600' }}">
                 {{ $batchStudents->count() }}
             </span>
         </a>
         <a href="{{ route('admin.batches', ['batch_id' => $selectedBatchId, 'tab' => 'projects']) }}"
-           class="px-4 py-2.5 text-xs font-bold transition-all flex items-center gap-2 border-b-2 {{ $activeTab === 'projects' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
-            <i data-lucide="folder-git-2" class="w-4 h-4"></i>
-            <span>💻 Project Digital Angkatan</span>
-            <span class="px-2 py-0.5 text-[10px] font-mono rounded-full {{ $activeTab === 'projects' ? 'bg-red-50 text-red-700 font-black' : 'bg-slate-100 text-slate-600' }}">
+           class="px-2.5 sm:px-4 py-2.5 text-[11px] sm:text-xs font-bold transition-all flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 border-b-2 whitespace-nowrap {{ $activeTab === 'projects' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-500 hover:text-slate-900' }}">
+            <i data-lucide="folder-git-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+            <span class="sm:hidden">Project Angkatan</span>
+            <span class="hidden sm:inline">Project Digital Angkatan</span>
+            <span class="px-1.5 sm:px-2 py-0.5 text-[10px] font-mono rounded-full shrink-0 {{ $activeTab === 'projects' ? 'bg-red-50 text-red-700 font-black' : 'bg-slate-100 text-slate-600' }}">
                 {{ $projects->count() }}
             </span>
         </a>
@@ -159,7 +161,106 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Mobile Card List (Responsive < 768px) -->
+            <div class="md:hidden divide-y divide-slate-100">
+                @forelse($batchStudents as $bs)
+                    @php
+                        $student = $bs->student;
+                        $mentor = $bs->mentor ?? $student->mentor ?? null;
+                    @endphp
+                    <div class="p-4 space-y-3 hover:bg-slate-50/70 transition-colors">
+                        <!-- Row 1: Avatar, Name, ID & Score/Grade -->
+                        <div class="flex items-start justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center font-bold text-slate-700 text-xs">
+                                    @if($student && $student->avatar)
+                                        <img src="{{ asset($student->avatar) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span>{{ strtoupper(substr($student->name ?? 'S', 0, 1)) }}</span>
+                                    @endif
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="font-black text-slate-900 text-xs truncate">
+                                        @if($student)
+                                            <a href="{{ $student->profile_url }}" target="_blank" class="hover:text-red-600 hover:underline">{{ $student->name }}</a>
+                                        @else
+                                            <span>(User Tidak Ditemukan)</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 font-mono truncate">
+                                        ID: {{ $student->account_id ?? $student->id ?? '-' }} • {{ $bs->role_title ?? 'Software Engineer Intern' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-right shrink-0">
+                                <div class="font-mono text-sm font-black text-slate-900 leading-none">{{ number_format($bs->final_score, 1) }}</div>
+                                <span class="inline-block px-2 py-0.5 mt-1 rounded-full text-[9.5px] font-black {{ in_array($bs->grade, ['A', 'A-']) ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : (in_array($bs->grade, ['B+', 'B', 'B-']) ? 'bg-blue-100 text-blue-800 border border-blue-300' : 'bg-amber-100 text-amber-800 border border-amber-300') }}">
+                                    Grade {{ $bs->grade }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: School & Mentor Grid -->
+                        <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                            <div class="min-w-0">
+                                <div class="text-[9.5px] font-bold text-slate-400 uppercase">Instansi &amp; Jurusan</div>
+                                <div class="font-semibold text-slate-800 truncate mt-0.5">{{ $bs->institution_name ?: ($student->school_origin ?? 'SMKN 1 Ciamis') }}</div>
+                                <div class="text-[10px] text-slate-500 truncate">{{ $bs->major ?: ($student->major ?? 'PPLG') }}</div>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[9.5px] font-bold text-slate-400 uppercase">Mentor Pembimbing</div>
+                                @if($mentor)
+                                    <div class="font-semibold text-slate-800 truncate mt-0.5">{{ $mentor->name }}</div>
+                                    <div class="text-[10px] text-slate-400 truncate">{{ $mentor->email }}</div>
+                                @else
+                                    <div class="text-amber-600 italic text-[10.5px] mt-0.5">Belum ditentukan</div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Row 3: 4 Pilar Nilai -->
+                        <div class="grid grid-cols-4 gap-1.5 text-[10px] font-mono text-center">
+                            <div class="px-1.5 py-1 rounded-lg bg-slate-100 text-slate-700">Tek: <b>{{ $bs->technical_skill }}</b></div>
+                            <div class="px-1.5 py-1 rounded-lg bg-slate-100 text-slate-700">Dis: <b>{{ $bs->discipline }}</b></div>
+                            <div class="px-1.5 py-1 rounded-lg bg-slate-100 text-slate-700">Tim: <b>{{ $bs->teamwork }}</b></div>
+                            <div class="px-1.5 py-1 rounded-lg bg-slate-100 text-slate-700">Ini: <b>{{ $bs->initiative }}</b></div>
+                        </div>
+
+                        <!-- Row 4: Certificate & Actions -->
+                        <div class="flex items-center justify-between gap-2 pt-1">
+                            <div class="min-w-0 text-[10px]">
+                                @if($bs->certificate_number)
+                                    <a href="{{ route('verify.show', $bs->certificate_number) }}" target="_blank" class="font-mono text-red-600 hover:underline font-semibold truncate block">
+                                        {{ $bs->certificate_number }}
+                                    </a>
+                                @else
+                                    <span class="text-slate-400 italic">Sertifikat belum terbit</span>
+                                @endif
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick='openGradeStudentModal(@json($bs), @json($student))' class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                    <span>Nilai DUDI</span>
+                                </button>
+                                <form action="{{ route('admin.batch_students.destroy', $bs->id) }}" method="POST" onsubmit="return confirm('Keluarkan siswa {{ addslashes($student->name ?? 'ini') }} dari {{ addslashes($selectedBatch->batch_name) }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-600 transition-colors cursor-pointer" title="Keluarkan dari Angkatan">
+                                        <i data-lucide="user-x" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-8 text-center text-slate-400 text-xs">
+                        Belum ada siswa yang didaftarkan pada angkatan ini.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -361,10 +462,10 @@
                                         <span>Repo</span>
                                     </a>
                                 @endif
-                                @if($project->live_url)
+                                @if(filled($project->live_url))
                                     <a href="{{ $project->live_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors">
                                         <i data-lucide="external-link" class="w-3 h-3"></i>
-                                        <span>Live</span>
+                                        <span>Live/Demo</span>
                                     </a>
                                 @endif
                             </div>
@@ -673,8 +774,8 @@
                     <input type="text" id="proj-repo" name="repo_url" placeholder="https://github.com/..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">URL Live Demo</label>
-                    <input type="text" id="proj-live" name="live_url" placeholder="https://app.tms.co.id" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Link Live/Demo <span class="text-[10px] font-normal text-slate-400">(Opsional)</span></label>
+                    <input type="text" id="proj-live" name="live_url" placeholder="https://live-atau-demo.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
                 </div>
             </div>
 

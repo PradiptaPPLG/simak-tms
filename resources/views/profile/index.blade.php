@@ -401,10 +401,10 @@
                                             <span>Repo</span>
                                         </a>
                                     @endif
-                                    @if($proj->live_url)
+                                    @if(filled($proj->live_url))
                                         <a href="{{ $proj->live_url }}" target="_blank" class="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition-colors">
                                             <i data-lucide="external-link" class="w-3 h-3"></i>
-                                            <span>Demo</span>
+                                            <span>Live/Demo</span>
                                         </a>
                                     @endif
                                 </div>
