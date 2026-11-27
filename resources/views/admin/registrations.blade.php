@@ -19,6 +19,10 @@
                 <span>Ekspor Excel / CSV</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
             </button>
+            <button type="button" onclick="openImportModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 cursor-pointer" title="Import / Restore Data Pendaftaran PKL dari Excel atau CSV">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-100 shrink-0"></i>
+                <span>Import Excel / CSV</span>
+            </button>
             <a href="{{ route('registry.index') }}" target="_blank" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5">
                 <i data-lucide="external-link" class="w-4 h-4 text-red-400 shrink-0"></i>
                 <span>Buka Form Pendaftaran</span>
@@ -197,8 +201,8 @@
                             </td>
 
                             <td class="py-3.5 px-4 font-mono text-[11px] text-slate-500">
-                                <div>{{ $reg->created_at->translatedFormat('d M Y') }}</div>
-                                <div class="text-[10px] text-slate-400">{{ $reg->created_at->translatedFormat('H:i') }} WIB</div>
+                                <div>{{ $reg->created_at ? $reg->created_at->translatedFormat('d M Y') : '-' }}</div>
+                                <div class="text-[10px] text-slate-400">{{ $reg->created_at ? $reg->created_at->translatedFormat('H:i') . ' WIB' : '' }}</div>
                             </td>
 
                             <td class="py-3.5 px-4 text-center">
@@ -590,4 +594,11 @@
     </div>
 </div>
 
+@include('partials.import-modal', [
+    'importRoute' => route('admin.registrations.import'),
+    'importTitle' => 'Import / Restore Antrian Pendaftaran PKL',
+    'templateName' => 'Template_Import_Pendaftaran_TMS.xlsx',
+    'templateHeaders' => ['No','Kode Antrian','Nama Lengkap','Jenis Kelamin','NIS / NISN','Tempat Lahir','Tanggal Lahir','Agama','Email','No. WhatsApp','Asal Sekolah','Kompetensi Keahlian','Status','Catatan','Waktu Mendaftar'],
+    'sampleRow' => ['1','REG-CONTOH01','Contoh Pendaftar PKL','Laki-laki','242510999','Ciamis','2009-03-02','Islam','pendaftar.contoh@gmail.com','081234567890','SMKN 1 Ciamis','PPLG','Pending Review','Siap magang di TMS','27 Nov 2026'],
+])
 @endsection

@@ -20,6 +20,12 @@
                 <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
             </button>
 
+            <!-- Indigo Import Button -->
+            <button type="button" onclick="openImportModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Import / Restore Data Siswa dari Excel atau CSV">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-100 shrink-0"></i>
+                <span>Import Excel / CSV</span>
+            </button>
+
             <!-- Tambah Siswa Manual Button -->
             <button onclick="document.getElementById('form-register-student').scrollIntoView({behavior: 'smooth'})" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-red-600/25 flex items-center justify-center gap-1.5 text-center shrink-0 cursor-pointer" title="Input Siswa Manual (Bypass Antrian Formulir Online)">
                 <i data-lucide="user-plus" class="w-4 h-4 shrink-0"></i>
@@ -849,4 +855,12 @@
     </div>
 
 </div>
+
+@include('partials.import-modal', [
+    'importRoute' => route('admin.students.import'),
+    'importTitle' => 'Import / Restore Data Siswa Magang',
+    'templateName' => 'Template_Import_Data_Siswa_TMS.xlsx',
+    'templateHeaders' => ['No','ID Akun','Nama Lengkap','Email','NIS / NIM','No. WhatsApp','Asal Sekolah','Jurusan','Angkatan','Mentor Pembimbing','Status Magang','Status Karir Alumni','Instansi / Kampus Alumni','Jml Logbook','Nilai Akhir','Predikat','No. E-Sertifikat'],
+    'sampleRow' => ['1','20999','Contoh Siswa Magang','contoh.siswa@smkn1ciamis.sch.id','212210999','081234567890','SMKN 1 Ciamis','PPLG','Angkatan 2026','Mentor Test 1','Aktif Magang','-','-','0','-','-','-'],
+])
 @endsection

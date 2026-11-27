@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/mentor/monitoring', [SimakController::class, 'mentorDashboard'])->name('mentor.dashboard');
         Route::get('/mentor/siswa', [SimakController::class, 'mentorStudents'])->name('mentor.students');
         Route::get('/mentor/siswa/export', [SimakController::class, 'mentorExportStudents'])->name('mentor.students.export');
+        Route::post('/mentor/siswa/import', [SimakController::class, 'mentorImportStudents'])->name('mentor.students.import');
         Route::get('/mentor/review', [SimakController::class, 'mentorReview'])->name('mentor.review');
         Route::post('/mentor/jurnal/{id}/approve', [SimakController::class, 'approveJournal'])->name('mentor.journal.approve');
         Route::post('/mentor/jurnal/{id}/catatan', [SimakController::class, 'mentorAddNote'])->name('mentor.journal.note');
@@ -109,10 +110,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin TMS Management Hub (Khusus Administrator TMS)
     Route::middleware(['role:admin_tms'])->group(function () {
-        // Export Data Siswa & Alumni (Excel/CSV)
+        // Export & Import Data Siswa, Alumni & Pendaftaran (Excel/CSV)
         Route::get('/admin/siswa/export', [SimakController::class, 'adminExportStudents'])->name('admin.students.export');
+        Route::post('/admin/siswa/import', [SimakController::class, 'adminImportStudents'])->name('admin.students.import');
         Route::get('/admin/alumni/export', [SimakController::class, 'adminExportAlumni'])->name('admin.alumni.export');
+        Route::post('/admin/alumni/import', [SimakController::class, 'adminImportAlumni'])->name('admin.alumni.import');
         Route::get('/admin/pendaftaran/export', [SimakController::class, 'adminExportRegistrations'])->name('admin.registrations.export');
+        Route::post('/admin/pendaftaran/import', [SimakController::class, 'adminImportRegistrations'])->name('admin.registrations.import');
 
         Route::get('/admin', [SimakController::class, 'adminDashboard'])->name('admin.dashboard');
         Route::get('/admin/siswa', [SimakController::class, 'adminStudents'])->name('admin.students');

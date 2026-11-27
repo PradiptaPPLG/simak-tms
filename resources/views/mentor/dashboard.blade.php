@@ -19,6 +19,12 @@
                 <span class="truncate">Ekspor Excel / CSV</span>
             </button>
 
+            <!-- Indigo Import Button -->
+            <button type="button" onclick="openImportModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/25 flex items-center justify-center gap-1.5 text-center cursor-pointer" title="Import / Restore Data Siswa Bimbingan dari Excel atau CSV">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-100 shrink-0"></i>
+                <span class="truncate">Import Excel / CSV</span>
+            </button>
+
             <!-- Cetak Rekap Button -->
             <button type="button" onclick="window.print()" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 text-center cursor-pointer" title="Cetak Rekap / Simpan PDF">
                 <i data-lucide="printer" class="w-4 h-4 text-slate-500 shrink-0"></i>
@@ -398,4 +404,12 @@
         }
     }
 </script>
+
+@include('partials.import-modal', [
+    'importRoute' => route('mentor.students.import'),
+    'importTitle' => 'Import / Restore Siswa Bimbingan Mentor',
+    'templateName' => 'Template_Import_Bimbingan_Mentor_TMS.xlsx',
+    'templateHeaders' => ['No','ID Akun','Nama Lengkap Siswa','Email','No. WhatsApp','Asal Sekolah','Jurusan / Peminatan','Status Magang','Total Logbook','Total Proyek','Nilai Teknis','Nilai Disiplin','Nilai Kerjasama','Nilai Inisiatif','Skor Akhir','Predikat','No. Sertifikat'],
+    'sampleRow' => ['1','20998','Contoh Siswa Bimbingan','bimbingan.contoh@gmail.com','081234567891','SMKN 1 Ciamis','PPLG','Aktif Magang','0','0','-','-','-','-','-','-','-'],
+])
 @endsection

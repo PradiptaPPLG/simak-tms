@@ -22,6 +22,10 @@
                 <span>Ekspor Excel / CSV</span>
                 <i data-lucide="chevron-down" class="w-3 h-3 text-emerald-200 shrink-0"></i>
             </button>
+            <button type="button" onclick="openImportModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5 cursor-pointer" title="Import / Restore Data Alumni dari Excel atau CSV">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-indigo-100 shrink-0"></i>
+                <span>Import Excel / CSV</span>
+            </button>
             <a href="{{ route('admin.students', ['status' => 'alumni']) }}" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center gap-1.5">
                 <i data-lucide="table" class="w-4 h-4 text-slate-500 shrink-0"></i>
                 <span class="hidden sm:inline">Mode Tabel Siswa</span>
@@ -460,4 +464,11 @@ function closeExportModal() {
     </div>
 </div>
 
+@include('partials.import-modal', [
+    'importRoute' => route('admin.alumni.import'),
+    'importTitle' => 'Import / Restore Direktori Alumni PKL',
+    'templateName' => 'Template_Import_Alumni_TMS.xlsx',
+    'templateHeaders' => ['No','ID Akun','Nama Lengkap','Email','No. WhatsApp','Asal Sekolah','Jurusan','Angkatan','Status Karir Pasca-PKL','Tempat Bekerja / Kuliah','Keahlian (Tech Stack)','Nilai Akhir','Predikat','No. E-Sertifikat'],
+    'sampleRow' => ['1','20888','Contoh Alumni TMS','contoh.alumni@gmail.com','081299887766','SMKN 1 Ciamis','PPLG','Angkatan 2026','Bekerja','PT. Teknologi Multi Sistem','Laravel, React, MySQL','92.0','A','-'],
+])
 @endsection

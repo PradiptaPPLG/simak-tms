@@ -3097,4 +3097,366 @@ class SimakController extends Controller
 
         return back()->with('success', "Data antrian pendaftaran {$name} berhasil dihapus.");
     }
+
+    // =========================================================================
+    // IMPORT DATA EXCEL / CSV (BACKUP RESTORE & MASS IMPORT WITH CONFLICT CHECK)
+    // =========================================================================
+
+    private function pickImportCell(array $row, array $candidates): ?string
+    {
+        $normalized = [];
+        foreach ($row as $k => $v) {
+            $normalized[strtolower(trim((string) $k))] = trim((string) ($v ?? ''));
+        }
+        foreach ($candidates as $key) {
+            $lk = strtolower(trim($key));
+            if (array_key_exists($lk, $normalized)) {
+                $val = ltrim($normalized[$lk], "'");
+                $val = trim($val);
+                if ($val !== '' && $val !== '-' && strtolower($val) !== '(belum terdaftar)' && strtolower($val) !== 'belum di-assign') {
+                    return $val;
+                }
+            }
+        }
+        return null;
+    }
+
+    private function mapStudentStatus(?string $raw, string $default = 'aktif'): string
+    {
+        if (!$raw) return $default;
+        $s = strtolower(trim($raw));
+        if (str_contains($s, 'alumni') || str_contains($s, 'lulus')) return 'alumni';
+        if (str_contains($s, 'pending')) return 'pending';
+        if (str_contains($s, 'selesai')) return 'selesai';
+        if (str_contains($s, 'aktif')) return 'aktif';
+        return in_array($s, ['aktif', 'alumni', 'pending', 'selesai'], true) ? $s : $default;
+    }
+
+    private function runImportWorkflow(Request $request, callable $classifier, callable $inserter, callable $updater, string $entityLabel)
+    {
+        $validated = $request->validate([
+            'rows' => 'required|array|min:1',
+            'mode' => 'required|in:check,skip,overwrite',
+        ]);
+
+        $mode = $validated['mode'];
+        $rows = $validated['rows'];
+
+        $newItems = [];
+        $duplicateItems = [];
+        $duplicateMeta = [];
+
+        foreach ($rows as $idx => $row) {
+            if (!is_array($row)) continue;
+            $classified = $classifier($row, $idx + 1);
+            if (!$classified) continue; // skip invalid/empty row
+
+            if (!empty($classified['duplicate'])) {
+                $duplicateItems[] = $classified;
+                $duplicateMeta[] = $classified['meta'];
+            } else {
+                $newItems[] = $classified;
+            }
+        }
+
+        if (empty($newItems) && empty($duplicateItems)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak ada baris data valid yang dapat dibaca dari file tersebut.',
+            ], 422);
+        }
+
+        if ($mode === 'check' && count($duplicateItems) > 0) {
+            return response()->json([
+                'status' => 'conflict',
+                'duplicate_count' => count($duplicateItems),
+                'new_count' => count($newItems),
+                'duplicates' => $duplicateMeta,
+            ]);
+        }
+
+        $inserted = 0;
+        $updated = 0;
+        $skipped = ($mode === 'skip') ? count($duplicateItems) : 0;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($newItems, $duplicateItems, $mode, $inserter, $updater, &$inserted, &$updated) {
+            foreach ($newItems as $item) {
+                $inserter($item);
+                $inserted++;
+            }
+            if ($mode === 'overwrite') {
+                foreach ($duplicateItems as $item) {
+                    $updater($item);
+                    $updated++;
+                }
+            }
+        });
+
+        $parts = [];
+        if ($inserted > 0) $parts[] = "{$inserted} data baru ditambahkan";
+        if ($updated > 0) $parts[] = "{$updated} data duplikat ditimpa/diperbarui";
+        if ($skipped > 0) $parts[] = "{$skipped} data duplikat dilewati";
+
+        $message = "Import {$entityLabel} selesai: " . implode(', ', $parts) . '.';
+        session()->flash('success', $message);
+
+        return response()->json([
+            'status' => 'success',
+            'inserted' => $inserted,
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'message' => $message,
+        ]);
+    }
+
+    private function buildStudentImportHandlers(?User $forcedMentor = null, bool $forceAlumni = false)
+    {
+        $batches = Batch::all()->keyBy(fn($b) => strtolower(trim($b->batch_name)));
+        $defaultBatchId = Batch::value('id') ?? 1;
+        $mentors = User::where('role', 'mentor')->get()->keyBy(fn($m) => strtolower(trim($m->name)));
+        $seenKeys = [];
+
+        $classifier = function (array $row, int $rowNum) use ($batches, $defaultBatchId, $mentors, $forcedMentor, $forceAlumni, &$seenKeys) {
+            $name = $this->pickImportCell($row, ['Nama Lengkap', 'Nama Lengkap Siswa', 'name']);
+            $email = $this->pickImportCell($row, ['Email', 'Email Siswa', 'email']);
+            $accountId = $this->pickImportCell($row, ['ID Akun', 'ID Akun 5-Digit', 'account_id']);
+
+            if (!$name && !$email) return null;
+
+            $emailLower = $email ? strtolower($email) : null;
+
+            // Check existing user in DB by account_id or email
+            $existing = null;
+            $reason = '';
+            if ($accountId) {
+                $existing = User::where('account_id', $accountId)->first();
+                if ($existing) $reason = "ID Akun ({$accountId}) sudah ada";
+            }
+            if (!$existing && $emailLower) {
+                $existing = User::whereRaw('LOWER(email) = ?', [$emailLower])->first();
+                if ($existing) $reason = "Email ({$emailLower}) sudah terdaftar";
+            }
+
+            // Also detect intra-file duplicates
+            $fileKey = $emailLower ?: ($accountId ?: strtolower($name));
+            $intraDup = isset($seenKeys[$fileKey]);
+            $seenKeys[$fileKey] = true;
+            if (!$existing && $intraDup) {
+                $reason = "Duplikat di dalam file";
+            }
+
+            $batchName = $this->pickImportCell($row, ['Angkatan', 'batch']);
+            $batchId = ($batchName && isset($batches[strtolower($batchName)]))
+                ? $batches[strtolower($batchName)]->id
+                : $defaultBatchId;
+
+            $mentorName = $this->pickImportCell($row, ['Mentor Pembimbing', 'Mentor Pembimbing TMS', 'Nama Mentor Pembimbing', 'mentor']);
+            $mentorId = $forcedMentor
+                ? $forcedMentor->id
+                : (($mentorName && isset($mentors[strtolower($mentorName)])) ? $mentors[strtolower($mentorName)]->id : null);
+
+            $status = $forceAlumni
+                ? 'alumni'
+                : $this->mapStudentStatus($this->pickImportCell($row, ['Status Magang', 'status']), 'aktif');
+
+            $careerRaw = $this->pickImportCell($row, ['Status Karir Alumni', 'Status Karir Pasca-PKL', 'alumni_status']);
+            $alumniStatus = $careerRaw ? strtolower($careerRaw) : null;
+
+            $payload = [
+                'name' => $name ?? 'Siswa Import',
+                'email' => $emailLower,
+                'account_id' => $accountId,
+                'nis_nim' => $this->pickImportCell($row, ['NIS / NIM', 'nis_nim']),
+                'phone_number' => $this->pickImportCell($row, ['No. WhatsApp', 'No. Telepon / WhatsApp', 'phone_number']),
+                'school_origin' => $this->pickImportCell($row, ['Asal Sekolah', 'Asal Sekolah / Kampus', 'Asal Sekolah Mitra', 'school_origin']) ?? 'SMKN 1 Ciamis',
+                'major' => $this->pickImportCell($row, ['Jurusan', 'Jurusan / Peminatan', 'Kompetensi Keahlian (Jurusan)', 'major']) ?? 'PPLG',
+                'batch_id' => $batchId,
+                'mentor_id' => $mentorId,
+                'status' => $status,
+                'alumni_status' => $alumniStatus,
+                'alumni_current_at' => $this->pickImportCell($row, ['Instansi / Kampus Alumni', 'Tempat Bekerja / Kuliah', 'alumni_current_at']),
+                'skills' => $this->pickImportCell($row, ['Keahlian (Tech Stack)', 'skills']),
+            ];
+
+            $isDup = (bool) $existing || $intraDup;
+
+            return [
+                'duplicate' => $isDup,
+                'existing' => $existing,
+                'intra_dup' => $intraDup,
+                'payload' => $payload,
+                'meta' => [
+                    'row_num' => $rowNum,
+                    'label' => $payload['name'],
+                    'sublabel' => trim(($payload['account_id'] ? "ID: {$payload['account_id']} • " : '') . ($payload['email'] ?? '-')),
+                    'reason' => $reason ?: 'Sudah terdaftar',
+                ],
+            ];
+        };
+
+        $inserter = function (array $item) {
+            $p = $item['payload'];
+            $accId = $p['account_id'] ?: $this->generateUniqueAccountId();
+            $email = $p['email'] ?: "siswa.{$accId}@tms.co.id";
+
+            User::create([
+                'name' => $p['name'],
+                'account_id' => $accId,
+                'username' => $accId,
+                'email' => $email,
+                'password' => Hash::make('tmshebatsukses'),
+                'role' => 'siswa',
+                'nis_nim' => $p['nis_nim'],
+                'phone_number' => $p['phone_number'],
+                'school_origin' => $p['school_origin'],
+                'major' => $p['major'],
+                'batch_id' => $p['batch_id'],
+                'mentor_id' => $p['mentor_id'],
+                'status' => $p['status'],
+                'alumni_status' => $p['alumni_status'],
+                'alumni_current_at' => $p['alumni_current_at'],
+                'skills' => $p['skills'],
+                'must_change_password' => 1,
+                'avatar' => 'https://ui-avatars.com/api/?name=' . urlencode($p['name']) . '&background=ef4444&color=ffffff&bold=true&size=256',
+            ]);
+        };
+
+        $updater = function (array $item) {
+            $existing = $item['existing'];
+            if (!$existing) return; // intra-file duplicate without DB record
+            $p = $item['payload'];
+
+            $updateData = [
+                'name' => $p['name'],
+                'school_origin' => $p['school_origin'],
+                'major' => $p['major'],
+                'batch_id' => $p['batch_id'],
+                'status' => $p['status'],
+            ];
+            if ($p['nis_nim']) $updateData['nis_nim'] = $p['nis_nim'];
+            if ($p['phone_number']) $updateData['phone_number'] = $p['phone_number'];
+            if ($p['mentor_id']) $updateData['mentor_id'] = $p['mentor_id'];
+            if ($p['alumni_status']) $updateData['alumni_status'] = $p['alumni_status'];
+            if ($p['alumni_current_at']) $updateData['alumni_current_at'] = $p['alumni_current_at'];
+            if ($p['skills']) $updateData['skills'] = $p['skills'];
+
+            $existing->update($updateData);
+        };
+
+        return [$classifier, $inserter, $updater];
+    }
+
+    public function adminImportStudents(Request $request)
+    {
+        $this->authorizeAdmin();
+        [$classifier, $inserter, $updater] = $this->buildStudentImportHandlers(null, false);
+        return $this->runImportWorkflow($request, $classifier, $inserter, $updater, 'Data Siswa');
+    }
+
+    public function adminImportAlumni(Request $request)
+    {
+        $this->authorizeAdmin();
+        [$classifier, $inserter, $updater] = $this->buildStudentImportHandlers(null, true);
+        return $this->runImportWorkflow($request, $classifier, $inserter, $updater, 'Direktori Alumni');
+    }
+
+    public function mentorImportStudents(Request $request)
+    {
+        $mentor = $this->authorizeMentorOrAdmin();
+        $forced = $mentor->role === 'mentor' ? $mentor : null;
+        [$classifier, $inserter, $updater] = $this->buildStudentImportHandlers($forced, false);
+        return $this->runImportWorkflow($request, $classifier, $inserter, $updater, 'Siswa Bimbingan');
+    }
+
+    public function adminImportRegistrations(Request $request)
+    {
+        $this->authorizeAdmin();
+        $seenKeys = [];
+
+        $classifier = function (array $row, int $rowNum) use (&$seenKeys) {
+            $fullName = $this->pickImportCell($row, ['Nama Lengkap', 'Nama Lengkap Pendaftar', 'full_name']);
+            $email = $this->pickImportCell($row, ['Email', 'email']);
+            $regCode = $this->pickImportCell($row, ['Kode Antrian', 'registration_code']);
+
+            if (!$fullName && !$email) return null;
+
+            $emailLower = $email ? strtolower($email) : null;
+            $existing = null;
+            $reason = '';
+
+            if ($regCode) {
+                $existing = PklRegistration::where('registration_code', $regCode)->first();
+                if ($existing) $reason = "Kode ({$regCode}) sudah ada";
+            }
+            if (!$existing && $emailLower) {
+                $existing = PklRegistration::whereRaw('LOWER(email) = ?', [$emailLower])->first();
+                if ($existing) $reason = "Email ({$emailLower}) sudah terdaftar";
+            }
+
+            $fileKey = $regCode ?: ($emailLower ?: strtolower($fullName));
+            $intraDup = isset($seenKeys[$fileKey]);
+            $seenKeys[$fileKey] = true;
+            if (!$existing && $intraDup) {
+                $reason = "Duplikat di dalam file";
+            }
+
+            $genderRaw = strtolower((string) $this->pickImportCell($row, ['Jenis Kelamin', 'gender']));
+            $gender = str_starts_with($genderRaw, 'p') ? 'P' : 'L';
+
+            $statusRaw = strtolower((string) $this->pickImportCell($row, ['Status', 'Status Pendaftaran', 'status']));
+            $status = match (true) {
+                str_contains($statusRaw, 'setuju') || $statusRaw === 'approved' => 'approved',
+                str_contains($statusRaw, 'tolak') || $statusRaw === 'rejected' => 'rejected',
+                default => 'pending',
+            };
+
+            $birthDate = $this->pickImportCell($row, ['Tanggal Lahir', 'birth_date']);
+            if ($birthDate) {
+                try {
+                    $birthDate = \Carbon\Carbon::parse($birthDate)->toDateString();
+                } catch (\Throwable $e) {
+                    $birthDate = null;
+                }
+            }
+
+            $payload = [
+                'registration_code' => $regCode ?: ('REG-' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 6))),
+                'full_name' => $fullName ?? 'Pendaftar Import',
+                'gender' => $gender,
+                'nis' => $this->pickImportCell($row, ['NIS / NISN', 'nis']),
+                'birth_place' => $this->pickImportCell($row, ['Tempat Lahir', 'birth_place']),
+                'birth_date' => $birthDate,
+                'religion' => $this->pickImportCell($row, ['Agama', 'religion']),
+                'email' => $emailLower ?? ('reg.' . time() . mt_rand(10, 99) . '@example.com'),
+                'phone_number' => $this->pickImportCell($row, ['No. WhatsApp', 'No. Telepon / WhatsApp', 'phone_number']),
+                'school_origin' => $this->pickImportCell($row, ['Asal Sekolah', 'school_origin']) ?? 'SMKN 1 Ciamis',
+                'skill_competency' => $this->pickImportCell($row, ['Kompetensi Keahlian', 'skill_competency']) ?? 'PPLG',
+                'status' => $status,
+                'rejection_reason' => $this->pickImportCell($row, ['Catatan', 'Catatan / Alasan Tolak', 'rejection_reason']),
+            ];
+
+            return [
+                'duplicate' => (bool) $existing || $intraDup,
+                'existing' => $existing,
+                'payload' => $payload,
+                'meta' => [
+                    'row_num' => $rowNum,
+                    'label' => $payload['full_name'],
+                    'sublabel' => trim("{$payload['registration_code']} • {$payload['email']}"),
+                    'reason' => $reason ?: 'Sudah terdaftar',
+                ],
+            ];
+        };
+
+        $inserter = fn(array $item) => PklRegistration::create($item['payload']);
+
+        $updater = function (array $item) {
+            if (!$item['existing']) return;
+            $p = $item['payload'];
+            unset($p['registration_code']); // keep original primary code if matched by email
+            $item['existing']->update($p);
+        };
+
+        return $this->runImportWorkflow($request, $classifier, $inserter, $updater, 'Antrian Pendaftaran');
+    }
 }
