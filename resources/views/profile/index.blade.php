@@ -373,8 +373,8 @@
                                             {{ $proj->title }}
                                         </h3>
                                     </div>
-                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold border border-slate-200">
-                                        Public
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold border border-slate-200 shrink-0">
+                                        {{ $proj->status ?? 'Public' }}
                                     </span>
                                 </div>
                                 <p class="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-2">
@@ -382,16 +382,20 @@
                                 </p>
                             </div>
 
+                            @php
+                                $primaryTech = $proj->tech_stack ? trim(explode(',', $proj->tech_stack)[0]) : 'Web App';
+                            @endphp
                             <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex items-center gap-1.5 font-medium">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-red-600 inline-block"></span>
-                                        Laravel
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <span class="flex items-center gap-1.5 font-medium truncate">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-red-600 inline-block shrink-0"></span>
+                                        <span class="truncate">{{ $primaryTech }}</span>
                                     </span>
-                                    <span class="flex items-center gap-1">
-                                        <i data-lucide="star" class="w-3.5 h-3.5 text-amber-500"></i>
-                                        12
-                                    </span>
+                                    @if($proj->project_category)
+                                        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-slate-100 text-[10px] text-slate-600 font-medium truncate max-w-[110px]">
+                                            {{ $proj->project_category }}
+                                        </span>
+                                    @endif
                                 </div>
 
                                 <div class="flex items-center gap-2">
