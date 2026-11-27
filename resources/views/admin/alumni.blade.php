@@ -15,7 +15,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Pusat rekam jejak, direktori karir, dan showcase talenta lulusan Praktik Kerja Lapangan.</p>
         </div>
 
-        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto no-print">
+        <div class="grid grid-cols-2 gap-2 w-full sm:w-auto shrink-0 no-print">
             <!-- Green Export Button (Opens Format Choice Modal) -->
             <button type="button" onclick="openExportModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer" title="Unduh Berkas Spreadsheet Data Alumni (Excel / CSV)">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
