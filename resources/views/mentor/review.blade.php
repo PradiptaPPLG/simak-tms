@@ -44,23 +44,92 @@
             </p>
         </div>
 
-        <!-- Dropdown Selector Siswa -->
-        <div class="w-full md:w-auto min-w-[280px] shrink-0">
-            <label class="block text-[11px] font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+        <!-- Custom Modern Dropdown Selector Siswa -->
+        @php
+            $selectedStudentObj = $selectedStudentId !== 'all' ? $students->firstWhere('id', $selectedStudentId) : null;
+        @endphp
+        <div class="w-full md:w-auto min-w-[290px] shrink-0 relative" id="mentor-student-dropdown-wrap">
+            <label class="block text-[11px] font-bold text-slate-300 mb-1.5 flex items-center gap-1.5">
                 <i data-lucide="filter" class="w-3.5 h-3.5 text-red-400"></i>
                 <span>Pilih Siswa yang Dipantau:</span>
             </label>
-            <select onchange="window.location.href = this.value" class="w-full px-3.5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer backdrop-blur-md">
-                <option value="{{ route('mentor.review', ['student_id' => 'all', 'date' => $selectedDate]) }}" {{ $selectedStudentId === 'all' ? 'selected' : '' }} class="bg-slate-900 text-white font-bold">
-                    👥 Semua Siswa Bimbingan ({{ $students->count() }} Siswa)
-                </option>
-                @foreach($students as $st)
-                    <option value="{{ route('mentor.review', ['student_id' => $st->id, 'date' => $selectedDate]) }}" {{ $selectedStudentId == $st->id ? 'selected' : '' }} class="bg-slate-900 text-white font-semibold">
-                        👤 {{ $st->name }} (ID: {{ $st->account_id ?? $st->id }}) - {{ $st->school_origin ?? 'Siswa' }}
-                    </option>
-                @endforeach
-            </select>
+            <button type="button" onclick="toggleMentorStudentDropdown(event)"
+                    class="w-full px-3.5 py-2.5 bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer backdrop-blur-md flex items-center justify-between gap-2.5 transition-all">
+                <div class="flex items-center gap-2 min-w-0">
+                    @if($selectedStudentObj)
+                        <span class="w-5 h-5 rounded-full overflow-hidden bg-red-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">
+                            @if($selectedStudentObj->avatar)
+                                <img src="{{ $selectedStudentObj->avatar }}" alt="{{ $selectedStudentObj->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{ strtoupper(substr($selectedStudentObj->name, 0, 1)) }}
+                            @endif
+                        </span>
+                        <span class="truncate">{{ $selectedStudentObj->name }} ({{ $selectedStudentObj->account_id ?? $selectedStudentObj->id }})</span>
+                    @else
+                        <span class="w-5 h-5 rounded-full bg-white/15 text-red-300 flex items-center justify-center shrink-0">
+                            <i data-lucide="users" class="w-3 h-3"></i>
+                        </span>
+                        <span class="truncate">Semua Siswa Bimbingan ({{ $students->count() }} Siswa)</span>
+                    @endif
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-300 shrink-0"></i>
+            </button>
+
+            <div id="mentor-student-dropdown-menu" class="hidden absolute right-0 mt-2 w-full sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 py-1.5 z-50 max-h-72 overflow-y-auto divide-y divide-slate-100">
+                <a href="{{ route('mentor.review', ['student_id' => 'all', 'date' => $selectedDate]) }}"
+                   class="flex items-center justify-between gap-2.5 px-3.5 py-2.5 hover:bg-slate-50 transition-colors {{ $selectedStudentId === 'all' ? 'bg-red-50/70' : '' }}">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+                            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                        </span>
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-slate-900 truncate">Semua Siswa Bimbingan</div>
+                            <div class="text-[10px] text-slate-500">{{ $students->count() }} siswa aktif terdaftar</div>
+                        </div>
+                    </div>
+                    @if($selectedStudentId === 'all')
+                        <i data-lucide="check" class="w-4 h-4 text-red-600 shrink-0"></i>
+                    @endif
+                </a>
+
+                <div class="py-1 divide-y divide-slate-50">
+                    @foreach($students as $st)
+                        <a href="{{ route('mentor.review', ['student_id' => $st->id, 'date' => $selectedDate]) }}"
+                           class="flex items-center justify-between gap-2.5 px-3.5 py-2 hover:bg-slate-50 transition-colors {{ $selectedStudentId == $st->id ? 'bg-red-50/70' : '' }}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-7 h-7 rounded-lg overflow-hidden bg-slate-900 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                                    @if($st->avatar)
+                                        <img src="{{ $st->avatar }}" alt="{{ $st->name }}" class="w-full h-full object-cover">
+                                    @else
+                                        {{ strtoupper(substr($st->name, 0, 1)) }}
+                                    @endif
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-slate-900 truncate">{{ $st->name }}</div>
+                                    <div class="text-[10px] text-slate-500 font-mono truncate">ID: {{ $st->account_id ?? $st->id }} • {{ $st->school_origin ?? 'Siswa' }}</div>
+                                </div>
+                            </div>
+                            @if($selectedStudentId == $st->id)
+                                <i data-lucide="check" class="w-4 h-4 text-red-600 shrink-0"></i>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </div>
         </div>
+        <script>
+            function toggleMentorStudentDropdown(e) {
+                e.stopPropagation();
+                document.getElementById('mentor-student-dropdown-menu')?.classList.toggle('hidden');
+            }
+            document.addEventListener('click', function(e) {
+                const wrap = document.getElementById('mentor-student-dropdown-wrap');
+                const menu = document.getElementById('mentor-student-dropdown-menu');
+                if (wrap && menu && !wrap.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        </script>
     </div>
 
     <!-- Quick Stats Cards -->
