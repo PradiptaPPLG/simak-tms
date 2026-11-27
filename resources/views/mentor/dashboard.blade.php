@@ -53,8 +53,11 @@
         <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-red-600 flex flex-col justify-between">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Siswa Aktif Sekarang</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{{ $activeInterns->count() }} <span class="text-xs sm:text-sm font-normal text-slate-500">Orang</span></h3>
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight mb-1.5">Siswa Aktif</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono flex items-baseline gap-1 flex-wrap">
+                        <span>{{ $activeInterns->count() }}</span>
+                        <span class="text-[11px] sm:text-sm font-normal text-slate-500 whitespace-nowrap">Orang</span>
+                    </h3>
                 </div>
                 <div class="w-8 h-8 sm:w-11 sm:h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="user-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -73,15 +76,18 @@
         <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-slate-900 flex flex-col justify-between">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Jurnal Masuk Hari Ini</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">{{ $pendingJournals->count() }} <span class="text-xs sm:text-sm font-normal text-slate-500">Perlu Validasi</span></h3>
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight mb-1.5">Jurnal Masuk</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono flex items-baseline gap-1 flex-wrap">
+                        <span>{{ $pendingJournals->count() }}</span>
+                        <span class="text-[11px] sm:text-sm font-normal text-slate-500 whitespace-nowrap">Pending</span>
+                    </h3>
                 </div>
                 <div class="w-8 h-8 sm:w-11 sm:h-11 bg-slate-100 text-slate-900 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="book-open" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
             </div>
             <div class="mt-3 pt-2.5 border-t border-slate-100 text-[10px] sm:text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                <span class="truncate">Batas Waktu Validasi</span>
+                <span class="truncate">Batas Validasi</span>
                 <span class="font-bold text-red-600 shrink-0">17.00 WIB</span>
             </div>
         </div>
@@ -90,8 +96,11 @@
         <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-red-500 flex flex-col justify-between">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Karya Portofolio Siswa</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">2 <span class="text-xs sm:text-sm font-normal text-slate-500">Proyek Digital</span></h3>
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight mb-1.5">Karya Portofolio</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono flex items-baseline gap-1 flex-wrap">
+                        <span>2</span>
+                        <span class="text-[11px] sm:text-sm font-normal text-slate-500 whitespace-nowrap">Proyek</span>
+                    </h3>
                 </div>
                 <div class="w-8 h-8 sm:w-11 sm:h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="folder-git-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -107,8 +116,11 @@
         <div class="mas-card p-3.5 sm:p-5 border-l-4 border-l-slate-800 flex flex-col justify-between">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 truncate">Rata-rata Skor Penilaian</p>
-                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">94.0 <span class="text-xs sm:text-sm font-normal text-emerald-600 font-bold">[ A ]</span></h3>
+                    <p class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight mb-1.5">Rata-rata Skor</p>
+                    <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono flex items-baseline gap-1 flex-wrap">
+                        <span>94.0</span>
+                        <span class="text-[11px] sm:text-sm text-emerald-600 font-bold whitespace-nowrap">[ A ]</span>
+                    </h3>
                 </div>
                 <div class="w-8 h-8 sm:w-11 sm:h-11 bg-slate-100 text-slate-800 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="award" class="w-4 h-4 sm:w-5 sm:h-5"></i>

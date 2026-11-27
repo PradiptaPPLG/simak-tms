@@ -534,13 +534,12 @@
                                     <span>{{ strtoupper(substr($journal->user->name ?? 'S', 0, 1)) }}</span>
                                 @endif
                             </div>
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                                     <span class="font-black text-slate-900">{{ $journal->user->name ?? 'Siswa Magang' }}</span>
-                                    <span class="text-slate-400">•</span>
+                                    <span class="text-slate-300">•</span>
                                     <span class="text-slate-500 font-mono">{{ $journal->user->school_origin ?? 'SMKN 1 Ciamis' }}</span>
-                                    <span class="text-slate-400">•</span>
-                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded {{ $badgeConfig['bg'] }}">
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full {{ $badgeConfig['bg'] }}">
                                         <i data-lucide="{{ $badgeConfig['icon'] }}" class="w-3 h-3"></i> {{ $badgeConfig['text'] }}
                                     </span>
                                 </div>
@@ -555,27 +554,45 @@
                                     <span>Tautan Bukti</span>
                                 </a>
                             @endif
-                            <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
-                                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                                    <span>ACC</span>
-                                </button>
-                            </form>
-                            <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
-                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                                    <span>Tolak</span>
-                                </button>
-                            </form>
+                            @if($jStatus !== 'approved')
+                                <form action="{{ route('mentor.journal.approve', $journal->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                        <span>ACC</span>
+                                    </button>
+                                </form>
+                            @endif
+                            @if($jStatus !== 'rejected')
+                                <form action="{{ route('mentor.journal.reject', $journal->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                        <span>Tolak</span>
+                                    </button>
+                                </form>
+                            @endif
+                            <button type="button"
+                                    onclick="const f = document.getElementById('review-saran-form-{{ $journal->id }}'); f.classList.toggle('hidden');"
+                                    class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer">
+                                <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
+                                <span>Kirim Saran</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Journal Activity Detail -->
-                    <div class="space-y-1">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Deskripsi Kegiatan / Log Koding Siswa:</span>
-                        <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-xl text-xs text-slate-700 leading-relaxed font-normal">
+                    <!-- Journal Activity Detail (Default Hide + Arrow Up/Down) -->
+                    <div class="rounded-xl border border-slate-200/80 bg-slate-50/70 overflow-hidden">
+                        <button type="button"
+                                onclick="const d = document.getElementById('review-desc-{{ $journal->id }}'); const c = document.getElementById('review-desc-chev-{{ $journal->id }}'); const hidden = d.classList.contains('hidden'); d.classList.toggle('hidden', !hidden); if (c) c.classList.toggle('rotate-180', hidden);"
+                                class="w-full px-3.5 py-2.5 flex items-center justify-between text-left text-xs font-bold text-slate-700 hover:bg-slate-100/70 transition-colors cursor-pointer">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span>Deskripsi Kegiatan / Log Koding Siswa</span>
+                            </span>
+                            <i id="review-desc-chev-{{ $journal->id }}" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"></i>
+                        </button>
+                        <div id="review-desc-{{ $journal->id }}" class="hidden px-3.5 pb-3.5 pt-1 text-xs text-slate-700 leading-relaxed font-normal border-t border-slate-200/60 bg-white">
                             {{ $journal->activity_detail }}
                         </div>
                     </div>
@@ -583,7 +600,7 @@
                     <!-- Existing Mentor Note Display (if exists) -->
                     @if($hasNote)
                         <div class="p-3.5 rounded-xl border text-xs space-y-1 {{ $noteBoxClass }}">
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-wrap items-center justify-between gap-1">
                                 <span class="font-bold text-[10px] uppercase tracking-wider flex items-center gap-1.5">
                                     <i data-lucide="message-square-quote" class="w-3.5 h-3.5"></i>
                                     <span>Catatan Bimbingan Mentor (oleh {{ $journal->mentor->name ?? 'Staff Mentor' }}):</span>
@@ -594,17 +611,17 @@
                         </div>
                     @endif
 
-                    <!-- Form Sisipkan / Update Catatan Mentor (Kirim Saran -> Status Ungu / Revisi) -->
-                    <form action="{{ route('mentor.journal.note', $journal->id) }}" method="POST" class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 space-y-3">
+                    <!-- Form Sisipkan / Update Catatan Mentor (Default Hide, dibuka via tombol Kirim Saran) -->
+                    <form id="review-saran-form-{{ $journal->id }}" action="{{ route('mentor.journal.note', $journal->id) }}" method="POST" class="hidden bg-slate-50/70 border border-purple-200/80 rounded-xl p-4 space-y-3">
                         @csrf
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                            <label class="block text-xs font-bold text-slate-700 mb-1 flex flex-wrap items-center justify-between gap-1">
                                 <span>Kirim Saran / Catatan Revisi Mentor</span>
                                 <span class="text-[10px] text-purple-600 font-semibold">Mengirim saran menandai jurnal Ungu (Perlu Perhatian / Revisi)</span>
                             </label>
                             <textarea id="mentor-note-{{ $journal->id }}" name="mentor_feedback" rows="2" required
                                       placeholder="Sisipkan saran perbaikan, evaluasi penulisan kode, atau arahan bimbingan industri untuk siswa..."
-                                      class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 leading-relaxed">{{ old('mentor_feedback', $journal->mentor_feedback ?? '') }}</textarea>
+                                      class="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 leading-relaxed">{{ old('mentor_feedback', $jStatus === 'revisi' ? ($journal->mentor_feedback ?? '') : '') }}</textarea>
                         </div>
 
                         <!-- Quick suggestion chips -->
@@ -645,10 +662,10 @@
     <!-- SECTION 2: PENILAIAN MODUL TUGAS SISWA                         -->
     <!-- ============================================================== -->
     <div class="space-y-3 pt-6 border-t border-slate-200">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+        <div class="flex items-center justify-between gap-2">
+            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between gap-2 w-full">
                 <span>Penilaian Modul Tugas & Submission</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 shrink-0 whitespace-nowrap">
                     {{ $pendingSubmissions->count() }} Perlu Penilaian
                 </span>
             </h2>
