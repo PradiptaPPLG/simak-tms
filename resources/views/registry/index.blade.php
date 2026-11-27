@@ -354,7 +354,7 @@
                         <div class="w-6 h-6 rounded-lg bg-red-600 text-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
                             <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
                         </div>
-                        <span>+ Tambah Anggota Tim (Maksimal 10 Siswa per Tim)</span>
+                        <span>Tambah Anggota Tim (Maksimal 10 Siswa per Tim)</span>
                     </button>
                     <p class="text-[11px] text-slate-400 text-center mt-1.5">
                         Asal sekolah dan jurusan anggota otomatis mengikuti data ketua tim agar tidak perlu mengisi ulang.

@@ -103,7 +103,7 @@
                     onclick="openEnrollStudentModal()" 
                     class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
                     <i data-lucide="user-plus" class="w-3.5 h-3.5 shrink-0"></i>
-                    <span>+ Siswa ke Batch</span>
+                    <span>Siswa ke Batch</span>
                 </button>
                 <button 
                     onclick="openEditBatchModal({{ json_encode($selectedBatch) }})" 
@@ -448,7 +448,7 @@
                 </div>
                 <button onclick="openCreateProjectModal({{ $selectedBatchId }})" class="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>+ Project Baru</span>
+                    <span>Project Baru</span>
                 </button>
             </div>
 
@@ -831,7 +831,7 @@
                     <label class="block text-xs font-bold text-slate-700">Anggota Tim Pengembang (Siswa PKL) *</label>
                     <button type="button" onclick="addExtraTeamMemberRow()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-[10.5px] font-bold flex items-center gap-1 cursor-pointer transition-colors">
                         <i data-lucide="user-plus" class="w-3 h-3"></i>
-                        <span>+ Tambah Anggota</span>
+                        <span>Tambah Anggota</span>
                     </button>
                 </div>
 
