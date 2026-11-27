@@ -758,9 +758,38 @@
                 <input type="text" id="proj-tech" name="tech_stack" required placeholder="Contoh: Laravel 11, Tailwind CSS, SQLite, Chart.js" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Anggota Tim Pengembang (Siswa PKL) *</label>
-                <input type="text" id="proj-members" name="team_members" required placeholder="Contoh: Pradipta Endra Maulana (Lead Dev), Farhan (Mentor)" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500">
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-bold text-slate-700">Anggota Tim Pengembang (Siswa PKL) *</label>
+                    <button type="button" onclick="addExtraTeamMemberRow()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-black text-white text-[10.5px] font-bold flex items-center gap-1 cursor-pointer transition-colors">
+                        <i data-lucide="user-plus" class="w-3 h-3"></i>
+                        <span>+ Tambah Anggota</span>
+                    </button>
+                </div>
+
+                <!-- Siswa Utama / Lead (terhubung ke creator_id) -->
+                <div class="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <div class="col-span-7">
+                        <select id="proj-creator-id" name="creator_id" required onchange="syncTeamMembersString()" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500">
+                            <option value="">-- Pilih Siswa Utama --</option>
+                            @foreach($allStudents as $st)
+                                <option value="{{ $st->id }}" data-name="{{ $st->name }}">
+                                    {{ $st->name }} ({{ $st->account_id ?? $st->id }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-span-5">
+                        <input type="text" id="proj-lead-role" value="Lead Dev" oninput="syncTeamMembersString()" placeholder="Peran (mis: Lead Dev)" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+
+                <!-- Anggota Tambahan Dinamis -->
+                <div id="proj-extra-members" class="space-y-1.5"></div>
+
+                <!-- Compiled string for team_members -->
+                <input type="hidden" id="proj-members" name="team_members" required>
+                <p class="text-[10px] text-slate-400">Otomatis terhubung ke halaman <b>Profil &amp; Portofolio</b> seluruh siswa yang dipilih di atas.</p>
             </div>
 
             <div>
@@ -949,6 +978,60 @@
     }
 
     // Modal Project
+    const ALL_STUDENTS_FOR_PROJECT = @json($allStudents->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'account_id' => $s->account_id ?? $s->id])->values());
+
+    function addExtraTeamMemberRow(selectedId = '', roleText = 'Developer') {
+        const container = document.getElementById('proj-extra-members');
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-12 gap-2 items-center bg-slate-50/70 p-2 rounded-xl border border-slate-200/80 extra-member-row';
+
+        let opts = '<option value="">-- Pilih Anggota --</option>';
+        ALL_STUDENTS_FOR_PROJECT.forEach(s => {
+            const sel = String(s.id) === String(selectedId) ? 'selected' : '';
+            opts += `<option value="${s.id}" data-name="${s.name}" ${sel}>${s.name} (${s.account_id})</option>`;
+        });
+
+        row.innerHTML = `
+            <div class="col-span-7">
+                <select onchange="syncTeamMembersString()" class="extra-member-select w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-red-500">
+                    ${opts}
+                </select>
+            </div>
+            <div class="col-span-4">
+                <input type="text" value="${roleText}" oninput="syncTeamMembersString()" placeholder="Peran" class="extra-member-role w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:border-red-500">
+            </div>
+            <div class="col-span-1 flex justify-end">
+                <button type="button" onclick="this.closest('.extra-member-row').remove(); syncTeamMembersString();" class="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center cursor-pointer" title="Hapus Anggota">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+        if (window.lucide) lucide.createIcons();
+        syncTeamMembersString();
+    }
+
+    function syncTeamMembersString() {
+        const parts = [];
+        const leadSel = document.getElementById('proj-creator-id');
+        const leadRole = (document.getElementById('proj-lead-role')?.value || '').trim();
+        if (leadSel && leadSel.value) {
+            const opt = leadSel.options[leadSel.selectedIndex];
+            const name = opt.getAttribute('data-name') || opt.text;
+            parts.push(leadRole ? `${name} (${leadRole})` : name);
+        }
+        document.querySelectorAll('#proj-extra-members .extra-member-row').forEach(row => {
+            const sel = row.querySelector('.extra-member-select');
+            const role = (row.querySelector('.extra-member-role')?.value || '').trim();
+            if (sel && sel.value) {
+                const opt = sel.options[sel.selectedIndex];
+                const name = opt.getAttribute('data-name') || opt.text;
+                parts.push(role ? `${name} (${role})` : name);
+            }
+        });
+        document.getElementById('proj-members').value = parts.join(', ');
+    }
+
     function openCreateProjectModal(batchId = null) {
         const modal = document.getElementById('modal-project');
         const form = document.getElementById('form-project');
@@ -958,7 +1041,11 @@
         
         document.getElementById('proj-title').value = '';
         document.getElementById('proj-tech').value = 'Laravel 11, Tailwind CSS, SQLite';
-        document.getElementById('proj-members').value = 'Pradipta Endra Maulana (Lead Dev)';
+        document.getElementById('proj-extra-members').innerHTML = '';
+        const leadSel = document.getElementById('proj-creator-id');
+        if (leadSel && leadSel.options.length > 1) leadSel.selectedIndex = 1;
+        document.getElementById('proj-lead-role').value = 'Lead Dev';
+        syncTeamMembersString();
         document.getElementById('proj-desc').value = '';
         document.getElementById('proj-repo').value = '';
         document.getElementById('proj-live').value = '';
@@ -968,6 +1055,7 @@
         }
 
         modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
     }
 
     function openEditProjectModal(project) {
@@ -982,12 +1070,33 @@
         document.getElementById('proj-category').value = project.project_category || 'Web Application';
         document.getElementById('proj-status').value = project.status || 'Completed & Deployed';
         document.getElementById('proj-tech').value = project.tech_stack || '';
-        document.getElementById('proj-members').value = project.team_members || '';
         document.getElementById('proj-desc').value = project.short_description || '';
         document.getElementById('proj-repo').value = project.repo_url || '';
         document.getElementById('proj-live').value = project.live_url || '';
 
+        // Populate Lead & Extra Members
+        document.getElementById('proj-extra-members').innerHTML = '';
+        const leadSel = document.getElementById('proj-creator-id');
+        if (project.creator_id) {
+            leadSel.value = project.creator_id;
+        }
+        const rawMembers = (project.team_members || '').split(',').map(s => s.trim()).filter(Boolean);
+        rawMembers.forEach((entry, idx) => {
+            const match = entry.match(/^(.+?)\s*\(([^)]+)\)$/);
+            const mName = match ? match[1].trim() : entry;
+            const mRole = match ? match[2].trim() : (idx === 0 ? 'Lead Dev' : 'Developer');
+            const found = ALL_STUDENTS_FOR_PROJECT.find(s => s.name.toLowerCase() === mName.toLowerCase());
+            if (idx === 0) {
+                if (found && !project.creator_id) leadSel.value = found.id;
+                document.getElementById('proj-lead-role').value = mRole;
+            } else if (found) {
+                addExtraTeamMemberRow(found.id, mRole);
+            }
+        });
+        syncTeamMembersString();
+
         modal.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
     }
 
     function closeProjectModal() {

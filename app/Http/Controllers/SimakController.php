@@ -435,7 +435,9 @@ class SimakController extends Controller
         $user->loadMissing(['mentor', 'batch']);
         $mentor = $user->mentor ?? User::where('role', 'mentor')->first();
 
-        $projects = ShowcaseProject::where('creator_id', $user->id)->get();
+        $projects = ShowcaseProject::where('creator_id', $user->id)
+            ->orWhere('team_members', 'like', '%' . $user->name . '%')
+            ->get();
         if ($projects->isEmpty() && $user->batch_id) {
             $projects = ShowcaseProject::where('batch_id', $user->batch_id)->get();
         }
@@ -760,7 +762,9 @@ class SimakController extends Controller
     public function profile()
     {
         $user = Auth::user() ?? User::first();
-        $projects = ShowcaseProject::where('creator_id', $user->id)->get();
+        $projects = ShowcaseProject::where('creator_id', $user->id)
+            ->orWhere('team_members', 'like', '%' . $user->name . '%')
+            ->get();
         $journals = DailyJournal::where('user_id', $user->id)->latest()->take(10)->get();
         $submissions = TaskSubmission::with('task')->where('user_id', $user->id)->latest()->get();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
@@ -1002,7 +1006,9 @@ class SimakController extends Controller
             abort(404, 'Profil siswa belum tersedia karena siswa belum terdaftar resmi di PT. TMS.');
         }
 
-        $projects = ShowcaseProject::where('creator_id', $user->id)->get();
+        $projects = ShowcaseProject::where('creator_id', $user->id)
+            ->orWhere('team_members', 'like', '%' . $user->name . '%')
+            ->get();
         $evaluation = Evaluation::where('user_id', $user->id)->first();
 
         $totalJournals = DailyJournal::where('user_id', $user->id)->count();
@@ -2493,17 +2499,18 @@ class SimakController extends Controller
 
         $request->validate([
             'batch_id' => 'required|exists:batches,id',
+            'creator_id' => 'required|exists:users,id',
             'title' => 'required|string|max:200',
             'tech_stack' => 'required|string|max:255',
             'project_category' => 'required|string|max:80',
-            'team_members' => 'required|string|max:255',
+            'team_members' => 'required|string|max:500',
             'short_description' => 'required|string|max:255',
             'status' => 'required|string|max:50',
             'live_url' => 'nullable|string',
             'repo_url' => 'nullable|string',
         ]);
 
-        $creatorId = $request->creator_id ?? User::where('role', 'siswa')->value('id') ?? Auth::id();
+        $creatorId = $request->creator_id;
 
         ShowcaseProject::create([
             'batch_id' => $request->batch_id,
@@ -2530,6 +2537,7 @@ class SimakController extends Controller
         $project = ShowcaseProject::findOrFail($id);
         $project->update([
             'batch_id' => $request->batch_id ?? $project->batch_id,
+            'creator_id' => $request->creator_id ?? $project->creator_id,
             'title' => $request->title,
             'tech_stack' => $request->tech_stack,
             'project_category' => $request->project_category ?? $project->project_category,
