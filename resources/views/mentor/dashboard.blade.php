@@ -186,7 +186,7 @@
         </div>
 
         <div class="space-y-3">
-            @forelse($pendingJournals as $journal)
+            @forelse($pendingJournals->take(3) as $journal)
                 <div class="p-4 rounded-xl border border-slate-200 bg-white hover:border-orange-300 transition-all space-y-3">
                     <div class="flex flex-col md:flex-row md:items-start justify-between gap-3.5">
                         <div class="space-y-1.5 flex-1 min-w-0">
@@ -202,7 +202,7 @@
                                 </span>
                             </div>
                             <div class="text-xs sm:text-sm font-bold text-slate-800 leading-snug">{{ $journal->activity_title }}</div>
-                            <p class="text-xs text-slate-600 leading-relaxed">{{ $journal->activity_detail }}</p>
+                            <p class="text-xs text-slate-600 leading-relaxed line-clamp-2">{{ $journal->activity_detail }}</p>
                             
                             @if($journal->commit_url)
                                 <div class="pt-1">
@@ -252,6 +252,18 @@
                 </div>
             @endforelse
         </div>
+
+        @if($pendingJournals->count() > 0)
+            <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-slate-100">
+                <span class="text-[11px] text-slate-400">
+                    Menampilkan {{ min(3, $pendingJournals->count()) }} dari {{ $pendingJournals->count() }} logbook pending terbaru.
+                </span>
+                <a href="{{ route('mentor.review') }}" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-colors">
+                    <span>Buka Semua di Pusat Review ({{ $pendingJournals->count() }})</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-emerald-400"></i>
+                </a>
+            </div>
+        @endif
     </div>
 
     <!-- 4. Section: Live Telemetri Siswa Bimbingan Saat Ini (Yang Sekarang) -->
