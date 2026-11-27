@@ -12,7 +12,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Monitoring aktivitas koding siswa magang aktif, validasi cepat jurnal harian, dan review bimbingan.</p>
         </div>
 
-        <div class="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto no-print">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full lg:w-auto shrink-0 no-print">
             <!-- Green Export Button (Opens Format Choice Modal) -->
             <button type="button" onclick="openExportModal()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/25 flex items-center justify-center gap-1.5 text-center cursor-pointer" title="Unduh Berkas Spreadsheet Data Siswa Bimbingan (Excel / CSV)">
                 <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-100 shrink-0"></i>
@@ -39,9 +39,9 @@
                 <i data-lucide="check-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
                 <span class="truncate">Pusat Review ({{ $pendingJournals->count() }})</span>
             </a>
-            <div class="col-span-2 sm:col-auto bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hidden lg:flex items-center justify-center gap-2 shadow-xs">
+            <div class="col-span-2 sm:col-span-1 bg-white border border-slate-200 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 shadow-xs whitespace-nowrap">
                 <i data-lucide="calendar" class="w-4 h-4 text-red-600 shrink-0"></i>
-                <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+                <span class="truncate">{{ now()->translatedFormat('d M Y') }}</span>
             </div>
         </div>
     </div>
