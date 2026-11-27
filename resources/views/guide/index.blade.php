@@ -3,6 +3,9 @@
 @section('title', 'Panduan & Tutorial Sistem • SIMAK-TMS')
 
 @section('content')
+@php
+    $currentRole = auth()->user()->role ?? 'siswa';
+@endphp
 <div class="space-y-6">
 
     <!-- 1. Header Banner -->
@@ -13,7 +16,13 @@
                     Panduan Penggunaan & Tutorial Alur Kerja
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-500 max-w-3xl leading-relaxed">
-                    Panduan komprehensif mengenai tugas & tanggung jawab per role (Siswa, Mentor, Admin TMS), fungsi seluruh menu sidebar, dan SOP lab industri PT. TMS.
+                    @if($currentRole === 'admin_tms')
+                        Panduan komprehensif mengenai tugas &amp; tanggung jawab seluruh role (Siswa, Mentor, Admin TMS), fungsi menu sidebar, dan SOP lab industri PT. TMS.
+                    @elseif($currentRole === 'mentor')
+                        Panduan tugas pembimbingan Mentor Industri, fungsi menu monitoring &amp; validasi logbook, serta SOP lab PT. TMS.
+                    @else
+                        Panduan penggunaan SIMAK-TMS khusus untuk Siswa PKL, fungsi menu aktivitas harian, serta SOP lab industri PT. TMS.
+                    @endif
                 </p>
             </div>
 
@@ -52,9 +61,10 @@
     <!-- ================================================================= -->
     <div id="tab-roles" class="guide-tab-content space-y-6">
 
-        <!-- Grid 3 Kolom: Siswa, Mentor, Admin -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Grid Role Card(s) sesuai hak akses user -->
+        <div class="grid grid-cols-1 {{ $currentRole === 'admin_tms' ? 'lg:grid-cols-3' : 'max-w-3xl' }} gap-6">
 
+            @if($currentRole === 'siswa' || $currentRole === 'admin_tms')
             <!-- 1. ROLE SISWA PKL -->
             <div class="mas-card p-6 space-y-5 border-t-4 border-t-red-600 flex flex-col justify-between">
                 <div class="space-y-4">
@@ -118,7 +128,9 @@
                     Menu Utama: <b>Dasbor Siswa, Jurnal Kegiatan, Arsip Portofolio, Evaluasi Nilai, Profil Developer</b>
                 </div>
             </div>
+            @endif
 
+            @if($currentRole === 'mentor' || $currentRole === 'admin_tms')
             <!-- 2. ROLE STAF MENTOR -->
             <div class="mas-card p-6 space-y-5 border-t-4 border-t-slate-900 flex flex-col justify-between">
                 <div class="space-y-4">
